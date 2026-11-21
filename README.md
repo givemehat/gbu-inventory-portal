@@ -1,183 +1,376 @@
 # Gautam Buddha University (GBU)
-## Central Stores & Purchase (S&P) Department — Inventory Management System
+## Central Stores & Purchase (S&P) Department — Digital Inventory Management System
 
-A fully functional, demo-ready working prototype of a university inventory management portal built for Gautam Buddha University (Greater Noida, UP). It handles the full tripartite lifecycle of **Stores**, **Procurement (Requisition → Director Approval → PO → GRN)**, and **Material Condemnations (Write-offs)** with an immutable audit trail, weighted average cost valuation, and role-based access control.
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React 18](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite%206-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS%203.4-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![SQLAlchemy 2.0](https://img.shields.io/badge/ORM-SQLAlchemy%202.0-D71F00?logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
+[![Automated Tests](https://img.shields.io/badge/Tests-14%2F14%20Passed-success?logo=pytest&logoColor=white)](backend/test_flows.py)
+[![Design System](https://img.shields.io/badge/Design-Shadcn%20%2B%20Tremor%20Patterns-black)](https://ui.shadcn.com)
 
-*Note: All university stationery form numbers (e.g. S&P-01 to S&P-05), supplier records, and inventory data included in this repository are realistic sample prototypes prepared for demonstration purposes.*
+A production-grade, enterprise digital inventory management prototype designed for the **Stores & Purchase (S&P) Department** of **Gautam Buddha University (GBU)**, Greater Noida, UP.
+
+It governs the full institutional material lifecycle across all 8 academic schools and administrative departments: **Stock Cataloging**, **Multi-Level Indenting**, **Purchase Orders & Goods Receipt Note (GRN)**, **Departmental Store Issuance**, **Survey Committee Condemnations (Write-offs)**, **School-Wise Material Consumption Analytics**, and **Statistical Time-Series Stock-Out Forecasting**.
+
+> **Honesty & Prototype Notice:**  
+> This digital portal is an engineering demonstration prototype designed and developed by **Rajnish Singh**. All form templates (e.g., `S&P-01` to `S&P-04`), voucher numbers, and seed records are realistic sample formats prepared to demonstrate enterprise software engineering standards. University EPABX: `0120-2344200`.
 
 ---
 
-### Tech Stack
-- **Frontend:** React 18, Vite 6, Tailwind CSS, React Router v6, Recharts, Lucide Icons
-- **Backend:** Python 3.14+, FastAPI, SQLAlchemy 2.0, Pydantic v2
-- **Database:** SQLite (local development) / MySQL (TiDB Cloud Serverless or Aiven MySQL via PyMySQL in production)
-- **Authentication:** JWT (12-hour session expiry), Bcrypt password hashing
-- **Deployment:** Frontend on **Vercel**, Backend on **Render**, Database on **TiDB Cloud**
+## Visual Tour & Key Interfaces
+
+### 1. Institutional Executive Dashboard & Panoramic Landmark Hero
+Featuring the authentic architectural landmark of Gautam Buddha University (**प्रशासनिक भवन / Administrative Block**), real-time inventory health tracker, statistical run-rate stock-out forecast alerts, and high-density KPI cards with micro-sparklines.
+
+![GBU Executive Dashboard](docs/screenshots/dashboard_typography_assets.png)
 
 ---
 
-### Demo Logins (Password: `demo123`)
+### 2. School-Wise Material Consumption & Requisition Drill-Down
+Department-by-department material consumption tracking across university schools (SoICT, SoE, SoBT, SoM, SoVSAS, SoBAS, SoLJ&G, Central Admin). Executives can drill down to item-level nomenclature, quantity drawn, monetary valuation (₹), budget percentage share, and historical issue voucher slips.
 
-| Role | Email | Department | Key Permissions |
+![School Consumption Breakdown](docs/screenshots/school_consumption_expanded.png)
+
+---
+
+### 3. Shadcn Command Palette (`⌘K` / `/`)
+Instant fuzzy keyboard launcher enabling zero-latency item search, active quantity inspection, direct page jumps, and fast action triggers (Raise Indent, Draft PO, Export Ledger).
+
+![Shadcn Command Palette](docs/screenshots/command_palette_shadcn.png)
+
+---
+
+### 4. Real-Time Action Notifications & Low-Stock Alerts
+Header notification popover aggregating threshold alerts (e.g. items falling below reorder level) and pending administrative approvals (indents and condemnation sanctions).
+
+![Notifications Popover](docs/screenshots/notifications_popover_clean.png)
+
+---
+
+### 5. Keyboard Navigation & Shortcuts Cheat Sheet (`?`)
+Full accessibility and ergonomic power-user shortcuts dialog supporting quick keyboard-driven navigation (`G+D`, `G+I`, `G+P`, `G+R`, `⌘K`, `Esc`).
+
+![Keyboard Shortcuts Dialog](docs/screenshots/shortcuts_modal.png)
+
+---
+
+### 6. Standard A4 Printable University Slips (`S&P-01` to `S&P-04`)
+Standardized A4 university store voucher formats with auto-fill from existing database records (Indents, Store Issues, Purchase Orders, and Write-off Sanctions) with clean print preview and browser print integration.
+
+![A4 University Slip Preview](docs/screenshots/forms_preview_modal_1440.png)
+
+---
+
+### 7. Storyset Vector Empty States & Modern Design Ergonomics
+Handcrafted SVG vector illustrations for zero-result queries and empty states, coupled with **Plus Jakarta Sans** UI typography and **JetBrains Mono** tabular figures (`tabular-nums`) for currency and codes.
+
+![Empty State Illustration](docs/screenshots/empty_illustration.png)
+
+---
+
+## System Architecture
+
+The portal follows an asynchronous multi-tier architecture adhering to separation of concerns, strict role-based access control (RBAC), and ACID transactional integrity.
+
+```mermaid
+graph TD
+    subgraph Client ["Frontend Layer (React 18 + Vite + Tailwind)"]
+        UI[Single Page App]
+        Cmd[Command Palette & Shortcuts]
+        Notif[Notification Center]
+        Print[A4 Form Formatter]
+    end
+
+    subgraph Security ["Security & Gateway Layer"]
+        CORS[CORS Policy Guard]
+        RateLimit[Rate Limiter - 100 req/min]
+        JWTGuard[JWT Bearer Token Guard]
+        SecHeaders[Security Headers: CSP, HSTS, X-Frame]
+    end
+
+    subgraph Application ["Application Layer (FastAPI Backend)"]
+        AuthRouter["/api/auth (Login, Me, Users)"]
+        ItemRouter["/api/items (Catalog, Stock Adjust)"]
+        IndentRouter["/api/indents (Requisitions, S&P Approvals)"]
+        PORouter["/api/purchase-orders (PO, GRN Receipt)"]
+        IssueRouter["/api/stock (Store Issues, Ledger Verification)"]
+        WriteOffRouter["/api/write-offs (Condemnation Sanctions)"]
+        ReportRouter["/api/reports (Statements, School Consumption, CSV)"]
+        MLRouter["/api/analytics/stock-forecast (ADC, EOQ, Anomalies)"]
+    end
+
+    subgraph Domain ["Domain Logic & Ledger Engine"]
+        WAC["Weighted Average Cost (WAC) Engine"]
+        Ledger["Double-Entry ACID Stock Ledger"]
+        PessimisticLock["Pessimistic Row Lock (with_for_update)"]
+        MLStat["Statistical Time-Series & Safety Stock Engine"]
+    end
+
+    subgraph Persistence ["Persistence Layer"]
+        DB[(SQLite in Dev / TiDB Cloud Serverless MySQL in Prod)]
+    end
+
+    UI --> CORS
+    CORS --> RateLimit
+    RateLimit --> JWTGuard
+    JWTGuard --> SecHeaders
+    SecHeaders --> Application
+
+    Application --> Domain
+    Domain --> DB
+```
+
+---
+
+## Tripartite University Material Lifecycle
+
+Every physical movement in the Central Store follows strict university governance workflows:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Staff as Academic Dept Staff
+    actor Director as Director (S&P)
+    actor Officer as Store Officer
+    actor Vendor as External Supplier
+    participant DB as Central Database & Ledger
+
+    rect rgb(235, 248, 255)
+    note over Staff, Director: Stage 1: Indenting & Sanction
+    Staff->>Officer: 1. Raises Requisition / Indent for lab consumables
+    Officer->>Director: 2. Forwards Indent for administrative sanction
+    Director->>DB: 3. Director approves Indent (Status: APPROVED)
+    end
+
+    rect rgb(240, 253, 244)
+    note over Officer, Vendor: Stage 2: Procurement & Goods Receipt (GRN)
+    Officer->>DB: 4. Generates Purchase Order (PO) referencing approved Indent
+    Officer->>Vendor: 5. Issues official PO with Indian FY numbering
+    Vendor-->>Officer: 6. Delivers goods at Central Receiving Dock
+    Officer->>DB: 7. Inspects & Records GRN (Increments stock & updates WAC price)
+    end
+
+    rect rgb(254, 243, 199)
+    note over Staff, Officer: Stage 3: Department Issue & Ledger Booking
+    Staff->>Officer: 8. Requests material issue against sanctioned requisition
+    Officer->>DB: 9. Verifies non-negative stock with row lock & Issues items
+    DB-->>DB: 10. Writes atomic double-entry ISSUE transaction
+    end
+
+    rect rgb(254, 226, 226)
+    note over Officer, Director: Stage 4: Condemnation & Material Disposal
+    Officer->>Director: 11. Survey committee proposes unserviceable write-off
+    Director->>DB: 12. Director sanctions condemnation
+    DB-->>DB: 13. Deducts physical balance & logs permanent audit record
+    end
+```
+
+---
+
+## AI/ML Inventory Intelligence & Mathematical Formulations
+
+To ensure data-driven material availability without excessive university capital lockup, the portal incorporates statistical time-series forecasting:
+
+### 1. Average Daily Consumption (ADC) / Daily Run Rate (DRR)
+Calculates real-world burn rates over an active 60-day historical window:
+$$\text{DRR} = \frac{\sum_{t=1}^{N} \text{Quantity Issued}_t}{N} \quad (N = 60 \text{ days})$$
+
+### 2. Dynamic Safety Stock (95% Service Level)
+Protects against procurement delays and unexpected consumption surges:
+$$\text{Safety Stock} = Z \times \sqrt{L} \times \sigma_{\text{daily}}$$
+Where:
+- $Z = 1.65$ (standard normal distribution score for 95% service level).
+- $L = 14 \text{ days}$ (standard university procurement lead time).
+- $\sigma_{\text{daily}} = \text{standard deviation of daily departmental store issues}$.
+
+### 3. Economic Order Quantity (EOQ)
+Calculates optimal replenishment batch sizes balancing ordering expense and storage holding costs:
+$$\text{EOQ} = \sqrt{\frac{2 \times D \times S}{H}}$$
+Where $D = \text{Annual Demand}$, $S = \text{Order Procurement Cost (₹500)}$, $H = \text{Annual Carrying Cost (18\%)}$.
+
+### 4. Cross-Department Requisition Anomaly Detection
+The backend automatically analyzes concurrent indents across schools. If multiple academic departments requisition the same material within a 14-day rolling window, the engine flags a **Bulk Order Discount Anomaly** alerting the Store Officer to combine requisitions into a single purchase tender.
+
+---
+
+## ACID Concurrency & Ledger Integrity Guarantees
+
+1. **Non-Negative Stock Invariant:** Physical stock can never drop below zero. Stock deductions validate inventory availability inside a transaction.
+2. **Pessimistic Row Locking (`with_for_update`):** During high-concurrency material issuance (e.g., 20 parallel threads attempting to issue the same remaining item), rows are locked at the database level to eliminate race conditions.
+3. **Weighted Average Cost (WAC) Valuation:**
+   $$\text{New WAC Rate} = \frac{(\text{Current Qty} \times \text{Old WAC}) + (\text{Received Qty} \times \text{Invoice Rate})}{\text{Current Qty} + \text{Received Qty}}$$
+4. **Segregation of Duties (SoD):** Department staff can only view and create their own indents; only the Director (S&P) has the cryptographic authority to sanction indents or condemnations.
+
+---
+
+## Role-Based Access Control (RBAC) Matrix
+
+Demo Password for all accounts: **`demo123`**
+
+| Role | Demo Email | Department | Permissions & Scope |
 | :--- | :--- | :--- | :--- |
-| **Store Officer** | `store@gbu.demo` | Stores & Purchase | Manage items/vendors, issue stock, create POs, receive goods (GRN), propose write-offs |
-| **Director (S&P)** | `director@gbu.demo` | Stores & Purchase | Approve/reject indents, sanction write-offs, review POs, inspect audit trail |
-| **Dept Staff** | `dept@gbu.demo` | School of ICT | Raise department indents, view only own requisitions |
-| **System Admin** | `admin@gbu.demo` | IT Cell | Unrestricted access across all modules and audit records |
-
-*Tip: The login screen includes 1-click demo account selector cards for quick evaluation during live interviews.*
+| **Store Officer** | `store@gbu.demo` | Central Stores & Purchase | Manage stock catalog, issue items, generate POs, receive goods (GRN), propose write-offs |
+| **Director (S&P)** | `director@gbu.demo` | Directorate of Stores & Purchase | Sanction/reject indents, authorize condemnations, review POs, inspect audit trail |
+| **Department Staff** | `dept@gbu.demo` | School of ICT (SoICT) | Raise department requisitions, view own school's material issue history |
+| **System Admin** | `admin@gbu.demo` | Central IT Cell | System governance, master data cataloging, user management, immutable audit logs |
 
 ---
 
-### Project Structure
+## Automated Test Suite (14 End-to-End Tests)
 
+The backend includes a comprehensive, automated `pytest` verification suite covering all core business rules:
+
+```bash
+cd backend
+.venv/bin/pytest -v test_flows.py
 ```
-gbu-inventory-backend/
-├── backend/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── auth.py         # JWT generation, bcrypt verification, role dependency guards
-│   │   ├── db.py           # Engine & SessionLocal (SQLite dev / MySQL + SSL in prod)
-│   │   ├── models.py       # SQLAlchemy 2.0 ORM models with foreign keys & relationships
-│   │   ├── main.py         # FastAPI application, lifespan handler, all /api endpoints
-│   │   └── seed.py         # 25 realistic items, 4 vendors, 4 demo users, sample flows
-│   ├── .env.example        # Backend environment variables template
-│   ├── requirements.txt    # Production Python dependencies
-│   └── test_flows.py       # Automated pytest suite covering all 7 university workflows
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ConfirmModal.jsx    # Action confirmation dialog with remark support
-│   │   │   ├── Header.jsx          # Header with user role badge, department & logout
-│   │   │   ├── ItemLedgerModal.jsx # Comprehensive stock ledger drawer for any item
-│   │   │   ├── Layout.jsx          # Protected route wrapper with dynamic page titles
-│   │   │   ├── Sidebar.jsx         # Role-gated responsive navigation with GBU crest
-│   │   │   ├── StatusBadge.jsx     # Visual status chips (PENDING, APPROVED, OPEN, etc.)
-│   │   │   └── Toast.jsx           # Global animated notifications (success, error, info)
-│   │   ├── pages/
-│   │   │   ├── Audit.jsx           # Immutable audit log (Director & Admin only)
-│   │   │   ├── Dashboard.jsx       # 6 KPI cards, category valuation chart, 30-day movement
-│   │   │   ├── Indents.jsx         # Multi-line requisitions & Director approval panel
-│   │   │   ├── IssueStock.jsx      # Departmental material issuance with live stock check
-│   │   │   ├── Items.jsx           # Item catalog, add/edit modal, low-stock filters
-│   │   │   ├── Login.jsx           # University branded login with demo cards & wake-up detector
-│   │   │   ├── PurchaseOrders.jsx  # PO creation from approved indents & Goods Receipt (GRN)
-│   │   │   ├── Reports.jsx         # Live CSV exports & printable university stock statement
-│   │   │   └── WriteOffs.jsx       # Condemnation proposals & Director sanction gate
-│   │   ├── api.js          # Centralized API client with JWT interception & error parser
-│   │   ├── App.jsx         # React Router configuration & RoleGuard protection
-│   │   └── main.jsx        # App entrypoint
-│   ├── .env.example        # Frontend environment variables template
-│   ├── package.json        # Frontend npm dependencies
-│   ├── tailwind.config.js  # University blue & amber design system
-│   └── vite.config.js      # Vite build configuration with chunk splitting
-├── DEMO_SCRIPT.md          # 5-minute interview presentation walkthrough script
-├── PROJECT_REPORT.md       # Comprehensive 2-page project documentation report
-└── README.md
+
+```text
+test_flows.py::test_health_and_readiness PASSED                          [  7%]
+test_flows.py::test_auth_and_rate_limiting PASSED                        [ 14%]
+test_flows.py::test_role_permissions PASSED                              [ 21%]
+test_flows.py::test_concurrency_stock_20_parallel_issues PASSED          [ 28%]
+test_flows.py::test_weighted_average_cost_wac PASSED                     [ 35%]
+test_flows.py::test_segregation_of_duties PASSED                         [ 42%]
+test_flows.py::test_approval_quality_and_lifecycle PASSED                [ 50%]
+test_flows.py::test_indian_financial_year_numbering PASSED               [ 57%]
+test_flows.py::test_ledger_integrity_reconciliation PASSED               [ 64%]
+test_flows.py::test_server_side_pagination_and_sorting PASSED            [ 71%]
+test_flows.py::test_error_envelope_and_security_headers PASSED           [ 78%]
+test_flows.py::test_notices_flow PASSED                                  [ 85%]
+test_flows.py::test_enterprise_reports_and_analytics PASSED              [ 92%]
+test_flows.py::test_ml_stockout_forecast_and_analytics PASSED            [100%]
+
+======================== 14 passed in 6.19s =========================
 ```
 
 ---
 
-### Local Development Setup
+## Local Development Setup
 
-#### 1. Backend Setup
+### Prerequisites
+- Python 3.11+
+- Node.js 18+ and `npm`
+
+### 1. Backend Setup
 ```bash
 cd backend
 python3 -m venv .venv
-source .venv/bin/activate       # On Windows: .venv\Scripts\activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-- API Documentation (Swagger UI): `http://localhost:8000/docs`
-- On first start, database migrations execute automatically and populate initial demo seed data.
-- **One-Command Database Reset & Demo Seed:**
-  ```bash
-  cd backend
-  python -m app.seed --reset
-  ```
-  *(Restores exact demo baseline: STN-001 balance 180 reams, 7 low-stock items, 1 pending indent, 1 open PO, 1 pending write-off. In production environment, `--reset` safely refuses to run without `--force`).*
 
-#### 2. Run Automated Verification Tests
-Run directly from inside `backend`:
-```bash
-cd backend
-pytest -v test_flows.py
-```
-*Executes all 12 end-to-end integration tests: health/ready, auth & rate limiting, role enforcement, 20 parallel issue concurrency stress test, weighted average cost (WAC), segregation of duties, approval quality/lifecycle, Indian financial year numbering, ledger integrity reconciliation, pagination/sorting/filtering, consistent error envelope & security headers, and store notices.*
+# Seed realistic database (25 catalog items, 4 vendors, 4 users, demo workflows)
+python -m app.seed --reset
 
-#### 3. Frontend Setup
-In a new terminal:
+# Run backend with hot-reload
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+API documentation is available at `http://127.0.0.1:8000/docs` (OpenAPI Swagger UI).
+
+### 2. Frontend Setup
+In a separate terminal:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Open `http://localhost:5173` in your browser. The Vite development proxy forwards all `/api` calls directly to `http://localhost:8000`.
+Open `http://localhost:5173` in your browser. All `/api` requests are automatically proxied to the FastAPI server at port 8000.
 
 ---
 
-### Production Deployment Guide
+## Production Cloud Deployment Guide
 
-#### 1. Free MySQL Database (TiDB Cloud Serverless or Aiven)
-1. Sign up for free at [TiDB Cloud](https://tidbcloud.com) or [Aiven](https://aiven.io).
-2. Create a free MySQL-compatible cluster (e.g. `gbu-inventory`).
-3. Note your connection details:
-   - Host: e.g. `gateway01.us-east-1.prod.aws.tidbcloud.com`
-   - Port: `4000` (or `3306` on Aiven)
-   - User: `xxxxxx.root`
-   - Password: `your-password`
-   - Database: `test` (or create `gbu_inv`)
-4. Construct your connection string:
-   ```
-   mysql+pymysql://<user>:<password>@<host>:<port>/<database>?charset=utf8mb4
+### Architecture
+- **Frontend:** Hosted on **Vercel** (Global Edge CDN).
+- **Backend:** Hosted on **Render** as a Python Web Service.
+- **Database:** Serverless MySQL on **TiDB Cloud** or **Aiven** with SSL encryption.
+
+### 1. Database (TiDB Cloud Serverless MySQL)
+1. Create a free cluster on [TiDB Cloud](https://tidbcloud.com).
+2. Obtain connection parameters (host, port, user, password, database).
+3. Set connection string:
+   ```env
+   DATABASE_URL=mysql+pymysql://<user>:<password>@<host>:4000/<database>?charset=utf8mb4
+   DB_SSL=1
    ```
 
-#### 2. Backend Deployment on Render (FastAPI)
-1. Push this repository to GitHub.
-2. In [Render Dashboard](https://dashboard.render.com), click **New +** → **Web Service**.
-3. Connect your GitHub repository.
-4. Configure service settings:
-   - **Name:** `gbu-inventory-backend`
-   - **Region:** Singapore / Frankfurt / Oregon
-   - **Root Directory:** `backend`
-   - **Environment:** `Python 3`
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-5. Under **Environment Variables**, configure:
-   - `DATABASE_URL`: `mysql+pymysql://<user>:<password>@<host>:<port>/<database>?charset=utf8mb4`
+### 2. Backend (Render)
+1. Connect your GitHub repository to [Render](https://dashboard.render.com).
+2. Choose **Web Service** with root directory set to `backend`.
+3. Set Build Command: `pip install -r requirements.txt`
+4. Set Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+5. Configure Environment Variables:
+   - `DATABASE_URL`: Your TiDB MySQL connection URL.
    - `DB_SSL`: `1`
-   - `SECRET_KEY`: Generate a random 64-character hex key via:
-     ```bash
-     python3 -c "import secrets; print(secrets.token_hex(32))"
-     ```
-     *(Paste output directly into Render env vars; never commit this to GitHub!)*
-   - `ORIGINS`: `https://gbu-inventory-portal.vercel.app,http://localhost:5173` (set your actual Vercel domain)
-6. Click **Deploy Web Service**. The database tables and seed data will be initialized on first boot.
+   - `SECRET_KEY`: Random 64-character hex string (`python3 -c "import secrets; print(secrets.token_hex(32))"`).
+   - `ORIGINS`: `https://your-frontend.vercel.app,http://localhost:5173`
 
-> **Handling the Free-Tier Cold-Start Problem:**  
-> Free instances on Render spin down after 15 minutes of inactivity, taking ~30–45 seconds to spin up on cold requests.  
-> **Built-in Mitigations:**
-> 1. **Portal Login Waking-Up Indicator:** `Login.jsx` automatically monitors the `/api/health` ping and displays a user-friendly *"Server waking up from standby"* notice.
-> 2. **Uptime Monitoring Ping:** Use a free monitor like [Cron-job.org](https://cron-job.org) or [UptimeRobot](https://uptimerobot.com) to ping `https://your-backend.onrender.com/api/health` every 10 minutes to keep the container continuously warm.
-
-#### 3. Frontend Deployment on Vercel
-1. In [Vercel Dashboard](https://vercel.com), click **Add New...** → **Project**.
-2. Select your repository.
-3. Configure settings:
-   - **Framework Preset:** `Vite`
-   - **Root Directory:** `frontend`
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-4. Under **Environment Variables**, add:
-   - `VITE_API_URL`: `https://your-backend-app.onrender.com`
-5. Click **Deploy**. Vercel will build and serve your frontend across its global Edge Network.
+### 3. Frontend (Vercel)
+1. Import repository into [Vercel](https://vercel.com).
+2. Set Root Directory to `frontend`.
+3. Set Framework Preset to `Vite`.
+4. Configure Environment Variable:
+   - `VITE_API_URL`: `https://your-backend.onrender.com`
+5. Deploy.
 
 ---
 
-### Core Business Rules Enforced
+## Repository Structure
 
-1. **Non-Negative Stock Rule:** No material can be issued or written off beyond available store balance (`400 Bad Request` with exact item stock message).
-2. **Requisition Sanction Gate:** A Purchase Order cannot be generated without an approved indent. Raising a PO automatically updates indent status to `ORDERED`.
-3. **Goods Receipt Note (GRN):** Partial deliveries are tracked line-by-line (`OPEN` → `PARTIAL` → `RECEIVED`). Receipt immediately increments stock and updates catalog price to the purchase rate.
-4. **Condemnation Approval Gate:** Write-off proposals do **not** decrease inventory until the Director approves. Upon sanction, physical stock decreases and a `WRITEOFF` ledger entry is written.
-5. **Role-Gated Security:** Department users see only their own requisitions and cannot view POs or audit logs. All critical operations generate permanent records in the `audit` table.
+```text
+gbu-inventory-portal/
+├── backend/
+│   ├── app/
+│   │   ├── auth.py          # JWT tokens, bcrypt hash, role dependency guards
+│   │   ├── db.py            # SQLAlchemy engine (SQLite dev / TiDB MySQL prod)
+│   │   ├── main.py          # FastAPI app, CORS, security headers, API endpoints
+│   │   ├── ml_forecast.py   # Statistical run-rate, safety stock, EOQ & anomaly engine
+│   │   ├── models.py        # SQLAlchemy 2.0 ORM schemas & relationships
+│   │   └── seed.py          # 25 catalog items, 4 vendors, 4 users, demo vouchers
+│   ├── requirements.txt     # Python dependencies
+│   └── test_flows.py        # 14 end-to-end automated pytest suites
+├── docs/
+│   └── screenshots/         # High-resolution visual captures
+│       ├── command_palette_shadcn.png
+│       ├── dashboard_typography_assets.png
+│       ├── empty_illustration.png
+│       ├── forms_preview_modal_1440.png
+│       ├── login_large_photo_1440.png
+│       ├── notifications_popover_clean.png
+│       ├── school_consumption_expanded.png
+│       └── shortcuts_modal.png
+├── frontend/
+│   ├── public/              # Static assets (gbu-campus.webp, gbu-logo.jpg)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── CommandPalette.jsx       # Cmd+K fast search & actions launcher
+│   │   │   ├── Header.jsx               # Breadcrumbs, search, notification, user menu
+│   │   │   ├── Illustrations.jsx        # Storyset-inspired vector empty states
+│   │   │   ├── ItemDrawer.jsx           # Slide-out item inspection & stock ledger
+│   │   │   ├── Layout.jsx               # Main application shell & global modals
+│   │   │   ├── NotificationPopover.jsx  # Actionable notifications & stock warnings
+│   │   │   ├── ShortcutsModal.jsx       # Keyboard navigation cheat sheet (?)
+│   │   │   ├── Sidebar.jsx              # Role-gated university navigation
+│   │   │   └── TremorWidgets.jsx        # TremorTracker, TremorBarList, TremorMetricCard
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx            # Landmark hero, KPI cards, ML alerts
+│   │   │   ├── Indents.jsx              # Requisition creation & director approvals
+│   │   │   ├── IssueStock.jsx           # Department material issue vouchers
+│   │   │   ├── Items.jsx                # Full stock register with live filters
+│   │   │   ├── Login.jsx                # Institutional sign-in with 1-click demo roles
+│   │   │   ├── PurchaseOrders.jsx       # PO issuance & Goods Receipt Note (GRN)
+│   │   │   ├── Reports.jsx              # School-level material consumption audit
+│   │   │   └── WriteOffs.jsx            # Survey committee condemnation proposals
+│   │   ├── api.js           # Axios/Fetch client with JWT interceptor & error envelope
+│   │   └── App.jsx          # React Router v6 tree with role guards
+│   ├── index.html           # Plus Jakarta Sans, JetBrains Mono, Source Serif 4
+│   └── tailwind.config.js   # University brand color palette & typography tokens
+└── README.md                # Project documentation & visual guide
+```
+
+---
+
+## License & Attribution
+
+Designed and engineered by **Rajnish Singh** for demonstration of enterprise full-stack development, database architecture, and university administrative workflows.
+All trademarks and campus imagery belong to **Gautam Buddha University**, Greater Noida, Uttar Pradesh.
