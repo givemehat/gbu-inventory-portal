@@ -129,13 +129,20 @@ export default function Reports() {
       <div className="print-container bg-surface rounded-panel border border-line p-6 sm:p-10 space-y-6">
         {/* University Header */}
         <div className="border-b-2 border-ink pb-5 text-center">
-          <div className="mb-2">
-            <h2 className="font-serif text-[24px] sm:text-[28px] font-semibold text-ink uppercase tracking-tight">
-              Gautam Buddha University
-            </h2>
-            <p className="text-[12px] text-ink-muted uppercase tracking-wider">
-              Greater Noida, Gautam Buddha Nagar, Uttar Pradesh — 201312
-            </p>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img
+              src="/gbu-logo.jpg"
+              alt="Gautam Buddha University Logo"
+              className="w-14 h-14 rounded-full object-contain border border-line"
+            />
+            <div className="text-left">
+              <h2 className="font-serif text-[22px] sm:text-[26px] font-semibold text-ink uppercase tracking-tight leading-tight">
+                Gautam Buddha University
+              </h2>
+              <p className="text-[11px] text-ink-muted uppercase tracking-wider">
+                Greater Noida, Gautam Buddha Nagar, Uttar Pradesh — 201312
+              </p>
+            </div>
           </div>
           <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[13px] font-medium text-ink uppercase tracking-wider">
             Stores & Purchase Department • Official Stock Position Statement

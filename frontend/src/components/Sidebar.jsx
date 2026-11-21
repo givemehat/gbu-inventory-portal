@@ -66,9 +66,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         {/* Brand header */}
         <div className="h-14 px-4 border-b border-line flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-primary text-white flex items-center justify-center font-bold text-[13px] tracking-tight shrink-0">
-              GBU
-            </div>
+            <img
+              src="/gbu-logo.jpg"
+              alt="GBU Logo"
+              className="w-8 h-8 rounded-full bg-white object-contain p-0.5 border border-line shrink-0 shadow-sm"
+            />
             <div className="leading-tight">
               <span className="font-semibold text-[13px] text-ink block">Stores & Purchase</span>
               <span className="text-[11px] text-ink-subtle block">Gautam Buddha University</span>

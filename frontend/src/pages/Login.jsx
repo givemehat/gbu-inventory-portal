@@ -84,8 +84,12 @@ export default function Login() {
         {/* Left Column: University Identity (stacked header on mobile, full-height blue panel on desktop) */}
         <div className="md:col-span-5 bg-primary text-white p-6 sm:p-8 md:p-10 flex flex-col justify-between">
           <div>
-            <div className="w-12 h-12 rounded bg-white text-primary flex items-center justify-center font-black text-[18px] mb-4 md:mb-6 shadow-sm">
-              GBU
+            <div className="mb-4 md:mb-6">
+              <img
+                src="/gbu-logo.jpg"
+                alt="Gautam Buddha University Logo"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-1 shadow-md object-contain"
+              />
             </div>
             <h1 className="font-serif text-[22px] sm:text-[26px] md:text-[28px] font-semibold tracking-tight leading-snug text-white">
               Gautam Buddha University
