@@ -482,45 +482,99 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ROW 2: Compact stat row (4 figures, plain white surface, 1px border, monochrome) */}
+      {/* ROW 2: High-density Ergonomic Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-surface p-4 rounded border border-line">
-          <span className="text-[12px] font-medium text-ink-muted block">Catalog items</span>
-          <span className="text-[22px] font-semibold text-ink tabular-nums block mt-1">
-            {data.total_items}
-          </span>
-          <Link to="/items" className="text-[11px] text-primary hover:underline font-medium mt-1 inline-block">
-            View stock register →
+        {/* Card 1: Catalog Items */}
+        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium text-ink-muted">Catalog items</span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-50 text-primary border border-blue-200">
+              Active stock
+            </span>
+          </div>
+          <div className="my-2">
+            <span className="text-[24px] font-semibold text-ink tabular-nums block">
+              {data.total_items}
+            </span>
+            <span className="text-[11px] text-ink-subtle">
+              Across 5 store categories
+            </span>
+          </div>
+          <Link to="/items" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
+            <span>View stock register</span>
+            <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
 
-        <div className="bg-surface p-4 rounded border border-line">
-          <span className="text-[12px] font-medium text-ink-muted block">Stock valuation</span>
-          <span className="text-[22px] font-semibold text-ink tabular-nums block mt-1">
-            {formatRupees(data.stock_value)}
-          </span>
-          <Link to="/reports" className="text-[11px] text-primary hover:underline font-medium mt-1 inline-block">
-            View stock statement →
+        {/* Card 2: Stock Valuation */}
+        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium text-ink-muted">Stock valuation</span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-green border border-green-200">
+              WAC Basis
+            </span>
+          </div>
+          <div className="my-2">
+            <span className="text-[24px] font-semibold text-ink tabular-nums block">
+              {formatRupees(data.stock_value)}
+            </span>
+            <span className="text-[11px] text-ink-subtle">
+              Weighted Average Cost
+            </span>
+          </div>
+          <Link to="/reports" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
+            <span>View stock statement</span>
+            <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
 
-        <div className="bg-surface p-4 rounded border border-line">
-          <span className="text-[12px] font-medium text-ink-muted block">Below minimum</span>
-          <span className="text-[22px] font-semibold text-amber tabular-nums block mt-1">
-            {data.low_stock_count || 0}
-          </span>
-          <Link to="/items?low=true" className="text-[11px] text-amber hover:underline font-medium mt-1 inline-block">
-            {data.low_stock_count} items need refill →
+        {/* Card 3: Below Minimum */}
+        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium text-ink-muted">Below minimum</span>
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+              data.low_stock_count > 0 
+                ? 'bg-amber-50 text-amber border border-amber-200' 
+                : 'bg-emerald-50 text-green border border-green-200'
+            }`}>
+              {data.low_stock_count > 0 ? 'Refill needed' : 'Nominal'}
+            </span>
+          </div>
+          <div className="my-2">
+            <span className={`text-[24px] font-semibold tabular-nums block ${
+              data.low_stock_count > 0 ? 'text-amber' : 'text-ink'
+            }`}>
+              {data.low_stock_count || 0}
+            </span>
+            <span className="text-[11px] text-ink-subtle">
+              Threshold alert triggers
+            </span>
+          </div>
+          <Link to="/items?low=true" className="text-[11px] text-amber hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
+            <span>{data.low_stock_count || 0} items need refill</span>
+            <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
 
-        <div className="bg-surface p-4 rounded border border-line">
-          <span className="text-[12px] font-medium text-ink-muted block">Open purchase orders</span>
-          <span className="text-[22px] font-semibold text-ink tabular-nums block mt-1">
-            {data.open_pos || 0}
-          </span>
-          <Link to="/purchase-orders" className="text-[11px] text-primary hover:underline font-medium mt-1 inline-block">
-            Track shipments →
+        {/* Card 4: Open POs */}
+        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium text-ink-muted">Open purchase orders</span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-sky-50 text-blue-700 border border-blue-200">
+              Inward transit
+            </span>
+          </div>
+          <div className="my-2">
+            <span className="text-[24px] font-semibold text-ink tabular-nums block">
+              {data.open_pos || 0}
+            </span>
+            <span className="text-[11px] text-ink-subtle">
+              Awaiting GRN entry
+            </span>
+          </div>
+          <Link to="/purchase-orders" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
+            <span>Track shipments</span>
+            <ChevronRight className="w-3 h-3" />
           </Link>
         </div>
       </div>
