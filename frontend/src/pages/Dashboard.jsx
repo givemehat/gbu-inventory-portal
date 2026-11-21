@@ -142,46 +142,65 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Top Institutional Header: Administrative Block */}
-      <div className="bg-surface rounded-panel border border-line p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
-        <div className="flex items-center gap-3.5 min-w-0">
-          <img
-            src="/gbu-campus.webp"
-            alt="GBU Administrative Block"
-            className="w-16 h-14 sm:w-20 sm:h-16 rounded object-cover border border-line shrink-0"
-          />
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-serif text-[16px] sm:text-[18px] font-semibold text-ink">
-                Gautam Buddha University
+      {/* Top Institutional Header: Prominent Administrative Block Hero */}
+      <div className="bg-surface rounded-panel border border-line overflow-hidden shadow-xs">
+        <div className="grid grid-cols-1 md:grid-cols-12">
+          {/* Prominent Campus Landmark Image */}
+          <div className="md:col-span-5 relative h-52 sm:h-60 md:h-auto min-h-[190px] bg-slate-900 overflow-hidden">
+            <img
+              src="/gbu-campus.webp"
+              alt="GBU Administrative Block (प्रशासनिक भवन)"
+              className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent flex items-end p-4">
+              <span className="text-white text-[12px] font-medium flex items-center gap-1.5 drop-shadow">
+                <Building2 className="w-3.5 h-3.5 text-blue-300" />
+                Administrative Building (प्रशासनिक भवन) • Central Campus
               </span>
-              <span className="text-[11px] px-2 py-0.5 rounded bg-blue-50 text-primary border border-blue-200 font-medium">
-                Central Stores & Purchase
-              </span>
-            </div>
-            <p className="text-[12px] text-ink-muted mt-0.5 truncate">
-              Administrative Building (प्रशासनिक भवन) • Greater Noida • Academic Session 2026–27
-            </p>
-            <div className="flex items-center gap-3 text-[11px] text-ink-subtle mt-1">
-              <span>Active official: <strong className="text-ink font-medium">{user.name}</strong> ({user.role})</span>
-              <span>•</span>
-              <span>Department: <strong className="text-ink font-medium">{user.dept}</strong></span>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
-          <div className="text-right hidden sm:block">
-            <span className="text-[11px] text-ink-muted block">Stock health index</span>
-            <span className="font-mono text-[13px] font-bold text-green">94.8% Nominal</span>
+          {/* Right: University & Portal Information */}
+          <div className="md:col-span-7 p-4 sm:p-5 flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="font-serif text-[18px] sm:text-[21px] font-semibold text-ink leading-snug">
+                  Gautam Buddha University
+                </span>
+                <span className="text-[11px] px-2 py-0.5 rounded bg-blue-50 text-primary border border-blue-200 font-medium">
+                  Central Stores & Purchase
+                </span>
+              </div>
+              <p className="text-[13px] text-ink-muted leading-relaxed">
+                Centralised digital stock ledger, material indents, purchase orders, goods receipt notes (GRN), and asset condemnation records across university schools.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-3 border-t border-line text-[12px]">
+              <div>
+                <span className="text-ink-muted block text-[11px]">Academic Session</span>
+                <strong className="text-ink font-medium">2026–2027</strong>
+              </div>
+              <div>
+                <span className="text-ink-muted block text-[11px]">Active Official</span>
+                <strong className="text-ink font-medium truncate block">{user.name} ({user.role})</strong>
+              </div>
+              <div>
+                <span className="text-ink-muted block text-[11px]">Stock Health Index</span>
+                <strong className="text-green font-mono font-bold block">94.8% Nominal</strong>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2.5 border-t border-line/60">
+              <span className="text-[11px] text-ink-subtle">Opp. Yamuna Expressway, Greater Noida — 201312</span>
+              <Link
+                to="/items"
+                className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded text-[12px] font-medium transition-colors shadow-xs"
+              >
+                Open stock register
+              </Link>
+            </div>
           </div>
-          <div className="h-8 w-px bg-line hidden sm:block" />
-          <Link
-            to="/items"
-            className="px-3 py-1.5 bg-paper hover:bg-slate-100 border border-line rounded text-[12px] font-medium text-ink transition-colors"
-          >
-            Open stock register
-          </Link>
         </div>
       </div>
 

@@ -115,14 +115,15 @@ export default function Login() {
             </p>
 
             {/* Campus Landmark Photo */}
-            <div className="hidden md:block mt-5 rounded border border-white/20 overflow-hidden shadow-sm">
+            <div className="hidden md:block mt-6 rounded-lg border border-white/20 overflow-hidden shadow-md">
               <img
                 src="/gbu-campus.webp"
                 alt="GBU Campus Administrative Block"
-                className="w-full h-32 object-cover"
+                className="w-full h-48 lg:h-52 object-cover object-center transform hover:scale-105 transition-transform duration-500"
               />
-              <div className="px-3 py-1.5 bg-[#0F2252]/90 text-[11px] text-blue-100 font-medium">
-                Administrative Building · GBU Campus
+              <div className="px-3.5 py-2 bg-[#0F2252]/95 text-[11px] text-blue-100 font-medium flex items-center justify-between">
+                <span>Administrative Building (प्रशासनिक भवन)</span>
+                <span className="text-[10px] text-blue-300">GBU Campus</span>
               </div>
             </div>
           </div>
