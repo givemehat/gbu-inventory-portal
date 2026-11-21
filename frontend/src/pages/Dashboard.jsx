@@ -17,6 +17,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
 import { Bell, Plus, Trash2, X, ChevronRight, Sparkles, AlertTriangle, Building2, BarChart3, Package, CreditCard, AlertOctagon, Truck } from 'lucide-react';
 import { TremorTracker, TremorBarList, TremorMetricCard } from '../components/TremorWidgets';
+import { assetUrl } from '../lib/utils';
 
 // Format Indian currency into Lakhs or standard grouping
 function formatRupees(num = 0) {
@@ -164,7 +165,7 @@ export default function Dashboard() {
         {/* Full-Width Panoramic Landmark Photo */}
         <div className="relative w-full h-72 sm:h-80 md:h-96 bg-slate-900 overflow-hidden">
           <img
-            src="/gbu-campus.webp"
+            src={assetUrl('gbu-campus.webp')}
             alt="GBU Administrative Block (प्रशासनिक भवन)"
             className="w-full h-full object-cover object-center transform hover:scale-102 transition-transform duration-700"
           />

@@ -15,6 +15,7 @@ import StatusBadge from '../components/StatusBadge';
 import WorkflowStrip from '../components/WorkflowStrip';
 import { useToast } from '../components/Toast';
 import ShipmentTracker from '../components/ShipmentTracker';
+import { assetUrl } from '../lib/utils';
 
 export default function PurchaseOrders() {
   const [pos, setPos] = useState([]);
@@ -764,7 +765,7 @@ export default function PurchaseOrders() {
               <div className="border-b-2 border-ink pb-4 text-center">
                 <div className="flex items-center justify-center gap-3 mb-2">
                   <img
-                    src="/gbu-logo.jpg"
+                    src={assetUrl('gbu-logo.jpg')}
                     alt="GBU Logo"
                     className="w-14 h-14 rounded-full object-contain border border-line"
                   />

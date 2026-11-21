@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api';
 import { useToast } from '../components/Toast';
+import { assetUrl } from '../lib/utils';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -96,7 +97,7 @@ export default function Login() {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img
-                src="/gbu-logo.jpg"
+                src={assetUrl('gbu-logo.jpg')}
                 alt="GBU Logo"
                 className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white p-1 shadow-md object-contain shrink-0"
               />
@@ -117,7 +118,7 @@ export default function Login() {
             {/* Campus Landmark Photo */}
             <div className="hidden md:block mt-6 rounded-lg border border-white/20 overflow-hidden shadow-lg">
               <img
-                src="/gbu-campus.webp"
+                src={assetUrl('gbu-campus.webp')}
                 alt="GBU Campus Administrative Block"
                 className="w-full h-60 lg:h-64 object-cover object-center transform hover:scale-105 transition-transform duration-500"
               />

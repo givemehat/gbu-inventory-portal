@@ -15,6 +15,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { getCurrentUser } from '../api';
+import { assetUrl } from '../lib/utils';
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
   const user = getCurrentUser() || { name: 'User', role: 'store' };
@@ -78,7 +79,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         <div className="h-14 px-4 border-b border-line flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <img
-              src="/gbu-logo.jpg"
+              src={assetUrl('gbu-logo.jpg')}
               alt="GBU Logo"
               className="w-8 h-8 rounded-full bg-white object-contain p-0.5 border border-line shrink-0 shadow-sm"
             />

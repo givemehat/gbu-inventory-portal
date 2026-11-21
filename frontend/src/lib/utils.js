@@ -15,3 +15,9 @@ export function formatInr(num = 0) {
   }
   return `₹${Number(num).toLocaleString('en-IN')}`;
 }
+
+export function assetUrl(path = '') {
+  const base = import.meta.env.BASE_URL || '/';
+  const cleanPath = String(path).replace(/^\//, '');
+  return `${base.replace(/\/$/, '')}/${cleanPath}`;
+}
