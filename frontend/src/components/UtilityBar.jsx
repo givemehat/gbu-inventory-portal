@@ -15,10 +15,6 @@ export default function UtilityBar() {
         </span>
         <span className="text-rose-300/60">•</span>
         <span className="text-rose-100">Gautam Buddha University</span>
-        <span className="text-rose-300/40 hidden lg:inline">•</span>
-        <span className="text-[10px] text-amber-200 hidden lg:inline font-serif italic">
-          अत्ता हि अत्तनो नाथो
-        </span>
       </div>
 
       {/* Mobile Title (abbreviated) */}

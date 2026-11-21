@@ -13,11 +13,16 @@ DEV_FALLBACK_SECRET = "dev-only-ephemeral-jwt-secret-key-32bytes"
 SECRET = os.getenv("SECRET_KEY", DEV_FALLBACK_SECRET)
 oauth = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-# Thread-safe in-memory sliding window rate limiter: 5 failures per 10 minutes per key
+# Thread-safe in-memory sliding window rate limiter
 _login_failures: dict[str, list[float]] = {}
 _failures_lock = threading.Lock()
-WINDOW_SECONDS = 600  # 10 minutes
-MAX_FAILURES = 5
+WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "600"))  # 10 minutes
+MAX_FAILURES = int(os.getenv("MAX_LOGIN_FAILURES", "5"))  # 5 attempts
+
+
+def clear_all_failures() -> None:
+    with _failures_lock:
+        _login_failures.clear()
 
 
 def get_client_ip(request: Request) -> str:

@@ -91,44 +91,38 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-paper flex items-center justify-center p-4 sm:p-6 lg:p-8 text-ink">
       <div className="max-w-[1100px] w-full bg-surface border border-line rounded-panel md:shadow-card overflow-hidden grid grid-cols-1 md:grid-cols-12">
-        {/* Left Column: University Identity (stacked header on mobile, full-height blue panel on desktop) */}
+        {/* Left Column: University Identity */}
         <div className="md:col-span-5 bg-primary text-white p-6 sm:p-8 md:p-8 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img
                 src="/gbu-logo.jpg"
-                alt="Gautam Buddha University Logo"
+                alt="GBU Logo"
                 className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white p-1 shadow-md object-contain shrink-0"
               />
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-blue-200 font-medium">
-                  गौतम बुद्ध विश्वविद्यालय
-                </p>
-                <p className="text-[11px] text-blue-200/90 italic">
-                  An Ultimate Destination for Higher Learning
+                <h1 className="font-serif text-[20px] sm:text-[22px] md:text-[24px] font-semibold tracking-tight leading-tight text-white">
+                  Gautam Buddha University
+                </h1>
+                <p className="font-serif text-[14px] text-blue-100 mt-0.5">
+                  Stores & Purchase Department
                 </p>
               </div>
             </div>
-            <h1 className="font-serif text-[22px] sm:text-[24px] md:text-[26px] font-semibold tracking-tight leading-snug text-white">
-              Gautam Buddha University
-            </h1>
-            <p className="font-serif text-[15px] sm:text-[16px] text-blue-100 mt-0.5">
-              Stores & Purchase Department
-            </p>
-            <p className="hidden md:block text-[12px] text-blue-100/90 mt-3 leading-relaxed">
-              Official digital portal for departmental stock indents, purchase orders, inventory ledgers, and condemnation records.
+            
+            <p className="hidden md:block text-[13px] text-blue-100/90 mt-3 leading-relaxed">
+              Official digital portal for departmental material requisitions, purchase orders, digital stock registers, and asset condemnation records.
             </p>
 
-            {/* Campus Landmark Photo: Administrative Building */}
-            <div className="hidden md:block mt-5 rounded border border-white/20 overflow-hidden shadow-sm bg-primary-hover/50">
+            {/* Campus Landmark Photo */}
+            <div className="hidden md:block mt-5 rounded border border-white/20 overflow-hidden shadow-sm">
               <img
                 src="/gbu-campus.webp"
-                alt="GBU Administrative Building (प्रशासनिक भवन)"
-                className="w-full h-28 object-cover"
+                alt="GBU Campus Administrative Block"
+                className="w-full h-32 object-cover"
               />
-              <div className="px-2.5 py-1.5 bg-[#0F2252]/90 flex items-center justify-between text-[11px] text-blue-100">
-                <span className="font-medium">प्रशासनिक भवन (Admin Block)</span>
-                <span className="text-[10px] text-blue-200 italic font-serif">अत्ता हि अत्तनो नाथो</span>
+              <div className="px-3 py-1.5 bg-[#0F2252]/90 text-[11px] text-blue-100 font-medium">
+                Administrative Building · GBU Campus
               </div>
             </div>
           </div>
