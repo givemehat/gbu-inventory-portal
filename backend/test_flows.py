@@ -521,5 +521,24 @@ def test_enterprise_reports_and_analytics():
     assert "fill_rate_percentage" in vendor_data["vendors"][0]
 
 
+# 14. AI/ML Stock-Out Forecasting & Procurement Anomaly Detection
+def test_ml_stockout_forecast_and_analytics():
+    store_headers, _ = login("store@gbu.demo")
+    res = client.get("/api/analytics/stock-forecast", headers=store_headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert "total_items_analyzed" in data
+    assert "forecasts" in data
+    assert len(data["forecasts"]) > 0
+    first = data["forecasts"][0]
+    assert "days_of_supply" in first
+    assert "daily_run_rate" in first
+    assert "recommended_safety_stock" in first
+    assert "economic_order_qty" in first
+    assert first["urgency"] in ("STOCKOUT", "CRITICAL", "WARNING", "HEALTHY", "DORMANT")
+    assert "confidence_score" in first
+    assert "cross_dept_anomalies" in data
+
+
 if __name__ == "__main__":
     pytest.main(["-v", "backend/test_flows.py"])

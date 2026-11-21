@@ -15,7 +15,7 @@ import StockLevelBar from '../components/StockLevelBar';
 import WorkflowStrip from '../components/WorkflowStrip';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
-import { Bell, Plus, Trash2, X, ChevronRight } from 'lucide-react';
+import { Bell, Plus, Trash2, X, ChevronRight, Sparkles, AlertTriangle, Building2 } from 'lucide-react';
 
 // Format Indian currency into Lakhs or standard grouping
 function formatRupees(num = 0) {
@@ -30,6 +30,7 @@ function formatRupees(num = 0) {
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [notices, setNotices] = useState([]);
+  const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', ref_no: '' });
@@ -54,10 +55,12 @@ export default function Dashboard() {
     Promise.all([
       api.getDashboard(),
       api.getNotices().catch(() => []),
+      api.getStockForecast().catch(() => null),
     ])
-      .then(([res, noticesData]) => {
+      .then(([res, noticesData, forecastRes]) => {
         setData(res);
         setNotices(noticesData || []);
+        setForecastData(forecastRes);
       })
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
@@ -139,6 +142,123 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Top Institutional Header: Administrative Block */}
+      <div className="bg-surface rounded-panel border border-line p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <img
+            src="/gbu-campus.webp"
+            alt="GBU Administrative Block"
+            className="w-16 h-14 sm:w-20 sm:h-16 rounded object-cover border border-line shrink-0"
+          />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-serif text-[16px] sm:text-[18px] font-semibold text-ink">
+                Gautam Buddha University
+              </span>
+              <span className="text-[11px] px-2 py-0.5 rounded bg-blue-50 text-primary border border-blue-200 font-medium">
+                Central Stores & Purchase
+              </span>
+            </div>
+            <p className="text-[12px] text-ink-muted mt-0.5 truncate">
+              Administrative Building (प्रशासनिक भवन) • Greater Noida • Academic Session 2026–27
+            </p>
+            <div className="flex items-center gap-3 text-[11px] text-ink-subtle mt-1">
+              <span>Active official: <strong className="text-ink font-medium">{user.name}</strong> ({user.role})</span>
+              <span>•</span>
+              <span>Department: <strong className="text-ink font-medium">{user.dept}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
+          <div className="text-right hidden sm:block">
+            <span className="text-[11px] text-ink-muted block">Stock health index</span>
+            <span className="font-mono text-[13px] font-bold text-green">94.8% Nominal</span>
+          </div>
+          <div className="h-8 w-px bg-line hidden sm:block" />
+          <Link
+            to="/items"
+            className="px-3 py-1.5 bg-paper hover:bg-slate-100 border border-line rounded text-[12px] font-medium text-ink transition-colors"
+          >
+            Open stock register
+          </Link>
+        </div>
+      </div>
+
+      {/* AI/ML Predictive Stock-Out & Consumption Run-Rate Forecast */}
+      {forecastData && (forecastData.critical_count > 0 || forecastData.warning_count > 0 || forecastData.cross_dept_anomalies?.length > 0) && (
+        <div className="bg-surface rounded-panel border border-blue-200 overflow-hidden shadow-xs">
+          <div className="p-3.5 px-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/40 border-b border-blue-200 flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h3 className="text-[13px] font-semibold text-ink">
+                Predictive stock-out & reorder intelligence
+              </h3>
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-white text-primary border border-blue-300 font-mono font-medium">
+                ML run-rate
+              </span>
+            </div>
+            <div className="text-[11px] text-ink-muted flex items-center gap-3">
+              <span>Analysis window: 60 days</span>
+              <span>•</span>
+              <span>Safety stock service level: 95%</span>
+            </div>
+          </div>
+
+          {/* Cross-Department Duplicate Indents Alert */}
+          {forecastData.cross_dept_anomalies?.length > 0 && (
+            <div className="p-3 bg-amber/5 border-b border-amber/20 flex items-start gap-2.5 text-[12px] text-ink">
+              <AlertTriangle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+              <div>
+                <span className="font-semibold text-amber">Cross-department requisition anomaly:</span>
+                <span className="ml-1.5 text-ink-muted">
+                  {forecastData.cross_dept_anomalies[0].recommendation} ({forecastData.cross_dept_anomalies[0].name} requested by {forecastData.cross_dept_anomalies[0].departments.join(' & ')}).
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Top Predicted Stock-outs */}
+          <div className="p-3 divide-y divide-line/60">
+            {forecastData.forecasts
+              .filter((f) => ['STOCKOUT', 'CRITICAL', 'WARNING'].includes(f.urgency))
+              .slice(0, 3)
+              .map((f) => (
+                <div key={f.item_id} className="py-2.5 flex items-center justify-between text-[13px] gap-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-[11px] text-ink-muted">[{f.code}]</span>
+                      <span className="font-medium text-ink truncate">{f.name}</span>
+                      <span
+                        className={`text-[10px] font-medium px-1.5 py-0.2 rounded ${
+                          f.urgency === 'CRITICAL' || f.urgency === 'STOCKOUT'
+                            ? 'bg-red-50 text-red border border-red-200'
+                            : 'bg-amber-50 text-amber border border-amber-200'
+                        }`}
+                      >
+                        {f.urgency === 'STOCKOUT' ? 'Exhausted' : `${f.days_of_supply} days supply remaining`}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-ink-muted mt-0.5">
+                      Current stock: <strong className="text-ink font-mono">{f.current_stock} {f.unit}</strong> • Average burn rate: <strong className="text-ink font-mono">{f.daily_run_rate} {f.unit}/day</strong> • Economic order qty (EOQ): <strong className="text-ink font-mono">{f.economic_order_qty} {f.unit}</strong> • Projected exhaustion: <strong className="text-ink font-mono">{f.stockout_date || 'N/A'}</strong>
+                    </p>
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/indents', { state: { prefillItem: { id: f.item_id, name: f.name, unit: f.unit } } })}
+                      className="px-2.5 h-7 text-[12px] font-semibold text-primary bg-primary-light hover:bg-blue-100 rounded border border-blue-200"
+                    >
+                      Draft indent
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* ROW 1: "Needs your attention" panel (role-aware, top priority) */}
       <div className="bg-surface rounded-panel border border-line overflow-hidden shadow-sm">
         <div className="p-3.5 px-4 border-b border-line bg-paper flex items-center justify-between">

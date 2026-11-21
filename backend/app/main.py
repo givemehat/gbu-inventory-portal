@@ -23,6 +23,7 @@ from .models import (
     User, Category, Item, Vendor, Txn, Indent, IndentLine, PO, POLine,
     WriteOff, Audit, Notice, DocCounter, utcnow
 )
+from .ml_forecast import analyze_inventory_procurement
 from .auth import (
     check_pw, make_token, me, need, is_rate_limited, record_failure,
     reset_failures, get_client_ip, validate_production_secret
@@ -1775,6 +1776,12 @@ def delete_notice(request: Request, id: int, db: Session = Depends(get_db), u: U
     db.delete(n)
     db.commit()
     return {"ok": True}
+
+
+# ----------------- AI / Machine Learning Inventory Intelligence -----------------
+@app.get("/api/analytics/stock-forecast")
+def stock_forecast(db: Session = Depends(get_db), u: User = Depends(me)):
+    return analyze_inventory_procurement(db)
 
 
 # ----------------- Health & Readiness -----------------

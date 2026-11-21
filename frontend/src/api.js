@@ -273,6 +273,7 @@ export const api = {
   getConsumptionByDept: (days = 90) => request(`/api/reports/consumption-by-dept?days=${days}`),
   getAbcAnalysis: () => request('/api/reports/abc-analysis'),
   getVendorPerformance: () => request('/api/reports/vendor-performance'),
+  getStockForecast: () => request('/api/analytics/stock-forecast'),
 
   downloadStockReport: async () => {
     const blob = await request('/api/reports/stock.csv');
