@@ -8,6 +8,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [wakingUp, setWakingUp] = useState(false);
+  const [showDemo, setShowDemo] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
@@ -43,13 +44,22 @@ export default function Login() {
     },
   ];
 
-  // Detect Render free tier cold-start
+  // Detect Render free tier cold-start and check demo accounts flag
   useEffect(() => {
     const timer = setTimeout(() => setWakingUp(true), 2000);
     api.health()
       .then(() => setWakingUp(false))
       .catch(() => setWakingUp(true))
       .finally(() => clearTimeout(timer));
+
+    api.getConfig()
+      .then((cfg) => {
+        if (cfg && cfg.show_demo_accounts !== undefined) {
+          setShowDemo(cfg.show_demo_accounts);
+        }
+      })
+      .catch(() => {});
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -169,42 +179,44 @@ export default function Login() {
               </button>
             </form>
 
-            {/* Try a demo role list */}
-            <div className="mt-6 pt-5 border-t border-line">
-              <span className="text-[13px] font-medium text-ink block mb-2.5">
-                Try a demo role
-              </span>
+            {/* Try a demo role list (controlled by SHOW_DEMO_ACCOUNTS) */}
+            {showDemo && (
+              <div className="mt-6 pt-5 border-t border-line">
+                <span className="text-[13px] font-medium text-ink block mb-2.5">
+                  Try a demo role
+                </span>
 
-              <div className="space-y-2">
-                {demoAccounts.map((acc) => {
-                  const isSelected = email === acc.email;
-                  return (
-                    <button
-                      key={acc.email}
-                      type="button"
-                      onClick={() => handleFill(acc)}
-                      className={`w-full p-3 text-left rounded border transition-colors flex flex-col gap-1 text-[13px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                        isSelected
-                          ? 'border-primary bg-primary-light/60 text-ink ring-1 ring-primary'
-                          : 'border-line hover:bg-paper/80 hover:border-slate-300 text-ink'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-[13px] text-ink">{acc.role}</span>
-                        <span className="text-[11px] font-mono text-ink-muted">{acc.email}</span>
-                      </div>
-                      <p className="text-[12px] text-ink-muted leading-relaxed">
-                        {acc.desc}
-                      </p>
-                    </button>
-                  );
-                })}
+                <div className="space-y-2">
+                  {demoAccounts.map((acc) => {
+                    const isSelected = email === acc.email;
+                    return (
+                      <button
+                        key={acc.email}
+                        type="button"
+                        onClick={() => handleFill(acc)}
+                        className={`w-full p-3 text-left rounded border transition-colors flex flex-col gap-1 text-[13px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                          isSelected
+                            ? 'border-primary bg-primary-light/60 text-ink ring-1 ring-primary'
+                            : 'border-line hover:bg-paper/80 hover:border-slate-300 text-ink'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-[13px] text-ink">{acc.role}</span>
+                          <span className="text-[11px] font-mono text-ink-muted">{acc.email}</span>
+                        </div>
+                        <p className="text-[12px] text-ink-muted leading-relaxed">
+                          {acc.desc}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="text-[12px] text-ink-muted mt-3">
+                  All demo accounts use the password <code className="font-mono font-semibold text-ink px-1.5 py-0.5 bg-paper rounded border border-line">demo123</code>.
+                </p>
               </div>
-
-              <p className="text-[12px] text-ink-muted mt-3">
-                All demo accounts use the password <code className="font-mono font-semibold text-ink px-1.5 py-0.5 bg-paper rounded border border-line">demo123</code>.
-              </p>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -63,7 +63,9 @@ async function request(path, options = {}) {
     let errMsg = `Request failed (${response.status})`;
     try {
       const errData = await response.json();
-      if (errData && errData.detail) {
+      if (errData && errData.error && errData.error.message) {
+        errMsg = errData.error.message;
+      } else if (errData && errData.detail) {
         if (typeof errData.detail === 'string') {
           errMsg = errData.detail;
         } else if (Array.isArray(errData.detail)) {
@@ -85,9 +87,24 @@ async function request(path, options = {}) {
   return response.json();
 }
 
+function wrapListResponse(res) {
+  if (res && Array.isArray(res.items)) {
+    const arr = [...res.items];
+    arr.total = res.total;
+    arr.page = res.page;
+    arr.pageSize = res.page_size;
+    arr.totalPages = res.total_pages;
+    return arr;
+  }
+  return res;
+}
+
 export const api = {
   // Health check for Render waking up detection
   health: () => request('/api/health'),
+  ready: () => request('/api/ready'),
+  getConfig: () => request('/api/config'),
+  integrityCheck: () => request('/api/admin/integrity-check'),
 
   // Auth
   login: async (email, password) => {
@@ -114,13 +131,18 @@ export const api = {
     body: JSON.stringify({ name }),
   }),
 
-  getItems: (params = {}) => {
+  getItems: async (params = {}) => {
     const q = new URLSearchParams();
     if (params.q) q.append('q', params.q);
     if (params.low) q.append('low', 'true');
     if (params.category_id) q.append('category_id', params.category_id);
+    if (params.page) q.append('page', params.page);
+    if (params.page_size) q.append('page_size', params.page_size);
+    if (params.sort) q.append('sort', params.sort);
+    if (params.order) q.append('order', params.order);
     const qs = q.toString() ? `?${q.toString()}` : '';
-    return request(`/api/items${qs}`);
+    const res = await request(`/api/items${qs}`);
+    return wrapListResponse(res);
   },
   getItem: (id) => request(`/api/items/${id}`),
   addItem: (data) => request('/api/items', {
@@ -143,32 +165,57 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  getTransactions: (params = {}) => {
+  getTransactions: async (params = {}) => {
     const q = new URLSearchParams();
     if (params.item_id) q.append('item_id', params.item_id);
     if (params.kind) q.append('kind', params.kind);
-    if (params.limit) q.append('limit', params.limit);
+    if (params.page) q.append('page', params.page);
+    if (params.page_size) q.append('page_size', params.page_size);
+    if (params.sort) q.append('sort', params.sort);
+    if (params.order) q.append('order', params.order);
     const qs = q.toString() ? `?${q.toString()}` : '';
-    return request(`/api/transactions${qs}`);
+    const res = await request(`/api/transactions${qs}`);
+    return wrapListResponse(res);
   },
 
   // Indents
-  getIndents: (status = '') => {
-    const qs = status ? `?status=${status}` : '';
-    return request(`/api/indents${qs}`);
+  getIndents: async (status = '', params = {}) => {
+    const q = new URLSearchParams();
+    if (status) q.append('status', status);
+    if (params.dept) q.append('dept', params.dept);
+    if (params.page) q.append('page', params.page);
+    if (params.page_size) q.append('page_size', params.page_size);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    const res = await request(`/api/indents${qs}`);
+    return wrapListResponse(res);
   },
   getIndent: (id) => request(`/api/indents/${id}`),
   createIndent: (data) => request('/api/indents', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  decideIndent: (id, approve, remark = '') => request(`/api/indents/${id}/decision`, {
+  decideIndent: (id, approve, remark = '', line_approvals = null) => request(`/api/indents/${id}/decision`, {
     method: 'POST',
-    body: JSON.stringify({ approve, remark }),
+    body: JSON.stringify({ approve, remark, line_approvals }),
+  }),
+  cancelIndent: (id) => request(`/api/indents/${id}/cancel`, {
+    method: 'POST',
+  }),
+  copyIndent: (id) => request(`/api/indents/${id}/copy`, {
+    method: 'POST',
   }),
 
   // Purchase Orders
-  getPOs: () => request('/api/purchase-orders'),
+  getPOs: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.status) q.append('status', params.status);
+    if (params.vendor_id) q.append('vendor_id', params.vendor_id);
+    if (params.page) q.append('page', params.page);
+    if (params.page_size) q.append('page_size', params.page_size);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    const res = await request(`/api/purchase-orders${qs}`);
+    return wrapListResponse(res);
+  },
   getPO: (id) => request(`/api/purchase-orders/${id}`),
   createPO: (data) => request('/api/purchase-orders', {
     method: 'POST',
@@ -180,7 +227,19 @@ export const api = {
   }),
 
   // Write-offs
-  getWriteOffs: () => request('/api/writeoffs'),
+  getWriteOffs: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (typeof params === 'string') {
+      if (params) q.append('status', params);
+    } else {
+      if (params.status) q.append('status', params.status);
+      if (params.page) q.append('page', params.page);
+      if (params.page_size) q.append('page_size', params.page_size);
+    }
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    const res = await request(`/api/writeoffs${qs}`);
+    return wrapListResponse(res);
+  },
   createWriteOff: (data) => request('/api/writeoffs', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -189,6 +248,17 @@ export const api = {
     method: 'POST',
     body: JSON.stringify({ approve, remark }),
   }),
+
+  // Audit
+  getAudit: async (params = {}) => {
+    const q = new URLSearchParams();
+    if (params.q) q.append('q', params.q);
+    if (params.page) q.append('page', params.page);
+    if (params.page_size) q.append('page_size', params.page_size);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    const res = await request(`/api/audit${qs}`);
+    return wrapListResponse(res);
+  },
 
   // Dashboard & Reports
   getDashboard: () => request('/api/dashboard'),

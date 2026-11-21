@@ -7,6 +7,8 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
+      - key: ENV
+        value: "production"
       - key: DATABASE_URL
         sync: false
       - key: DB_SSL
@@ -14,4 +16,6 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ORIGINS
-        value: "*"
+        sync: false
+      - key: SHOW_DEMO_ACCOUNTS
+        value: "true"

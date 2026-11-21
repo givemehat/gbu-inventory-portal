@@ -1,13 +1,65 @@
-import os, time
-import bcrypt, jwt
-from fastapi import Depends, HTTPException
+import os
+import time
+import threading
+import bcrypt
+import jwt
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from .db import get_db
 from .models import User
 
-SECRET = os.getenv("SECRET_KEY", "gbu-inventory-jwt-secret-key-production-super-secure-min32")
+DEV_FALLBACK_SECRET = "dev-only-ephemeral-jwt-secret-key-32bytes"
+SECRET = os.getenv("SECRET_KEY", DEV_FALLBACK_SECRET)
 oauth = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+
+# Thread-safe in-memory sliding window rate limiter: 5 failures per 10 minutes per key
+_login_failures: dict[str, list[float]] = {}
+_failures_lock = threading.Lock()
+WINDOW_SECONDS = 600  # 10 minutes
+MAX_FAILURES = 5
+
+
+def get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "127.0.0.1"
+
+
+def is_rate_limited(email: str, client_ip: str) -> bool:
+    key = f"{email.lower().strip()}:{client_ip}"
+    now = time.time()
+    with _failures_lock:
+        attempts = [t for t in _login_failures.get(key, []) if now - t < WINDOW_SECONDS]
+        _login_failures[key] = attempts
+        return len(attempts) >= MAX_FAILURES
+
+
+def record_failure(email: str, client_ip: str) -> None:
+    key = f"{email.lower().strip()}:{client_ip}"
+    now = time.time()
+    with _failures_lock:
+        attempts = [t for t in _login_failures.get(key, []) if now - t < WINDOW_SECONDS]
+        attempts.append(now)
+        _login_failures[key] = attempts
+
+
+def reset_failures(email: str, client_ip: str) -> None:
+    key = f"{email.lower().strip()}:{client_ip}"
+    with _failures_lock:
+        _login_failures.pop(key, None)
+
+
+def validate_production_secret() -> None:
+    is_prod = os.getenv("ENV", "").lower() in ("production", "prod")
+    secret_val = os.getenv("SECRET_KEY")
+    if is_prod and (not secret_val or secret_val == DEV_FALLBACK_SECRET):
+        raise RuntimeError(
+            "CRITICAL SECURITY CONFIGURATION ERROR: Production environment requires a securely generated, "
+            "non-default SECRET_KEY environment variable. Generate one with: "
+            "python -c 'import secrets; print(secrets.token_hex(32))'"
+        )
 
 
 def hash_pw(p: str) -> str:

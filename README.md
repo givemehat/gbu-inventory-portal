@@ -1,7 +1,9 @@
 # Gautam Buddha University (GBU)
 ## Central Stores & Purchase (S&P) Department — Inventory Management System
 
-A complete, production-ready university inventory management portal built for Gautam Buddha University (Greater Noida, UP). It handles the full tripartite lifecycle of **Stores**, **Procurement (Requisition → Director Approval → PO → GRN)**, and **Material Condemnations (Write-offs)** with an immutable audit trail and role-based access control.
+A fully functional, demo-ready working prototype of a university inventory management portal built for Gautam Buddha University (Greater Noida, UP). It handles the full tripartite lifecycle of **Stores**, **Procurement (Requisition → Director Approval → PO → GRN)**, and **Material Condemnations (Write-offs)** with an immutable audit trail, weighted average cost valuation, and role-based access control.
+
+*Note: All university stationery form numbers (e.g. S&P-01 to S&P-05), supplier records, and inventory data included in this repository are realistic sample prototypes prepared for demonstration purposes.*
 
 ---
 
@@ -87,7 +89,13 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 - API Documentation (Swagger UI): `http://localhost:8000/docs`
-- On first start, SQLite database `inv.db` is created and automatically populated with realistic demo seed data.
+- On first start, database migrations execute automatically and populate initial demo seed data.
+- **One-Command Database Reset & Demo Seed:**
+  ```bash
+  cd backend
+  python -m app.seed --reset
+  ```
+  *(Restores exact demo baseline: STN-001 balance 180 reams, 7 low-stock items, 1 pending indent, 1 open PO, 1 pending write-off. In production environment, `--reset` safely refuses to run without `--force`).*
 
 #### 2. Run Automated Verification Tests
 Run directly from inside `backend`:
@@ -95,11 +103,7 @@ Run directly from inside `backend`:
 cd backend
 pytest -v test_flows.py
 ```
-Or from root:
-```bash
-PYTHONPATH=backend pytest -v backend/test_flows.py
-```
-*Executes all 7 end-to-end integration tests: health, auth, role enforcement, stock issues, procurement, write-offs, and dashboard reports.*
+*Executes all 12 end-to-end integration tests: health/ready, auth & rate limiting, role enforcement, 20 parallel issue concurrency stress test, weighted average cost (WAC), segregation of duties, approval quality/lifecycle, Indian financial year numbering, ledger integrity reconciliation, pagination/sorting/filtering, consistent error envelope & security headers, and store notices.*
 
 #### 3. Frontend Setup
 In a new terminal:
