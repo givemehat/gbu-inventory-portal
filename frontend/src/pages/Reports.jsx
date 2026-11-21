@@ -23,6 +23,8 @@ export default function Reports() {
   // Department Consumption State
   const [consumptionDays, setConsumptionDays] = useState(90);
   const [consumptionData, setConsumptionData] = useState(null);
+  const [selectedSchoolFilter, setSelectedSchoolFilter] = useState('ALL');
+  const [expandedDept, setExpandedDept] = useState(null);
 
   // ABC Analysis State
   const [abcData, setAbcData] = useState(null);
@@ -641,49 +643,157 @@ export default function Reports() {
                 </button>
               ))}
             </div>
+
+            {/* School Filter Selector */}
+            <div className="flex items-center gap-2">
+              <label htmlFor="school-filter" className="text-[12px] font-medium text-ink-muted">Filter School:</label>
+              <select
+                id="school-filter"
+                value={selectedSchoolFilter}
+                onChange={(e) => setSelectedSchoolFilter(e.target.value)}
+                className="h-8 px-2.5 rounded border border-line bg-surface text-ink text-[12px] outline-none focus:border-primary max-w-xs truncate"
+              >
+                <option value="ALL">All University Schools ({consumptionData.departments.length})</option>
+                {consumptionData.departments.map((d) => (
+                  <option key={d.department} value={d.department}>
+                    {d.department} (₹{d.total_value.toLocaleString('en-IN')})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="text-ink-muted">
               Total Consumption Value: <strong className="text-ink font-semibold">₹{consumptionData.total_consumption_value.toLocaleString('en-IN')}</strong>
             </div>
           </div>
 
-          <div className="bg-surface rounded-panel border border-line p-6 space-y-6">
+          <div className="bg-surface rounded-panel border border-line p-5 space-y-4">
             <div>
               <h2 className="font-serif text-[20px] font-medium text-ink">
-                Departmental Spend & Consumption Register
+                Individual School Spend & Material Consumption Breakdown
               </h2>
               <p className="text-[13px] text-ink-muted mt-0.5">
-                Breakdown of store requisitions fulfilled across academic schools and research centers.
+                Detailed audit of store issues, top items consumed, and voucher history across academic schools.
               </p>
             </div>
 
             <div className="space-y-3">
-              {consumptionData.departments.map((dept, idx) => (
-                <div key={idx} className="p-3.5 rounded border border-line bg-paper/30 hover:bg-paper transition-colors">
-                  <div className="flex items-center justify-between text-[13px] mb-1.5">
-                    <span className="font-medium text-ink flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      {dept.department}
-                    </span>
-                    <div className="text-right">
-                      <strong className="text-ink font-semibold">₹{dept.total_value.toLocaleString('en-IN')}</strong>
-                      <span className="text-[11px] text-ink-muted ml-2">({dept.pct}%)</span>
-                    </div>
-                  </div>
-                  {/* Progress bar */}
-                  <div className="w-full h-2 rounded-full bg-line overflow-hidden">
+              {consumptionData.departments
+                .filter((d) => selectedSchoolFilter === 'ALL' || d.department === selectedSchoolFilter)
+                .map((dept, idx) => {
+                  const isExpanded = expandedDept === dept.department || selectedSchoolFilter !== 'ALL';
+                  return (
                     <div
-                      className="h-full bg-primary rounded-full"
-                      style={{ width: `${Math.min(dept.pct, 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-ink-muted mt-1.5">
-                    <span>Requisitions: {dept.issues_count} times</span>
-                    <span>Total units drawn: {dept.total_qty.toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
+                      key={idx}
+                      className="rounded border border-line bg-surface overflow-hidden transition-all duration-200 shadow-2xs"
+                    >
+                      {/* Department Summary Row */}
+                      <div
+                        onClick={() => setExpandedDept(isExpanded && selectedSchoolFilter === 'ALL' ? null : dept.department)}
+                        className="p-3.5 bg-paper/40 hover:bg-paper cursor-pointer flex items-center justify-between gap-4 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <span className="font-semibold text-ink text-[14px] block truncate">
+                              {dept.department}
+                            </span>
+                            <span className="text-[11px] text-ink-muted">
+                              {dept.issues_count} requisitions • {dept.total_qty.toLocaleString()} total units drawn
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                          <div className="text-right">
+                            <strong className="text-[15px] font-mono font-bold text-ink block">
+                              ₹{dept.total_value.toLocaleString('en-IN')}
+                            </strong>
+                            <span className="text-[11px] text-primary font-medium">
+                              {dept.pct}% of store budget
+                            </span>
+                          </div>
+
+                          <span className="text-[12px] text-primary font-medium hover:underline hidden sm:inline-block">
+                            {isExpanded ? 'Hide items' : 'View consumed items'} →
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="w-full h-1.5 bg-line overflow-hidden">
+                        <div
+                          className="h-full bg-primary"
+                          style={{ width: `${Math.min(dept.pct, 100)}%` }}
+                        />
+                      </div>
+
+                      {/* Expandable Individual School Details */}
+                      {isExpanded && (
+                        <div className="p-4 bg-surface border-t border-line space-y-4 animate-in fade-in duration-150">
+                          {/* Top Consumed Items Table */}
+                          <div>
+                            <span className="text-[12px] font-semibold text-ink-muted block mb-2">
+                              Top Consumed Materials by {dept.department}
+                            </span>
+                            {(!dept.top_items || dept.top_items.length === 0) ? (
+                              <p className="text-[12px] text-ink-muted italic">No itemized breakdown recorded.</p>
+                            ) : (
+                              <div className="overflow-x-auto border border-line rounded">
+                                <table className="w-full text-left text-[12px]">
+                                  <thead className="bg-paper border-b border-line text-ink font-semibold text-[11px]">
+                                    <tr>
+                                      <th className="p-2">Item Nomenclature</th>
+                                      <th className="p-2 text-right">Units Consumed</th>
+                                      <th className="p-2 text-right">Valuation (₹)</th>
+                                      <th className="p-2 text-right">% of School Spend</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-line/60 text-ink">
+                                    {dept.top_items.map((item, iIdx) => {
+                                      const itemPct = dept.total_value > 0 ? ((item.value / dept.total_value) * 100).toFixed(1) : 0;
+                                      return (
+                                        <tr key={iIdx} className="hover:bg-paper/30">
+                                          <td className="p-2 font-medium">{item.name}</td>
+                                          <td className="p-2 text-right font-mono">{item.qty} {item.unit}</td>
+                                          <td className="p-2 text-right font-mono font-semibold">₹{item.value.toLocaleString('en-IN')}</td>
+                                          <td className="p-2 text-right font-mono text-ink-muted">{itemPct}%</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Recent Issue Slips */}
+                          {dept.recent_vouchers && dept.recent_vouchers.length > 0 && (
+                            <div>
+                              <span className="text-[12px] font-semibold text-ink-muted block mb-2">
+                                Recent Store Issue Vouchers ({dept.recent_vouchers.length})
+                              </span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                                {dept.recent_vouchers.map((v) => (
+                                  <div key={v.id} className="p-2 bg-paper rounded border border-line flex items-center justify-between">
+                                    <div>
+                                      <span className="font-mono font-semibold text-primary">[{v.ref}]</span>
+                                      <span className="font-medium text-ink ml-1.5">{v.item}</span>
+                                      <span className="text-ink-muted block mt-0.5">{v.qty} {v.unit} • {v.date}</span>
+                                    </div>
+                                    <strong className="font-mono text-ink">₹{v.value.toLocaleString('en-IN')}</strong>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>

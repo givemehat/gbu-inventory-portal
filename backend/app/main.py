@@ -1493,7 +1493,7 @@ def rep_bin_card(
 
 @app.get("/api/reports/consumption-by-dept")
 def rep_consumption_by_dept(days: int = 90, db: Session = Depends(get_db), u: User = Depends(me)):
-    """Computes departmental consumption breakdown (quantities and spend) over recent days."""
+    """Computes departmental consumption breakdown (quantities and spend) over recent days with item drill-downs."""
     cutoff = datetime.now(timezone.utc) - timedelta(days=days) if days > 0 else datetime(2020, 1, 1, tzinfo=timezone.utc)
 
     out_txns = db.scalars(
@@ -1501,6 +1501,8 @@ def rep_consumption_by_dept(days: int = 90, db: Session = Depends(get_db), u: Us
     ).all()
 
     dept_stats: dict[str, dict] = {}
+    dept_items: dict[str, dict] = {}
+    dept_vouchers: dict[str, list] = {}
     total_spend = Decimal("0.00")
     total_issues_count = len(out_txns)
 
@@ -1522,25 +1524,64 @@ def rep_consumption_by_dept(days: int = 90, db: Session = Depends(get_db), u: Us
                 "total_qty": Decimal("0.000"),
                 "total_value": Decimal("0.00"),
             }
+            dept_items[dept_name] = {}
+            dept_vouchers[dept_name] = []
 
         dept_stats[dept_name]["issues_count"] += 1
         dept_stats[dept_name]["total_qty"] += t.qty
         dept_stats[dept_name]["total_value"] += line_val
 
-    sorted_depts = sorted(
-        [
-            {
-                "department": s["department"],
-                "issues_count": s["issues_count"],
-                "total_qty": float(s["total_qty"]),
-                "total_value": float(round(s["total_value"], 2)),
-                "pct": float(round((s["total_value"] / total_spend * 100), 1)) if total_spend > 0 else 0.0,
+        item_name = t.item.name if t.item else "Unknown"
+        item_unit = t.item.unit if t.item else ""
+        if item_name not in dept_items[dept_name]:
+            dept_items[dept_name][item_name] = {
+                "name": item_name,
+                "unit": item_unit,
+                "qty": Decimal("0"),
+                "value": Decimal("0.00"),
             }
-            for s in dept_stats.values()
-        ],
-        key=lambda x: x["total_value"],
-        reverse=True
-    )
+        dept_items[dept_name][item_name]["qty"] += t.qty
+        dept_items[dept_name][item_name]["value"] += line_val
+
+        if len(dept_vouchers[dept_name]) < 8:
+            dept_vouchers[dept_name].append({
+                "id": t.id,
+                "ref": t.ref or f"ISS-{t.id}",
+                "date": t.at.strftime("%Y-%m-%d"),
+                "item": item_name,
+                "qty": float(t.qty),
+                "unit": item_unit,
+                "value": float(round(line_val, 2)),
+                "note": t.note or "",
+            })
+
+    sorted_depts = []
+    for dept_name, s in dept_stats.items():
+        top_items = sorted(
+            [
+                {
+                    "name": it["name"],
+                    "unit": it["unit"],
+                    "qty": float(it["qty"]),
+                    "value": float(round(it["value"], 2)),
+                }
+                for it in dept_items[dept_name].values()
+            ],
+            key=lambda x: x["value"],
+            reverse=True
+        )
+
+        sorted_depts.append({
+            "department": s["department"],
+            "issues_count": s["issues_count"],
+            "total_qty": float(s["total_qty"]),
+            "total_value": float(round(s["total_value"], 2)),
+            "pct": float(round((s["total_value"] / total_spend * 100), 1)) if total_spend > 0 else 0.0,
+            "top_items": top_items,
+            "recent_vouchers": dept_vouchers[dept_name],
+        })
+
+    sorted_depts.sort(key=lambda x: x["total_value"], reverse=True)
 
     return {
         "period_days": days,
