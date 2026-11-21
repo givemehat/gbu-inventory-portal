@@ -4,20 +4,14 @@ import {
   FileCheck2,
   Plus,
   PackageCheck,
-  Building,
-  Calendar,
-  Layers,
   ChevronDown,
   ChevronUp,
-  AlertCircle,
-  CheckCircle2,
-  IndianRupee,
   X,
   Truck,
-  User
 } from 'lucide-react';
 import { api, getCurrentUser } from '../api';
 import StatusBadge from '../components/StatusBadge';
+import WorkflowStrip from '../components/WorkflowStrip';
 import { useToast } from '../components/Toast';
 
 export default function PurchaseOrders() {
@@ -40,7 +34,7 @@ export default function PurchaseOrders() {
   const [grnModal, setGrnModal] = useState({
     isOpen: false,
     po: null,
-    lines: [], // { line_id, item_name, unit, ordered, got, pending, receiveQty }
+    lines: [],
   });
 
   // Quick Vendor Add Modal
@@ -64,7 +58,6 @@ export default function PurchaseOrders() {
         setVendors(vendorsData);
         setApprovedIndents(indentsData);
 
-        // Check if navigated from Indents screen with pre-selected indent
         if (location.state?.createFromIndent) {
           const preIndent = location.state.createFromIndent;
           handleOpenCreateWithIndent(preIndent, vendorsData);
@@ -87,7 +80,7 @@ export default function PurchaseOrders() {
         item_name: l.item,
         unit: l.unit,
         qty: l.qty,
-        rate: 100, // default placeholder
+        rate: 100,
       }))
     );
     setIsCreateOpen(true);
@@ -143,7 +136,7 @@ export default function PurchaseOrders() {
           rate: Number(l.rate),
         })),
       });
-      toast.success(`Purchase Order ${res.no} created successfully!`);
+      toast.success(`Purchase Order ${res.no} created`);
       setIsCreateOpen(false);
       loadData();
     } catch (err) {
@@ -153,18 +146,18 @@ export default function PurchaseOrders() {
     }
   };
 
-  // Open GRN Modal
   const handleOpenGrn = (po) => {
     const grnLines = po.lines.map((l) => {
       const pending = Math.max(0, l.qty - l.got);
       return {
         line_id: l.id,
+        item_id: l.item_id,
         item_name: l.item,
         unit: l.unit,
         ordered: l.qty,
         got: l.got,
         pending,
-        receiveQty: pending, // default to receive remaining
+        receiveQty: pending,
       };
     });
 
@@ -191,11 +184,10 @@ export default function PurchaseOrders() {
       }));
 
     if (receiveLines.length === 0) {
-      toast.error('Please enter receiving quantity greater than 0 for at least one line.');
+      toast.error('Enter received quantity greater than 0 for at least one line.');
       return;
     }
 
-    // Validate no line receives more than pending
     for (const l of grnModal.lines) {
       if (l.receiveQty > l.pending) {
         toast.error(`Cannot receive ${l.receiveQty} for ${l.item_name}. Only ${l.pending} pending.`);
@@ -206,7 +198,7 @@ export default function PurchaseOrders() {
     try {
       setSubmitting(true);
       const updatedPo = await api.receiveGoods(grnModal.po.id, receiveLines);
-      toast.success(`Goods received against ${updatedPo.no}! Status: ${updatedPo.status}. Stock updated.`);
+      toast.success(`Goods inward recorded against ${updatedPo.no}. Stock updated.`);
       setGrnModal({ isOpen: false, po: null, lines: [] });
       loadData();
     } catch (err) {
@@ -216,14 +208,13 @@ export default function PurchaseOrders() {
     }
   };
 
-  // Quick Add Vendor
   const handleAddVendor = async (e) => {
     e.preventDefault();
     if (!newVendor.name.trim()) return;
     try {
       setSubmitting(true);
       const res = await api.addVendor(newVendor);
-      toast.success(`Vendor "${res.name}" registered.`);
+      toast.success(`Vendor "${res.name}" registered`);
       const updatedV = await api.getVendors();
       setVendors(updatedV);
       setSelectedVendorId(res.id);
@@ -241,13 +232,14 @@ export default function PurchaseOrders() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Purchase Orders & Goods Receipt (GRN)</h2>
-          <p className="text-xs text-slate-500">
-            {pos.length} orders on file • {openPoCount} active shipments • Total PO Commitment:{' '}
-            <strong className="text-gbu-900">₹{totalPoValue.toLocaleString('en-IN')}</strong>
+          <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
+            Purchase Orders & Goods Receipt
+          </h1>
+          <p className="text-[14px] text-ink-muted mt-1">
+            <span className="tabular-nums">{pos.length}</span> orders on file • <span className="tabular-nums">{openPoCount}</span> open • Total commitment: <span className="tabular-nums font-medium text-ink">₹{totalPoValue.toLocaleString('en-IN')}</span>
           </p>
         </div>
 
@@ -255,25 +247,25 @@ export default function PurchaseOrders() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsVendorOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors"
+              className="h-9 px-3 rounded border border-line bg-surface hover:bg-paper text-ink text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
             >
-              <Truck className="w-4 h-4 text-slate-500" />
-              <span>Register Vendor</span>
+              <Truck className="w-3.5 h-3.5 text-ink-muted" />
+              <span>Register vendor</span>
             </button>
             <button
               onClick={() => {
                 if (approvedIndents.length === 0) {
-                  toast.error('No approved indents available. Raise and approve an indent first!');
+                  toast.error('No approved indents available. Raise and approve an indent first.');
                   return;
                 }
                 handleIndentSelect(approvedIndents[0].id);
                 setSelectedVendorId(vendors[0]?.id || '');
                 setIsCreateOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gbu-900 hover:bg-gbu-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-gbu-950/20 transition-all"
+              className="h-9 px-4 rounded bg-primary hover:bg-primary-hover text-surface text-[14px] font-medium transition-colors inline-flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
-              <span>Create PO from Indent</span>
+              <span>Create purchase order</span>
             </button>
           </div>
         )}
@@ -281,16 +273,15 @@ export default function PurchaseOrders() {
 
       {/* PO List */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-2 text-slate-400">
-          <div className="w-6 h-6 border-2 border-gbu-800 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-medium">Loading purchase orders...</span>
+        <div className="py-20 text-center text-[13px] text-ink-muted">
+          Loading purchase orders...
         </div>
       ) : pos.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
-          <FileCheck2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-sm font-bold text-slate-800">No Purchase Orders Found</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            Purchase Orders are created against Director-sanctioned indents.
+        <div className="bg-surface rounded-panel border border-line p-12 text-center text-ink-muted">
+          <FileCheck2 className="w-10 h-10 text-ink-subtle mx-auto mb-2 stroke-[1.5]" />
+          <p className="text-[14px] font-medium text-ink">No purchase orders on file</p>
+          <p className="text-[12px] text-ink-muted mt-0.5">
+            Purchase orders are generated against Director-sanctioned indents.
           </p>
         </div>
       ) : (
@@ -302,36 +293,30 @@ export default function PurchaseOrders() {
             return (
               <div
                 key={po.id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:border-slate-300 transition-all"
+                className="bg-surface rounded-panel border border-line overflow-hidden transition-colors"
               >
-                {/* PO Card Header */}
-                <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start sm:items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 flex items-center justify-center font-bold shrink-0">
-                      <FileCheck2 className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
-                          {po.no}
+                <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="font-mono text-[13px] font-semibold text-ink px-2 py-0.5 rounded bg-paper border border-line">
+                        {po.no}
+                      </span>
+                      <StatusBadge status={po.status} />
+                      {po.indent_no && (
+                        <span className="text-[12px] font-mono text-ink-muted bg-paper px-2 py-0.5 rounded border border-line">
+                          Requisition: {po.indent_no}
                         </span>
-                        <StatusBadge status={po.status} />
-                        {po.indent_no && (
-                          <span className="text-[11px] font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                            Requisition: {po.indent_no}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-600 mt-1">
-                        Vendor: <strong className="text-slate-900">{po.vendor}</strong> • Ordered by: {po.by || 'Stores'}
-                      </p>
+                      )}
                     </div>
+                    <p className="text-[13px] text-ink-muted mt-1.5">
+                      Vendor: <span className="font-medium text-ink">{po.vendor}</span> • Placed by: {po.by || 'Stores'}
+                    </p>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 pt-3 sm:pt-0 border-t sm:border-t-0 border-line">
                     <div className="text-left sm:text-right">
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Total Value</span>
-                      <span className="text-base font-extrabold text-slate-900 block leading-tight">
+                      <span className="text-[11px] text-ink-muted block uppercase tracking-wide">PO total</span>
+                      <span className="text-[16px] font-semibold text-ink tabular-nums block leading-tight">
                         ₹{(po.total || 0).toLocaleString('en-IN')}
                       </span>
                     </div>
@@ -340,17 +325,17 @@ export default function PurchaseOrders() {
                       {canReceive && (
                         <button
                           onClick={() => handleOpenGrn(po)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors"
+                          className="h-8 px-3.5 rounded bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
                         >
-                          <PackageCheck className="w-4 h-4" />
-                          <span>Receive Goods (GRN)</span>
+                          <PackageCheck className="w-3.5 h-3.5" />
+                          <span>Receive goods</span>
                         </button>
                       )}
 
                       <button
                         onClick={() => setExpandedPoId(isExpanded ? null : po.id)}
-                        className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                        title={isExpanded ? 'Hide items' : 'View line items'}
+                        className="p-1.5 text-ink-muted hover:text-ink rounded transition-colors"
+                        title={isExpanded ? 'Collapse' : 'Expand lines'}
                       >
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
@@ -358,41 +343,43 @@ export default function PurchaseOrders() {
                   </div>
                 </div>
 
-                {/* PO Lines Accordion */}
+                {/* Bill of Quantities Accordion */}
                 {isExpanded && (
-                  <div className="bg-slate-50/70 border-t border-slate-200 p-4 sm:p-5">
-                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
-                      Purchase Order Bill of Quantities ({po.lines.length} items)
-                    </h4>
-                    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                      <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+                  <div className="bg-paper border-t border-line p-5">
+                    <h3 className="text-[12px] font-medium text-ink-muted uppercase tracking-wider mb-2.5">
+                      Purchase order line items ({po.lines.length})
+                    </h3>
+                    <div className="border border-line rounded overflow-hidden bg-surface">
+                      <table className="w-full text-left text-[13px]">
+                        <thead className="bg-paper text-ink-muted font-medium border-b border-line text-[12px]">
                           <tr>
-                            <th className="px-3 py-2">Item Description</th>
-                            <th className="px-3 py-2 text-right">Ordered Qty</th>
-                            <th className="px-3 py-2 text-right">Unit Rate (₹)</th>
+                            <th className="px-3 py-2">Item</th>
+                            <th className="px-3 py-2 text-right">Ordered</th>
+                            <th className="px-3 py-2 text-right">Unit rate</th>
                             <th className="px-3 py-2 text-right">Received (GRN)</th>
                             <th className="px-3 py-2 text-right">Pending</th>
-                            <th className="px-3 py-2 text-right">Line Total</th>
+                            <th className="px-3 py-2 text-right">Total</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 text-slate-700">
+                        <tbody className="divide-y divide-line text-ink">
                           {po.lines.map((line) => {
                             const pending = Math.max(0, line.qty - line.got);
                             return (
-                              <tr key={line.id} className="hover:bg-slate-50/60">
-                                <td className="px-3 py-2 font-medium">{line.item}</td>
-                                <td className="px-3 py-2 text-right">
+                              <tr key={line.id} className="hover:bg-paper/30">
+                                <td className="px-3 py-2">{line.item}</td>
+                                <td className="px-3 py-2 text-right tabular-nums">
                                   {line.qty} {line.unit}
                                 </td>
-                                <td className="px-3 py-2 text-right">₹{line.rate.toLocaleString('en-IN')}</td>
-                                <td className="px-3 py-2 text-right font-bold text-emerald-700">
+                                <td className="px-3 py-2 text-right tabular-nums">
+                                  ₹{line.rate.toLocaleString('en-IN')}
+                                </td>
+                                <td className="px-3 py-2 text-right font-medium text-green tabular-nums">
                                   {line.got} {line.unit}
                                 </td>
-                                <td className={`px-3 py-2 text-right font-semibold ${pending > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                                <td className={`px-3 py-2 text-right tabular-nums ${pending > 0 ? 'text-amber font-medium' : 'text-ink-subtle'}`}>
                                   {pending} {line.unit}
                                 </td>
-                                <td className="px-3 py-2 text-right font-bold text-slate-900">
+                                <td className="px-3 py-2 text-right font-medium tabular-nums text-ink">
                                   ₹{(line.qty * line.rate).toLocaleString('en-IN')}
                                 </td>
                               </tr>
@@ -411,56 +398,58 @@ export default function PurchaseOrders() {
 
       {/* Create PO Modal */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-[2px]">
+          <div className="bg-surface rounded-panel max-w-2xl w-full border border-line shadow-sm overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-line flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Create Official Purchase Order</h3>
-                <p className="text-xs text-slate-500">Tied directly to an approved university requisition</p>
+                <h3 className="font-serif text-[18px] font-semibold text-ink">Create Purchase Order</h3>
+                <p className="text-[12px] text-ink-muted">Generate formal order against approved requisition</p>
               </div>
-              <button onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-                <X className="w-5 h-5" />
+              <button
+                type="button"
+                onClick={() => setIsCreateOpen(false)}
+                className="text-ink-muted hover:text-ink p-1 rounded"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreatePo} className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
-              {/* Indent Selection */}
+            <form onSubmit={handleCreatePo} className="p-5 overflow-y-auto space-y-4 flex-1">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Select Approved Indent (Requisition) *
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Sanctioned indent (requisition)
                 </label>
                 <select
                   required
                   value={selectedIndentId}
                   onChange={(e) => handleIndentSelect(e.target.value)}
-                  className="w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none bg-white"
+                  className="w-full h-9 text-[14px] px-3 rounded border border-line bg-surface text-ink outline-none focus:border-primary"
                 >
-                  <option value="">-- Choose an Approved Indent --</option>
+                  <option value="">-- Choose an approved indent --</option>
                   {approvedIndents.map((ind) => (
                     <option key={ind.id} value={ind.id}>
-                      [{ind.no}] Dept: {ind.dept} ({ind.lines.length} items) — {ind.note || 'No note'}
+                      [{ind.no}] Dept: {ind.dept} ({ind.lines.length} items)
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Vendor Selection */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-700">Contracted University Vendor *</label>
+                  <label className="block text-[12px] font-medium text-ink-muted">Authorized vendor</label>
                   <button
                     type="button"
                     onClick={() => setIsVendorOpen(true)}
-                    className="text-xs text-gbu-700 hover:underline font-semibold"
+                    className="text-[12px] text-primary hover:underline"
                   >
-                    + Register New Vendor
+                    + Register new vendor
                   </button>
                 </div>
                 <select
                   required
                   value={selectedVendorId}
                   onChange={(e) => setSelectedVendorId(e.target.value)}
-                  className="w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none bg-white"
+                  className="w-full h-9 text-[14px] px-3 rounded border border-line bg-surface text-ink outline-none focus:border-primary"
                 >
                   {vendors.map((v) => (
                     <option key={v.id} value={v.id}>
@@ -470,31 +459,31 @@ export default function PurchaseOrders() {
                 </select>
               </div>
 
-              {/* Line items with Rates */}
+              {/* Items Table */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                  Sanctioned Items & Negotiated Rates
+                <label className="block text-[12px] font-medium text-ink-muted mb-2">
+                  Bill of materials & negotiated unit rates
                 </label>
                 {poLines.length === 0 ? (
-                  <p className="text-xs text-slate-400 p-4 border border-dashed rounded-xl text-center">
-                    Select an approved indent above to load requisitioned items.
+                  <p className="text-[13px] text-ink-muted p-4 border border-dashed border-line rounded text-center">
+                    Select an approved indent to populate requisitioned items.
                   </p>
                 ) : (
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+                  <div className="border border-line rounded overflow-hidden">
+                    <table className="w-full text-left text-[13px]">
+                      <thead className="bg-paper text-ink-muted font-medium border-b border-line text-[12px]">
                         <tr>
                           <th className="px-3 py-2">Item</th>
                           <th className="px-3 py-2 text-right">Quantity</th>
-                          <th className="px-3 py-2 text-right">Negotiated Rate (₹)</th>
-                          <th className="px-3 py-2 text-right">Line Total</th>
+                          <th className="px-3 py-2 text-right">Negotiated rate (₹)</th>
+                          <th className="px-3 py-2 text-right">Line total</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-700">
+                      <tbody className="divide-y divide-line text-ink">
                         {poLines.map((line, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/60">
+                          <tr key={idx} className="hover:bg-paper/40">
                             <td className="px-3 py-2 font-medium">{line.item_name}</td>
-                            <td className="px-3 py-2 text-right font-bold">
+                            <td className="px-3 py-2 text-right tabular-nums">
                               {line.qty} {line.unit}
                             </td>
                             <td className="px-3 py-2 text-right">
@@ -505,10 +494,10 @@ export default function PurchaseOrders() {
                                 required
                                 value={line.rate}
                                 onChange={(e) => handleRateChange(idx, e.target.value)}
-                                className="w-24 text-right text-xs py-1 px-2 border border-slate-300 rounded-lg focus:border-gbu-600 outline-none"
+                                className="w-24 h-7 text-right text-[13px] px-2 border border-line rounded focus:border-primary outline-none tabular-nums"
                               />
                             </td>
-                            <td className="px-3 py-2 text-right font-bold text-gbu-900">
+                            <td className="px-3 py-2 text-right font-medium tabular-nums text-ink">
                               ₹{(line.qty * line.rate).toLocaleString('en-IN')}
                             </td>
                           </tr>
@@ -519,27 +508,27 @@ export default function PurchaseOrders() {
                 )}
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-600">Total Purchase Order Commitment:</span>
-                <span className="text-base font-extrabold text-slate-900">
+              <div className="p-3 bg-paper rounded border border-line flex items-center justify-between text-[13px]">
+                <span className="text-ink-muted">Total purchase commitment:</span>
+                <span className="text-[16px] font-semibold text-ink tabular-nums">
                   ₹{poLines.reduce((acc, l) => acc + (l.qty * l.rate || 0), 0).toLocaleString('en-IN')}
                 </span>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="h-9 px-4 text-[13px] font-medium text-ink-muted hover:bg-paper rounded border border-line"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || poLines.length === 0}
-                  className="px-5 py-2 bg-gbu-900 hover:bg-gbu-800 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50"
+                  className="h-9 px-4 bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium rounded transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Creating PO...' : 'Issue Purchase Order'}
+                  {submitting ? 'Creating...' : 'Create purchase order'}
                 </button>
               </div>
             </form>
@@ -549,58 +538,56 @@ export default function PurchaseOrders() {
 
       {/* GRN (Receive Goods) Modal */}
       {grnModal.isOpen && grnModal.po && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-[2px]">
+          <div className="bg-surface rounded-panel max-w-2xl w-full border border-line shadow-sm overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-line flex items-center justify-between">
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-slate-900">Goods Receipt Note (GRN)</h3>
-                  <span className="font-mono text-xs font-bold text-slate-800 bg-slate-200 px-2 py-0.5 rounded">
-                    {grnModal.po.no}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Vendor: <strong>{grnModal.po.vendor}</strong> • Partial receipts supported
+                <h3 className="font-serif text-[18px] font-semibold text-ink">
+                  Goods Receipt Note (GRN) — {grnModal.po.no}
+                </h3>
+                <p className="text-[12px] text-ink-muted">
+                  Vendor: {grnModal.po.vendor} • Record delivery into central stores
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setGrnModal({ isOpen: false, po: null, lines: [] })}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+                className="text-ink-muted hover:text-ink p-1 rounded"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleConfirmGrn} className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
-              <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900">
-                <p className="font-semibold">Automated Inventory Update:</p>
-                <p className="mt-0.5 text-blue-800/80">
-                  Received quantities will be immediately added to inventory stock, and item catalog prices will be updated to the PO rate.
-                </p>
+            <form onSubmit={handleConfirmGrn} className="p-5 overflow-y-auto space-y-4 flex-1">
+              <div className="p-3 bg-paper border border-line rounded text-[13px] text-ink">
+                <span className="font-semibold block text-[11px] uppercase tracking-wide text-ink-muted mb-0.5">
+                  Stock update summary
+                </span>
+                Received quantities will be added to store stock immediately, and item catalog rates will update to the PO purchase price.
               </div>
 
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+              <div className="border border-line rounded overflow-hidden">
+                <table className="w-full text-left text-[13px]">
+                  <thead className="bg-paper text-ink-muted font-medium border-b border-line text-[12px]">
                     <tr>
                       <th className="px-3 py-2">Item</th>
                       <th className="px-3 py-2 text-right">Ordered</th>
                       <th className="px-3 py-2 text-right">Received</th>
                       <th className="px-3 py-2 text-right">Pending</th>
-                      <th className="px-3 py-2 text-right">Qty Received Now</th>
+                      <th className="px-3 py-2 text-right">Qty received now</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                  <tbody className="divide-y divide-line text-ink">
                     {grnModal.lines.map((l, idx) => (
-                      <tr key={l.line_id} className="hover:bg-slate-50/60">
+                      <tr key={l.line_id} className="hover:bg-paper/40">
                         <td className="px-3 py-2 font-medium">{l.item_name}</td>
-                        <td className="px-3 py-2 text-right">
+                        <td className="px-3 py-2 text-right tabular-nums">
                           {l.ordered} {l.unit}
                         </td>
-                        <td className="px-3 py-2 text-right text-emerald-700 font-semibold">
+                        <td className="px-3 py-2 text-right text-green font-medium tabular-nums">
                           {l.got} {l.unit}
                         </td>
-                        <td className="px-3 py-2 text-right text-amber-700 font-bold">
+                        <td className="px-3 py-2 text-right font-medium text-amber tabular-nums">
                           {l.pending} {l.unit}
                         </td>
                         <td className="px-3 py-2 text-right">
@@ -612,7 +599,7 @@ export default function PurchaseOrders() {
                             value={l.receiveQty}
                             onChange={(e) => handleGrnLineQtyChange(idx, e.target.value)}
                             disabled={l.pending <= 0}
-                            className="w-24 text-right text-xs py-1 px-2 border border-slate-300 rounded-lg focus:border-gbu-600 outline-none font-bold text-slate-900"
+                            className="w-24 h-7 text-right text-[13px] px-2 border border-line rounded focus:border-primary outline-none tabular-nums font-semibold"
                           />
                         </td>
                       </tr>
@@ -621,21 +608,21 @@ export default function PurchaseOrders() {
                 </table>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setGrnModal({ isOpen: false, po: null, lines: [] })}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="h-9 px-4 text-[13px] font-medium text-ink-muted hover:bg-paper rounded border border-line"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50 flex items-center gap-2"
+                  className="h-9 px-4 bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium rounded transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
                 >
-                  <PackageCheck className="w-4 h-4" />
-                  <span>{submitting ? 'Recording GRN...' : 'Confirm Goods Inward'}</span>
+                  <PackageCheck className="w-3.5 h-3.5" />
+                  <span>{submitting ? 'Recording...' : 'Receive goods'}</span>
                 </button>
               </div>
             </form>
@@ -645,60 +632,70 @@ export default function PurchaseOrders() {
 
       {/* Register Vendor Modal */}
       {isVendorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900">Register University Vendor</h3>
-              <button onClick={() => setIsVendorOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-[2px]">
+          <div className="bg-surface rounded-panel max-w-sm w-full border border-line shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-line flex items-center justify-between">
+              <h3 className="font-serif text-[18px] font-semibold text-ink">Register Vendor</h3>
+              <button
+                type="button"
+                onClick={() => setIsVendorOpen(false)}
+                className="text-ink-muted hover:text-ink p-1 rounded"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <form onSubmit={handleAddVendor} className="p-4 space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Vendor / Firm Name *</label>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Vendor or firm name
+                </label>
                 <input
                   type="text"
                   required
                   value={newVendor.name}
                   onChange={(e) => setNewVendor({ ...newVendor, name: e.target.value })}
-                  placeholder="e.g. Apex Office Supplies, Delhi"
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none"
+                  placeholder="e.g. Apex Office Supplies"
+                  className="w-full h-9 text-[13px] px-3 rounded border border-line focus:border-primary outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Contact Phone</label>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Contact telephone
+                </label>
                 <input
                   type="text"
                   value={newVendor.phone}
                   onChange={(e) => setNewVendor({ ...newVendor, phone: e.target.value })}
                   placeholder="e.g. 9811002233"
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none"
+                  className="w-full h-9 text-[13px] px-3 rounded border border-line focus:border-primary outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Email address
+                </label>
                 <input
                   type="email"
                   value={newVendor.email}
                   onChange={(e) => setNewVendor({ ...newVendor, email: e.target.value })}
                   placeholder="e.g. sales@apexsupplies.com"
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none"
+                  className="w-full h-9 text-[13px] px-3 rounded border border-line focus:border-primary outline-none"
                 />
               </div>
               <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsVendorOpen(false)}
-                  className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+                  className="h-8 px-3 text-[13px] text-ink-muted hover:bg-paper rounded border border-line"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-1.5 bg-gbu-900 hover:bg-gbu-800 text-white text-xs font-bold rounded-lg disabled:opacity-50"
+                  className="h-8 px-4 bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium rounded disabled:opacity-50"
                 >
-                  Save Vendor
+                  Save vendor
                 </button>
               </div>
             </form>

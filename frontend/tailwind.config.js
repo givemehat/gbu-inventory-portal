@@ -7,27 +7,39 @@ export default {
   theme: {
     extend: {
       colors: {
-        gbu: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+        ink: {
+          DEFAULT: '#14213D',
+          muted: '#4B5563',
+          subtle: '#6B7280',
         },
-        accent: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-        }
-      }
+        primary: {
+          DEFAULT: '#1F3A8A',
+          hover: '#172554',
+          light: '#EFF6FF',
+        },
+        paper: '#F7F8FA',
+        surface: '#FFFFFF',
+        line: '#E3E6EC',
+        amber: {
+          DEFAULT: '#B45309',
+          light: '#FEF3C7',
+          border: '#FDE68A',
+        },
+        green: {
+          DEFAULT: '#15803D',
+          light: '#DCFCE7',
+          border: '#BBF7D0',
+        },
+        red: {
+          DEFAULT: '#B91C1C',
+          light: '#FEE2E2',
+          border: '#FECACA',
+        },
+      },
+      fontFamily: {
+        sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+      },
     },
   },
   plugins: [],

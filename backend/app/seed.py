@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from .auth import hash_pw
 from .models import *
 
@@ -63,12 +63,66 @@ def run(db):
         db.add(i)
         objs[c] = i
     db.flush()
-    t0 = datetime.utcnow() - timedelta(days=20)
+    t_start = datetime.now(timezone.utc) - timedelta(days=60)
+    # 1. Spread opening stock verification across 60-55 days ago
     for k, (c, i) in enumerate(objs.items()):
-        db.add(Txn(item_id=i.id, kind="IN", qty=i.qty + 10, ref="OPENING", note="Opening stock", user_id=us["store"].id, at=t0))
-        if k % 3 == 0:
-            db.add(Txn(item_id=i.id, kind="OUT", qty=10, ref="ISSUE", note="To School of Engineering",
-                       user_id=us["store"].id, at=t0 + timedelta(days=3 + k % 10)))
+        db.add(Txn(item_id=i.id, kind="IN", qty=i.qty, ref="OPENING", note="Physical opening balance verification",
+                   user_id=us["store"].id, at=t_start + timedelta(days=k % 5)))
+
+    # 2. Add realistic IN and OUT movements across 8 weeks (net change 0 per item to preserve exact demo quantities)
+    movements = [
+        # (item_code, kind, qty, days_ago, ref, note)
+        ("STN-001", "IN", 40, 52, "PO-2026-0081", "GRN from Sharma Stationers"),
+        ("STN-001", "OUT", 20, 47, "ISSUE", "To Examination Cell (Term Exam Papers)"),
+        ("STN-001", "OUT", 20, 31, "ISSUE", "To Registrar Office (Annual Reports)"),
+        ("STN-003", "IN", 20, 49, "PO-2026-0082", "GRN from Sharma Stationers"),
+        ("STN-003", "OUT", 12, 35, "ISSUE", "To School of ICT Classrooms"),
+        ("STN-003", "OUT", 8, 14, "ISSUE", "To School of Management Classrooms"),
+        ("CMP-001", "IN", 15, 45, "PO-2026-0083", "GRN from Rajdhani Computers"),
+        ("CMP-001", "OUT", 15, 28, "ISSUE", "To Smart Classrooms Phase 2"),
+        ("CMP-003", "IN", 20, 42, "PO-2026-0084", "GRN from Rajdhani Computers"),
+        ("CMP-003", "OUT", 10, 26, "ISSUE", "To Central Computer Centre Lab 3"),
+        ("CMP-003", "OUT", 10, 12, "ISSUE", "To Faculty Cubicles Block A"),
+        ("LAB-001", "IN", 10, 50, "PO-2026-0085", "GRN from Delta Electricals"),
+        ("LAB-001", "OUT", 10, 38, "ISSUE", "To Robotics & IoT Research Lab"),
+        ("LAB-002", "IN", 30, 44, "PO-2026-0086", "GRN from Delta Electricals"),
+        ("LAB-002", "OUT", 18, 30, "ISSUE", "To Basic Electronics Lab 1"),
+        ("LAB-002", "OUT", 12, 16, "ISSUE", "To Student Project Workshop"),
+        ("LAB-003", "IN", 40, 40, "PO-2026-0087", "GRN from Delta Electricals"),
+        ("LAB-003", "OUT", 25, 24, "ISSUE", "To Digital Signal Processing Lab"),
+        ("LAB-003", "OUT", 15, 9, "ISSUE", "To Sensor Networks Lab"),
+        ("LAB-005", "IN", 15, 36, "PO-2026-0088", "GRN from Clean Care Supplies"),
+        ("LAB-005", "OUT", 15, 20, "ISSUE", "To PCB Cleaning & Chemistry Station"),
+        ("ELE-001", "IN", 50, 48, "PO-2026-0089", "GRN from Delta Electricals"),
+        ("ELE-001", "OUT", 30, 34, "ISSUE", "To Estate & Maintenance (Library 2F)"),
+        ("ELE-001", "OUT", 20, 18, "ISSUE", "To Administrative Block Corridor Lighting"),
+        ("ELE-002", "IN", 20, 43, "PO-2026-0090", "GRN from Delta Electricals"),
+        ("ELE-002", "OUT", 12, 29, "ISSUE", "To Conference Hall & Syndicate Rooms"),
+        ("ELE-002", "OUT", 8, 11, "ISSUE", "To Server Room UPS Backup Lines"),
+        ("CLN-001", "IN", 30, 46, "PO-2026-0091", "GRN from Clean Care Supplies"),
+        ("CLN-001", "OUT", 18, 32, "ISSUE", "To Girls Hostel 1 & 2 Housekeeping"),
+        ("CLN-001", "OUT", 12, 15, "ISSUE", "To Boys Hostel 3 & 4 Housekeeping"),
+        ("CLN-002", "IN", 25, 41, "PO-2026-0092", "GRN from Clean Care Supplies"),
+        ("CLN-002", "OUT", 15, 27, "ISSUE", "To Main Academic Building Dispensers"),
+        ("CLN-002", "OUT", 10, 8, "ISSUE", "To Guest House & Faculty Lounge"),
+        ("CLN-003", "IN", 20, 39, "PO-2026-0093", "GRN from Clean Care Supplies"),
+        ("CLN-003", "OUT", 12, 22, "ISSUE", "To School of Biotechnology Labs"),
+        ("CLN-003", "OUT", 8, 6, "ISSUE", "To Central Library Reading Rooms"),
+        ("STN-004", "IN", 100, 37, "PO-2026-0094", "GRN from Sharma Stationers"),
+        ("STN-004", "OUT", 60, 19, "ISSUE", "To Dean Office Student File Refill"),
+        ("STN-004", "OUT", 40, 5, "ISSUE", "To Admissions Cell 2026"),
+        ("STN-005", "IN", 30, 33, "PO-2026-0095", "GRN from Sharma Stationers"),
+        ("STN-005", "OUT", 18, 17, "ISSUE", "To Accounts & Dispatch Section"),
+        ("STN-005", "OUT", 12, 4, "ISSUE", "To Examination Cell Dispatch"),
+    ]
+
+    now_utc = datetime.now(timezone.utc)
+    for c, kind, qty, d_ago, ref, note in movements:
+        item_obj = objs.get(c)
+        if item_obj:
+            t_date = now_utc - timedelta(days=d_ago)
+            db.add(Txn(item_id=item_obj.id, kind=kind, qty=qty, ref=ref, note=note,
+                       user_id=us["store"].id, at=t_date))
     # one pending indent, one approved indent with an open PO, one pending write-off
     a = Indent(dept="School of ICT", note="Lab refill for next semester", by_id=us["dept"].id)
     a.lines = [IndentLine(item_id=objs["LAB-004"].id, qty=20), IndentLine(item_id=objs["CMP-002"].id, qty=15)]
@@ -84,8 +138,8 @@ def run(db):
     db.add(w)
     db.flush()
     p.no, w.no = f"PO-{p.at.year}-{p.id:04d}", f"WO-{w.at.year}-{w.id:04d}"
-    db.add(Audit(user_id=us["admin"].id, action="System initialized with standard master data", at=t0))
-    db.add(Audit(user_id=us["store"].id, action="Verified opening stock for 25 store items", at=t0))
+    db.add(Audit(user_id=us["admin"].id, action="System initialized with standard master data", at=t_start))
+    db.add(Audit(user_id=us["store"].id, action="Verified opening stock for 25 store items", at=t_start))
     db.add(Audit(user_id=us["dept"].id, action=f"Raised indent {a.no} (School of ICT)", at=a.at))
     db.add(Audit(user_id=us["store"].id, action=f"Raised indent {b.no} (Admin Block)", at=b.at))
     db.add(Audit(user_id=us["approver"].id, action=f"APPROVED indent {b.no}", at=b.at))

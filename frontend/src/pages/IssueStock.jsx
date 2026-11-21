@@ -1,17 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  ArrowUpRight,
-  Package,
-  Building,
-  FileText,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  Layers,
-  Search
-} from 'lucide-react';
-import { api, getCurrentUser } from '../api';
-import StatusBadge from '../components/StatusBadge';
+import { ArrowUpRight, Clock, AlertCircle } from 'lucide-react';
+import { api } from '../api';
+import Combobox from '../components/Combobox';
 import { useToast } from '../components/Toast';
 
 export default function IssueStock() {
@@ -25,6 +15,7 @@ export default function IssueStock() {
   const [qty, setQty] = useState('');
   const [dept, setDept] = useState('School of ICT');
   const [note, setNote] = useState('');
+  const [touched, setTouched] = useState(false);
   const toast = useToast();
 
   const universityDepts = [
@@ -69,9 +60,11 @@ export default function IssueStock() {
   const selectedItem = items.find((i) => i.id === Number(selectedItemId));
   const numericQty = Number(qty) || 0;
   const isOverLimit = selectedItem && numericQty > selectedItem.qty;
+  const isZeroOrNegative = touched && numericQty <= 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setTouched(true);
     if (!selectedItem) {
       toast.error('Please select an inventory item.');
       return;
@@ -81,7 +74,7 @@ export default function IssueStock() {
       return;
     }
     if (isOverLimit) {
-      toast.error(`Only ${selectedItem.qty} ${selectedItem.unit} of ${selectedItem.name} in stock.`);
+      toast.error(`Only ${selectedItem.qty} ${selectedItem.unit} of ${selectedItem.name} in stock. Enter ${selectedItem.qty} or fewer.`);
       return;
     }
 
@@ -93,9 +86,10 @@ export default function IssueStock() {
         dept,
         note: note.trim() || `Material issued to ${dept}`,
       });
-      toast.success(`Successfully issued ${numericQty} ${selectedItem.unit} to ${dept}!`);
+      toast.success(`Issued ${numericQty} ${selectedItem.unit} of ${selectedItem.name} to ${dept}`);
       setQty('');
       setNote('');
+      setTouched(false);
       loadData();
     } catch (err) {
       toast.error(err.message);
@@ -106,82 +100,55 @@ export default function IssueStock() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
+      {/* Page Header */}
       <div>
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">Material Issue Counter</h2>
-        <p className="text-xs text-slate-500">
-          Disburse store materials to academic schools and administrative departments with live ledger tracking.
+        <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
+          Issue Stock
+        </h1>
+        <p className="text-[14px] text-ink-muted mt-1">
+          Disburse store materials to university departments with immediate stock register debit.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Issue Form (Left Column, 7 cols) */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
-            <div className="flex items-center gap-2.5 pb-4 mb-5 border-b border-slate-100">
-              <div className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shadow-sm">
-                <ArrowUpRight className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">New Material Issuance</h3>
-                <p className="text-xs text-slate-500">Instant stock deduction upon submission</p>
-              </div>
-            </div>
+          <div className="bg-surface rounded-panel border border-line p-5 sm:p-6 shadow-none">
+            <h2 className="text-[16px] font-medium text-ink pb-3 mb-4 border-b border-line">
+              Issue Voucher
+            </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Item Selection */}
+              {/* Item Selection via Combobox */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Select Item from Stores *
+                <label className="block text-[12px] font-medium text-ink-muted mb-1.5">
+                  Store item
                 </label>
-                <select
+                <Combobox
+                  items={items}
                   value={selectedItemId}
-                  onChange={(e) => setSelectedItemId(e.target.value)}
-                  className="w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-gbu-600 focus:ring-2 focus:ring-gbu-600/20 outline-none bg-white"
-                >
-                  {items.map((i) => (
-                    <option key={i.id} value={i.id}>
-                      [{i.code}] {i.name} — ({i.qty} {i.unit} in stock)
-                    </option>
-                  ))}
-                </select>
+                  onChange={(id) => {
+                    setSelectedItemId(id);
+                    setTouched(false);
+                  }}
+                  placeholder="Search item by code or name..."
+                />
               </div>
 
-              {/* Live Availability Status Card */}
+              {/* Current stock context */}
               {selectedItem && (
-                <div
-                  className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-colors ${
-                    selectedItem.qty <= 0
-                      ? 'bg-rose-50 border-rose-200 text-rose-800'
-                      : isOverLimit
-                      ? 'bg-rose-50 border-rose-300 text-rose-900'
-                      : selectedItem.low
-                      ? 'bg-amber-50 border-amber-200 text-amber-900'
-                      : 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 shrink-0" />
-                    <div>
-                      <span className="font-semibold block">{selectedItem.name}</span>
-                      <span className="text-[11px] opacity-80">
-                        Category: {selectedItem.category} • Location: {selectedItem.location || 'Central Stores'}
-                      </span>
-                    </div>
+                <div className="p-3 rounded bg-paper border border-line text-[13px] flex items-center justify-between">
+                  <div>
+                    <span className="font-medium text-ink block">{selectedItem.name}</span>
+                    <span className="text-[12px] text-ink-muted">
+                      Rack {selectedItem.location || 'Central Stores'} • Category: {selectedItem.category}
+                    </span>
                   </div>
                   <div className="text-right">
-                    <span className="font-bold text-sm block">
+                    <span className="tabular-nums font-semibold text-[14px] text-ink block">
                       {selectedItem.qty} {selectedItem.unit}
                     </span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider">
-                      {selectedItem.qty <= 0
-                        ? 'Out of Stock'
-                        : isOverLimit
-                        ? 'Insufficient Stock'
-                        : selectedItem.low
-                        ? 'Low Stock'
-                        : 'Available'}
-                    </span>
+                    <span className="text-[11px] text-ink-muted">Available stock</span>
                   </div>
                 </div>
               )}
@@ -189,12 +156,12 @@ export default function IssueStock() {
               {/* Quantity to Issue */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-700">
-                    Quantity to Issue *
+                  <label className="block text-[12px] font-medium text-ink-muted">
+                    Quantity to issue
                   </label>
                   {selectedItem && (
-                    <span className="text-[11px] text-slate-500">
-                      Unit: <strong className="text-slate-800">{selectedItem.unit}</strong>
+                    <span className="text-[12px] text-ink-muted">
+                      Unit: <span className="font-medium text-ink">{selectedItem.unit}</span>
                     </span>
                   )}
                 </div>
@@ -204,58 +171,60 @@ export default function IssueStock() {
                   step="any"
                   required
                   value={qty}
-                  onChange={(e) => setQty(e.target.value)}
-                  placeholder={`Enter quantity to issue (Max: ${selectedItem?.qty || 0})`}
-                  className={`w-full text-sm px-3.5 py-2.5 rounded-xl border outline-none transition-all ${
-                    isOverLimit
-                      ? 'border-rose-400 bg-rose-50/50 text-rose-900 focus:ring-2 focus:ring-rose-200'
-                      : 'border-slate-300 focus:border-gbu-600 focus:ring-2 focus:ring-gbu-600/20'
+                  onBlur={() => setTouched(true)}
+                  onChange={(e) => {
+                    setQty(e.target.value);
+                    setTouched(true);
+                  }}
+                  placeholder={selectedItem ? `Enter quantity (max ${selectedItem.qty})` : 'Enter quantity'}
+                  className={`w-full h-9 text-[14px] px-3 rounded border outline-none transition-colors tabular-nums ${
+                    isOverLimit || isZeroOrNegative
+                      ? 'border-red bg-paper focus:border-red'
+                      : 'border-line focus:border-primary bg-surface'
                   }`}
                 />
                 {isOverLimit && (
-                  <p className="mt-1 text-xs text-rose-600 font-medium flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    Cannot issue {numericQty} {selectedItem.unit}. Maximum available is {selectedItem.qty} {selectedItem.unit}.
+                  <p className="mt-1 text-[12px] text-red flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    Only {selectedItem.qty} {selectedItem.unit} of {selectedItem.name} in stock. Enter {selectedItem.qty} or fewer.
                   </p>
                 )}
                 {selectedItem && !isOverLimit && numericQty > 0 && (
-                  <p className="mt-1 text-xs text-emerald-700 font-medium">
-                    Remaining balance after issue: {(selectedItem.qty - numericQty).toFixed(1)} {selectedItem.unit}
+                  <p className="mt-1 text-[12px] text-green">
+                    Stock after issue: <span className="tabular-nums font-medium">{(selectedItem.qty - numericQty).toFixed(1)} {selectedItem.unit}</span>
                   </p>
                 )}
               </div>
 
               {/* Receiving Department */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Receiving School / Department *
+                <label className="block text-[12px] font-medium text-ink-muted mb-1.5">
+                  Receiving school or department
                 </label>
-                <div className="space-y-2">
-                  <select
-                    value={dept}
-                    onChange={(e) => setDept(e.target.value)}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none bg-white"
-                  >
-                    {universityDepts.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <select
+                  value={dept}
+                  onChange={(e) => setDept(e.target.value)}
+                  className="w-full h-9 text-[14px] px-3 rounded border border-line bg-surface text-ink outline-none focus:border-primary"
+                >
+                  {universityDepts.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Notes / Purpose */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Requisition Purpose / Notes
+                <label className="block text-[12px] font-medium text-ink-muted mb-1.5">
+                  Requisition reference or purpose
                 </label>
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="e.g. End-semester examination supplies, Lab 3 practicals requirement..."
+                  placeholder="e.g. End-semester exams requirement, Dept office supplies"
                   rows={2}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none placeholder:text-slate-400"
+                  className="w-full text-[14px] p-2.5 rounded border border-line bg-surface text-ink outline-none focus:border-primary placeholder:text-ink-subtle"
                 />
               </div>
 
@@ -263,17 +232,14 @@ export default function IssueStock() {
                 <button
                   type="submit"
                   disabled={submitting || isOverLimit || !selectedItem || selectedItem.qty <= 0}
-                  className="w-full py-3 px-4 rounded-xl bg-gbu-900 hover:bg-gbu-800 text-white font-bold text-xs sm:text-sm tracking-wide shadow-md shadow-gbu-950/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-9 px-5 rounded bg-primary hover:bg-primary-hover text-surface text-[14px] font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Recording Issuance...</span>
-                    </>
+                    'Recording...'
                   ) : (
                     <>
                       <ArrowUpRight className="w-4 h-4" />
-                      <span>Confirm Stock Issue</span>
+                      <span>Issue stock</span>
                     </>
                   )}
                 </button>
@@ -284,44 +250,42 @@ export default function IssueStock() {
 
         {/* Recent Dispatches Stream (Right Column, 5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gbu-800" />
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Recent Dispatches
-                </h3>
-              </div>
-              <span className="text-[11px] text-slate-500 font-medium">Last 10 issues</span>
+          <div className="bg-surface rounded-panel border border-line p-5 shadow-none">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-line">
+              <h2 className="text-[14px] font-medium text-ink flex items-center gap-2">
+                <Clock className="w-4 h-4 text-ink-muted" />
+                <span>Recent stock dispatches</span>
+              </h2>
+              <span className="text-[12px] text-ink-muted">Last 10 issues</span>
             </div>
 
             {loading ? (
-              <div className="py-8 text-center text-xs text-slate-400">Loading history...</div>
+              <div className="py-8 text-center text-[13px] text-ink-muted">Loading register entries...</div>
             ) : recentIssues.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">No stock dispatches recorded yet.</div>
+              <div className="py-8 text-center text-[13px] text-ink-muted">No stock dispatches recorded yet.</div>
             ) : (
-              <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
                 {recentIssues.map((t) => (
                   <div
                     key={t.id}
-                    className="p-3 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors"
+                    className="p-3 rounded border border-line bg-paper/60 hover:bg-paper transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="font-semibold text-xs text-slate-900 block truncate max-w-[200px]">
+                      <div className="truncate">
+                        <span className="font-medium text-[13px] text-ink block truncate">
                           {t.item}
                         </span>
-                        <span className="text-[11px] text-slate-500 block mt-0.5">
+                        <span className="text-[12px] text-ink-muted block mt-0.5 truncate">
                           {t.note}
                         </span>
                       </div>
-                      <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 shrink-0">
+                      <span className="text-[12px] font-medium text-ink tabular-nums shrink-0 px-1.5 py-0.5 rounded bg-surface border border-line">
                         -{t.qty} {t.unit}
                       </span>
                     </div>
-                    <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] text-slate-400">
-                      <span>By: {t.by}</span>
-                      <span>
+                    <div className="mt-2 pt-2 border-t border-line/60 flex items-center justify-between text-[11px] text-ink-muted">
+                      <span>Issued by: {t.by}</span>
+                      <span className="tabular-nums">
                         {new Date(t.at).toLocaleDateString('en-IN', {
                           day: '2-digit',
                           month: 'short',

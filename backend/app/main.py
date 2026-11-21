@@ -435,8 +435,74 @@ def dashboard(db: Session = Depends(get_db), u: User = Depends(me)):
         if d_key in daily_map and t.kind in daily_map[d_key]:
             daily_map[d_key][t.kind] += int(t.qty)
 
+    # Weekly In vs Out flow (8 weeks, strictly excluding OPENING stock)
+    now_utc = datetime.now(timezone.utc)
+    weeks = []
+    for w in range(7, -1, -1):
+        w_start = now_utc - timedelta(days=(w + 1) * 7)
+        w_end = now_utc - timedelta(days=w * 7)
+        label = w_start.strftime("%d %b")
+        weeks.append({"label": label, "start": w_start, "end": w_end, "in": 0.0, "out": 0.0})
+
+    txns_8w = db.scalars(
+        select(Txn).where(Txn.at >= (now_utc - timedelta(days=56)), Txn.ref != "OPENING")
+    ).all()
+    for t in txns_8w:
+        t_at = t.at.replace(tzinfo=timezone.utc) if t.at.tzinfo is None else t.at
+        for wk in weeks:
+            if wk["start"] <= t_at < wk["end"]:
+                if t.kind == "IN":
+                    wk["in"] += t.qty
+                elif t.kind in ("OUT", "WRITEOFF"):
+                    wk["out"] += t.qty
+                break
+
+    weekly_flow = [{"week": wk["label"], "in": round(wk["in"], 1), "out": round(wk["out"], 1)} for wk in weeks]
+
     cnt = lambda m, s: db.scalar(select(func.count(m.id)).where(m.status.in_(s))) or 0
     low_stock_items = [d_item(i) for i in its if i.qty <= i.min_stock]
+
+    # Role-aware attention items
+    attention = {"type": u.role}
+    if u.role in ("store", "admin"):
+        attention["low_stock"] = [
+            dict(id=i["id"], code=i["code"], name=i["name"], unit=i["unit"], qty=i["qty"], min_stock=i["min_stock"],
+                 deficit=round(max(0, i["min_stock"] - i["qty"]), 1))
+            for i in sorted(low_stock_items, key=lambda x: x["qty"] / max(1, x["min_stock"]))
+        ]
+        open_pos_list = db.scalars(select(PO).where(PO.status.in_(["OPEN", "PARTIAL"])).order_by(PO.id.desc())).all()
+        attention["open_pos"] = [
+            dict(id=p.id, no=p.no, vendor=p.vendor.name, status=p.status, at=p.at.isoformat(),
+                 total=round(sum(l.qty * l.rate for l in p.lines), 2),
+                 pending_lines=sum(1 for l in p.lines if l.got < l.qty))
+            for p in open_pos_list
+        ]
+    elif u.role == "approver":
+        pending_inds = db.scalars(select(Indent).where(Indent.status == "PENDING").order_by(Indent.id.desc())).all()
+        attention["pending_indents"] = [
+            dict(id=x.id, no=x.no, dept=x.dept, note=x.note, by=x.by.name if x.by else "",
+                 at=x.at.isoformat(), lines_count=len(x.lines),
+                 lines=[dict(item=l.item.name, unit=l.item.unit, qty=l.qty) for l in x.lines])
+            for x in pending_inds
+        ]
+        pending_wos = db.scalars(select(WriteOff).where(WriteOff.status == "PENDING").order_by(WriteOff.id.desc())).all()
+        attention["pending_writeoffs"] = [
+            dict(id=w.id, no=w.no, item=w.item.name, unit=w.item.unit, qty=w.qty, reason=w.reason,
+                 by=w.by.name if w.by else "", at=w.at.isoformat())
+            for w in pending_wos
+        ]
+    elif u.role == "dept":
+        my_inds = db.scalars(select(Indent).where(Indent.by_id == u.id).order_by(Indent.id.desc()).limit(5)).all()
+        attention["my_indents"] = [
+            dict(id=x.id, no=x.no, dept=x.dept, status=x.status, at=x.at.isoformat(), lines_count=len(x.lines))
+            for x in my_inds
+        ]
+
+    # Sorted descending by value
+    value_by_cat = [
+        dict(name=k, value=round(v, 2))
+        for k, v in sorted(by_cat.items(), key=lambda x: x[1], reverse=True)
+    ]
 
     return dict(
         total_items=len(its),
@@ -446,9 +512,11 @@ def dashboard(db: Session = Depends(get_db), u: User = Depends(me)):
         pending_indents=cnt(Indent, ["PENDING"]),
         pending_writeoffs=cnt(WriteOff, ["PENDING"]),
         open_pos=cnt(PO, ["OPEN", "PARTIAL"]),
-        value_by_category=[dict(name=k, value=round(v, 2)) for k, v in sorted(by_cat.items())],
+        value_by_category=value_by_cat,
         flow_30d=flow,
         movement_30d=list(daily_map.values()),
+        weekly_flow=weekly_flow,
+        attention=attention,
         recent=txns(limit=8, db=db, u=u),
     )
 

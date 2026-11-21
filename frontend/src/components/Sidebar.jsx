@@ -9,158 +9,122 @@ import {
   Trash2,
   FileSpreadsheet,
   History,
-  Building2,
-  X,
-  ShieldCheck,
-  UserCheck,
-  Layers
+  X
 } from 'lucide-react';
 import { getCurrentUser } from '../api';
 
 export default function Sidebar({ mobileOpen, setMobileOpen }) {
-  const user = getCurrentUser() || { name: 'User', role: 'store', dept: 'Stores & Purchase' };
+  const user = getCurrentUser() || { name: 'User', role: 'store' };
 
-  const navItems = [
+  const navSections = [
     {
-      to: '/dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      roles: ['admin', 'store', 'approver', 'dept'],
+      title: 'Overview',
+      items: [
+        { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'store', 'approver', 'dept'] },
+      ],
     },
     {
-      to: '/items',
-      label: 'Store Items',
-      icon: Package,
-      roles: ['admin', 'store', 'approver', 'dept'],
+      title: 'Stores',
+      items: [
+        { to: '/items', label: 'Items', icon: Package, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/issue-stock', label: 'Issue stock', icon: ArrowUpRight, roles: ['admin', 'store'] },
+      ],
     },
     {
-      to: '/issue-stock',
-      label: 'Issue Stock',
-      icon: ArrowUpRight,
-      roles: ['admin', 'store'],
+      title: 'Procurement',
+      items: [
+        { to: '/indents', label: 'Indents', icon: ClipboardList, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/purchase-orders', label: 'Purchase orders', icon: FileCheck2, roles: ['admin', 'store', 'approver'] },
+      ],
     },
     {
-      to: '/indents',
-      label: 'Indents (Requisitions)',
-      icon: ClipboardList,
-      roles: ['admin', 'store', 'approver', 'dept'],
-    },
-    {
-      to: '/purchase-orders',
-      label: 'Purchase Orders',
-      icon: FileCheck2,
-      roles: ['admin', 'store', 'approver'],
-    },
-    {
-      to: '/write-offs',
-      label: 'Write-offs',
-      icon: Trash2,
-      roles: ['admin', 'store', 'approver'],
-    },
-    {
-      to: '/reports',
-      label: 'Reports & Export',
-      icon: FileSpreadsheet,
-      roles: ['admin', 'store', 'approver', 'dept'],
-    },
-    {
-      to: '/audit',
-      label: 'Audit Trail',
-      icon: History,
-      roles: ['admin', 'approver'],
+      title: 'Control',
+      items: [
+        { to: '/write-offs', label: 'Write-offs', icon: Trash2, roles: ['admin', 'store', 'approver'] },
+        { to: '/reports', label: 'Reports', icon: FileSpreadsheet, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/audit', label: 'Audit log', icon: History, roles: ['admin', 'approver'] },
+      ],
     },
   ];
 
-  const visibleNav = navItems.filter((item) => item.roles.includes(user.role));
-
-  const roleLabels = {
-    admin: { label: 'System Admin', bg: 'bg-rose-500/10 text-rose-300 border-rose-500/20' },
-    store: { label: 'Store Officer', bg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' },
-    approver: { label: 'Director (S&P)', bg: 'bg-amber-500/10 text-amber-300 border-amber-500/20' },
-    dept: { label: 'Department Staff', bg: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20' },
-  };
-
-  const currentRole = roleLabels[user.role] || { label: user.role, bg: 'bg-slate-700 text-slate-300' };
-
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-ink/40 z-40 lg:hidden backdrop-blur-[1px]"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar sidebar container */}
+      {/* Sidebar container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-gbu-900 text-white flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+        className={`fixed top-0 bottom-0 left-0 z-40 w-[232px] bg-surface border-r border-line flex flex-col transition-transform duration-150 ease-in-out lg:translate-x-0 ${
+          mobileOpen ? 'translate-x-0 shadow-lg' : '-translate-x-full'
         }`}
       >
         {/* Brand header */}
-        <div className="p-5 border-b border-gbu-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md shadow-amber-900/40 text-slate-900 font-black text-lg">
+        <div className="h-14 px-4 border-b border-line flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded bg-primary text-white flex items-center justify-center font-bold text-[13px] tracking-tight shrink-0">
               GBU
             </div>
-            <div>
-              <h1 className="font-bold text-base tracking-tight leading-none text-white">Stores & Purchase</h1>
-              <p className="text-xs text-gbu-300 mt-1 font-medium">Gautam Buddha University</p>
+            <div className="leading-tight">
+              <span className="font-semibold text-[13px] text-ink block">Stores & Purchase</span>
+              <span className="text-[11px] text-ink-subtle block">Gautam Buddha University</span>
             </div>
           </div>
           <button
+            type="button"
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden text-gbu-300 hover:text-white p-1 rounded-lg"
+            aria-label="Close navigation"
+            className="lg:hidden text-ink-muted hover:text-ink p-1 rounded"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Current user badge */}
-        <div className="px-4 py-3 mx-3 my-3 rounded-xl bg-gbu-950/60 border border-gbu-800">
-          <div className="flex items-center justify-between gap-2">
-            <div className="truncate">
-              <p className="text-xs text-gbu-300 font-medium truncate">{user.dept || 'Stores & Purchase'}</p>
-              <p className="text-sm font-semibold text-white truncate">{user.name}</p>
-            </div>
-            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${currentRole.bg} shrink-0`}>
-              {currentRole.label}
-            </span>
-          </div>
-        </div>
+        {/* Navigation Groups */}
+        <nav className="flex-1 py-3 overflow-y-auto space-y-4">
+          {navSections.map((section) => {
+            const visibleItems = section.items.filter((item) => item.roles.includes(user.role));
+            if (visibleItems.length === 0) return null;
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-          {visibleNav.map((item) => {
-            const Icon = item.icon;
             return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 ${
-                    isActive
-                      ? 'bg-amber-500 text-slate-950 font-semibold shadow-md shadow-amber-500/20'
-                      : 'text-gbu-100 hover:bg-gbu-800/70 hover:text-white'
-                  }`
-                }
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span>{item.label}</span>
-              </NavLink>
+              <div key={section.title} className="px-2">
+                <span className="px-2.5 text-[11px] font-semibold text-ink-subtle uppercase tracking-wider block mb-1">
+                  {section.title}
+                </span>
+                <div className="space-y-0.5">
+                  {visibleItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setMobileOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center gap-2.5 px-2.5 h-8 rounded text-[13px] font-medium transition-colors ${
+                            isActive
+                              ? 'bg-primary-light text-primary font-semibold border-l-[3px] border-primary rounded-l-none pl-[7px]'
+                              : 'text-ink hover:bg-paper hover:text-ink'
+                          }`
+                        }
+                      >
+                        <Icon className="w-4 h-4 shrink-0 text-ink-muted" />
+                        <span className="whitespace-nowrap">{item.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>
 
-        {/* Footer info */}
-        <div className="p-4 border-t border-gbu-800/80 text-xs text-gbu-400 flex items-center justify-between">
-          <span>Portal v2.6 • Production</span>
-          <span className="flex items-center gap-1 text-emerald-400 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Online
-          </span>
+        {/* Minimal Footer */}
+        <div className="p-3 border-t border-line text-[11px] text-ink-subtle">
+          Central Stores Portal
         </div>
       </aside>
     </>

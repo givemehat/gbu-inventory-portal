@@ -1,16 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  FileSpreadsheet,
-  Download,
-  Printer,
-  Calendar,
-  Layers,
-  Building,
-  CheckCircle2,
-  FileText,
-  Search,
-  Filter
-} from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import { api, getCurrentUser } from '../api';
 import { useToast } from '../components/Toast';
 
@@ -40,7 +29,7 @@ export default function Reports() {
     try {
       setDownloadingStock(true);
       await api.downloadStockReport();
-      toast.success('Stock Report downloaded successfully.');
+      toast.success('Stock report downloaded');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -52,7 +41,7 @@ export default function Reports() {
     try {
       setDownloadingTxn(true);
       await api.downloadTxnReport();
-      toast.success('Transactions Ledger downloaded successfully.');
+      toast.success('Transactions ledger downloaded');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -76,51 +65,54 @@ export default function Reports() {
       {/* Top Banner (hidden on print) */}
       <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">University Inventory Reports & Audit Statements</h2>
-          <p className="text-xs text-slate-500">
-            Export structured CSV datasets for spreadsheet audits or generate verified print statements.
+          <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
+            Inventory Reports & Stock Statements
+          </h1>
+          <p className="text-[14px] text-ink-muted mt-1">
+            Export structured CSV datasets for spreadsheet audits or generate official verified print statements.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={handleDownloadStock}
             disabled={downloadingStock}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold shadow-sm transition-colors"
+            className="h-9 px-3 rounded border border-line bg-surface hover:bg-paper text-ink text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
           >
-            <Download className="w-3.5 h-3.5 text-gbu-800" />
-            <span>{downloadingStock ? 'Downloading...' : 'Export Stock CSV'}</span>
+            <Download className="w-3.5 h-3.5 text-ink-muted" />
+            <span>{downloadingStock ? 'Downloading...' : 'Export stock CSV'}</span>
           </button>
 
           <button
             onClick={handleDownloadTxn}
             disabled={downloadingTxn}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold shadow-sm transition-colors"
+            className="h-9 px-3 rounded border border-line bg-surface hover:bg-paper text-ink text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
           >
-            <Download className="w-3.5 h-3.5 text-gbu-800" />
-            <span>{downloadingTxn ? 'Downloading...' : 'Export Ledger CSV'}</span>
+            <Download className="w-3.5 h-3.5 text-ink-muted" />
+            <span>{downloadingTxn ? 'Downloading...' : 'Export ledger CSV'}</span>
           </button>
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gbu-900 hover:bg-gbu-800 text-white text-xs font-bold shadow-md shadow-gbu-950/20 transition-all print-include"
+            className="h-9 px-4 rounded bg-primary hover:bg-primary-hover text-surface text-[14px] font-medium transition-colors inline-flex items-center gap-1.5"
           >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Print Statement</span>
+            <Printer className="w-4 h-4" />
+            <span>Print statement</span>
           </button>
         </div>
       </div>
 
       {/* Filter Header in web view */}
-      <div className="no-print bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div className="no-print bg-surface p-4 rounded-panel border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-slate-600">Filter Category for Statement:</span>
+          <label htmlFor="cat-filter" className="text-[13px] font-medium text-ink-muted">Filter category:</label>
           <select
+            id="cat-filter"
             value={selectedCat}
             onChange={(e) => setSelectedCat(e.target.value)}
-            className="text-xs font-medium py-1.5 px-3 rounded-lg border border-slate-300 bg-white text-slate-700 outline-none"
+            className="h-8 text-[13px] px-2.5 rounded border border-line bg-surface text-ink outline-none focus:border-primary"
           >
-            <option value="">All Categories ({items.length} items)</option>
+            <option value="">All categories ({items.length} items)</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -128,97 +120,89 @@ export default function Reports() {
             ))}
           </select>
         </div>
-        <span className="text-xs text-slate-500 font-medium">
-          Showing {filteredItems.length} items • Subtotal Valuation: <strong>₹{totalValue.toLocaleString('en-IN')}</strong>
+        <span className="text-[13px] text-ink-muted">
+          Showing <span className="font-medium text-ink tabular-nums">{filteredItems.length}</span> items • Total valuation: <span className="font-medium text-ink tabular-nums">₹{totalValue.toLocaleString('en-IN')}</span>
         </span>
       </div>
 
-      {/* Printable University Statement Container */}
-      <div className="print-container bg-white rounded-3xl border border-slate-200 shadow-lg p-6 sm:p-10 space-y-6">
-        {/* University Official Header */}
-        <div className="border-b-2 border-slate-900 pb-5 text-center relative">
-          <div className="flex items-center justify-center gap-3 mb-1">
-            <div className="w-12 h-12 rounded-xl bg-gbu-900 text-amber-400 flex items-center justify-center font-black text-xl border border-gbu-800 shadow-sm">
-              GBU
-            </div>
-            <div className="text-left">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight uppercase">
-                Gautam Buddha University
-              </h1>
-              <p className="text-xs text-slate-600 font-semibold tracking-wider uppercase">
-                Greater Noida, Gautam Buddha Nagar, Uttar Pradesh - 201312
-              </p>
-            </div>
+      {/* Printable Statement Container */}
+      <div className="print-container bg-surface rounded-panel border border-line p-6 sm:p-10 space-y-6">
+        {/* University Header */}
+        <div className="border-b-2 border-ink pb-5 text-center">
+          <div className="mb-2">
+            <h2 className="font-serif text-[24px] sm:text-[28px] font-semibold text-ink uppercase tracking-tight">
+              Gautam Buddha University
+            </h2>
+            <p className="text-[12px] text-ink-muted uppercase tracking-wider">
+              Greater Noida, Gautam Buddha Nagar, Uttar Pradesh — 201312
+            </p>
           </div>
-          <div className="mt-3 py-1 bg-gbu-900 text-white rounded-lg font-bold text-xs sm:text-sm uppercase tracking-widest inline-block px-6">
+          <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[13px] font-medium text-ink uppercase tracking-wider">
             Stores & Purchase Department • Official Stock Position Statement
           </div>
 
-          <div className="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2">
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-between text-[12px] text-ink-muted border-t border-line pt-2 gap-2">
             <span>
-              Report Date:{' '}
-              <strong className="text-slate-800">
-                {new Date().toLocaleDateString('en-IN', {
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </strong>
+              Report date: <strong className="text-ink">{new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</strong>
             </span>
             <span>
-              Academic Session: <strong className="text-slate-800">2026-2027</strong>
+              Academic session: <strong className="text-ink">2026-2027</strong>
             </span>
             <span>
-              Generated by: <strong className="text-slate-800">{user.name} ({user.role})</strong>
+              Generated by: <strong className="text-ink">{user.name} ({user.role})</strong>
             </span>
           </div>
         </div>
 
         {/* Statement Items Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-100 text-slate-700 font-bold border-y-2 border-slate-800 uppercase text-[10px] tracking-wider">
+          <table className="w-full text-left text-[12px]">
+            <thead className="bg-paper text-ink font-semibold border-y border-line text-[11px] uppercase tracking-wider">
               <tr>
                 <th className="px-3 py-2 text-center w-12">S.No.</th>
-                <th className="px-3 py-2">Item Code</th>
-                <th className="px-3 py-2">Nomenclature & Specifications</th>
+                <th className="px-3 py-2">Item code</th>
+                <th className="px-3 py-2">Nomenclature & specifications</th>
                 <th className="px-3 py-2">Category</th>
-                <th className="px-3 py-2 text-right">Physical Qty</th>
-                <th className="px-3 py-2 text-right">Min Level</th>
-                <th className="px-3 py-2 text-right">Unit Rate (₹)</th>
-                <th className="px-3 py-2 text-right">Asset Value (₹)</th>
-                <th className="px-3 py-2 text-center">Rack Loc.</th>
+                <th className="px-3 py-2 text-right">Physical qty</th>
+                <th className="px-3 py-2 text-right">Min level</th>
+                <th className="px-3 py-2 text-right">Unit rate (₹)</th>
+                <th className="px-3 py-2 text-right">Asset value (₹)</th>
+                <th className="px-3 py-2 text-center">Location</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 text-slate-800">
+            <tbody className="divide-y divide-line text-ink">
               {filteredItems.map((item, idx) => (
-                <tr key={item.id} className="hover:bg-slate-50">
-                  <td className="px-3 py-2 text-center font-mono text-slate-500">{idx + 1}</td>
-                  <td className="px-3 py-2 font-mono font-bold text-slate-900">{item.code}</td>
+                <tr key={item.id} className="hover:bg-paper/40">
+                  <td className="px-3 py-2 text-center text-ink-muted font-mono">{idx + 1}</td>
+                  <td className="px-3 py-2 font-mono font-medium text-ink">{item.code}</td>
                   <td className="px-3 py-2 font-medium">{item.name}</td>
-                  <td className="px-3 py-2 text-slate-600">{item.category}</td>
-                  <td className="px-3 py-2 text-right font-bold">
+                  <td className="px-3 py-2 text-ink-muted">{item.category}</td>
+                  <td className="px-3 py-2 text-right font-semibold tabular-nums">
                     {item.qty} {item.unit}
                   </td>
-                  <td className="px-3 py-2 text-right text-slate-500 font-medium">
+                  <td className="px-3 py-2 text-right text-ink-muted tabular-nums">
                     {item.min_stock} {item.unit}
                   </td>
-                  <td className="px-3 py-2 text-right">₹{item.price.toLocaleString('en-IN')}</td>
-                  <td className="px-3 py-2 text-right font-bold text-slate-950">
+                  <td className="px-3 py-2 text-right tabular-nums">
+                    ₹{item.price.toLocaleString('en-IN')}
+                  </td>
+                  <td className="px-3 py-2 text-right font-medium tabular-nums text-ink">
                     ₹{(item.value || item.qty * item.price).toLocaleString('en-IN')}
                   </td>
-                  <td className="px-3 py-2 text-center text-slate-500">{item.location || '—'}</td>
+                  <td className="px-3 py-2 text-center text-ink-muted">{item.location || '—'}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot className="border-t-2 border-slate-900 bg-slate-50 text-slate-900 font-bold text-xs">
+            <tfoot className="border-t-2 border-ink bg-paper text-ink font-medium text-[12px]">
               <tr>
-                <td colSpan={4} className="px-3 py-2.5 uppercase tracking-wider">
+                <td colSpan={4} className="px-3 py-2.5 uppercase tracking-wide">
                   Total Valuation Summary ({filteredItems.length} items)
                 </td>
-                <td className="px-3 py-2.5 text-right font-extrabold">{totalQty.toLocaleString()} units</td>
+                <td className="px-3 py-2.5 text-right font-semibold tabular-nums">
+                  {totalQty.toLocaleString()} units
+                </td>
                 <td colSpan={2}></td>
-                <td className="px-3 py-2.5 text-right text-sm font-black text-gbu-950">
+                <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-ink text-[13px]">
                   ₹{totalValue.toLocaleString('en-IN')}
                 </td>
                 <td></td>
@@ -227,28 +211,28 @@ export default function Reports() {
           </table>
         </div>
 
-        {/* Official University Signature & Stamp Block */}
-        <div className="pt-14 mt-10 border-t border-slate-200 grid grid-cols-3 gap-8 text-center text-xs text-slate-700">
+        {/* University Signatures Block */}
+        <div className="pt-12 mt-8 border-t border-line grid grid-cols-3 gap-8 text-center text-[12px] text-ink-muted">
           <div>
-            <div className="border-b border-slate-400 pb-1 w-3/4 mx-auto mb-1.5 font-bold text-slate-900">
+            <div className="border-b border-ink/40 pb-1 w-3/4 mx-auto mb-1.5 font-medium text-ink">
               {user.role === 'store' ? user.name : 'Store Officer'}
             </div>
-            <p className="font-semibold text-slate-800">Store Officer / Custodian</p>
-            <p className="text-[11px] text-slate-500">Central Stores & Purchase Dept</p>
+            <p className="font-medium text-ink">Store Officer / Custodian</p>
+            <p className="text-[11px] text-ink-muted">Stores & Purchase Department</p>
           </div>
 
           <div className="flex flex-col items-center justify-center">
-            <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-[10px] text-slate-400 uppercase font-semibold">
+            <div className="w-16 h-16 rounded-full border border-dashed border-line flex items-center justify-center text-[10px] text-ink-muted uppercase">
               Official Seal
             </div>
           </div>
 
           <div>
-            <div className="border-b border-slate-400 pb-1 w-3/4 mx-auto mb-1.5 font-bold text-slate-900">
+            <div className="border-b border-ink/40 pb-1 w-3/4 mx-auto mb-1.5 font-medium text-ink">
               Prof. (Dr.) Director (S&P)
             </div>
-            <p className="font-semibold text-slate-800">Director, Stores & Purchase</p>
-            <p className="text-[11px] text-slate-500">Gautam Buddha University</p>
+            <p className="font-medium text-ink">Director, Stores & Purchase</p>
+            <p className="text-[11px] text-ink-muted">Gautam Buddha University</p>
           </div>
         </div>
       </div>

@@ -1,20 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Package,
-  IndianRupee,
-  AlertTriangle,
-  ClipboardList,
-  Trash2,
-  FileCheck2,
-  ArrowUpRight,
-  TrendingUp,
-  ExternalLink,
-  RefreshCw,
-  Clock,
-  ChevronRight,
-  Activity
-} from 'lucide-react';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import {
   BarChart,
   Bar,
@@ -23,419 +8,514 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  AreaChart,
-  Area,
-  Legend
 } from 'recharts';
 import { api, getCurrentUser } from '../api';
 import StatusBadge from '../components/StatusBadge';
-import ItemLedgerModal from '../components/ItemLedgerModal';
+import StockLevelBar from '../components/StockLevelBar';
+import WorkflowStrip from '../components/WorkflowStrip';
+import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
+
+// Format Indian currency into Lakhs or standard grouping
+function formatRupees(num = 0) {
+  if (num >= 100000) {
+    return `₹${(num / 100000).toFixed(2)} L`;
+  } else if (num >= 1000) {
+    return `₹${(num / 1000).toFixed(1)} K`;
+  }
+  return `₹${num.toLocaleString('en-IN')}`;
+}
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState(null);
   const user = getCurrentUser() || {};
   const toast = useToast();
+  const navigate = useNavigate();
+  const { openItemDrawer } = useOutletContext() || {};
 
-  const loadData = () => {
+  // Inline decision modal for Director
+  const [decisionModal, setDecisionModal] = useState({
+    isOpen: false,
+    type: '', // 'indent' | 'writeoff'
+    id: null,
+    no: '',
+    isApprove: true,
+  });
+
+  const loadDashboard = () => {
     setLoading(true);
     api.getDashboard()
       .then((res) => setData(res))
-      .catch((err) => toast.error(`Failed to load dashboard: ${err.message}`))
+      .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    loadData();
+    loadDashboard();
   }, []);
+
+  const handleDecisionConfirm = async (remark) => {
+    try {
+      if (decisionModal.type === 'indent') {
+        await api.decideIndent(decisionModal.id, decisionModal.isApprove, remark);
+        toast.success(`Indent ${decisionModal.no} ${decisionModal.isApprove ? 'approved' : 'rejected'}`);
+      } else {
+        await api.decideWriteOff(decisionModal.id, decisionModal.isApprove, remark);
+        toast.success(`Write-off ${decisionModal.no} ${decisionModal.isApprove ? 'approved' : 'rejected'}`);
+      }
+      loadDashboard();
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
+  };
 
   if (loading && !data) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center gap-3 text-slate-400">
-        <div className="w-8 h-8 border-3 border-gbu-800 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm font-medium">Loading university dashboard metrics...</span>
+      <div className="space-y-4 animate-pulse">
+        <div className="h-44 bg-surface border border-line rounded-panel" />
+        <div className="grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((n) => (
+            <div key={n} className="h-20 bg-surface border border-line rounded" />
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-64 bg-surface border border-line rounded-panel" />
+          <div className="h-64 bg-surface border border-line rounded-panel" />
+        </div>
       </div>
     );
   }
 
   if (!data) return null;
 
-  const statCards = [
-    {
-      label: 'Total Catalog Items',
-      value: data.total_items,
-      sub: 'Across 6 University Categories',
-      icon: Package,
-      color: 'bg-blue-500/10 text-blue-700 border-blue-200',
-      iconBg: 'bg-blue-600 text-white',
-      link: '/items',
-    },
-    {
-      label: 'Inventory Valuation',
-      value: `₹${(data.stock_value || 0).toLocaleString('en-IN')}`,
-      sub: 'Current physical assets in store',
-      icon: IndianRupee,
-      color: 'bg-emerald-500/10 text-emerald-800 border-emerald-200',
-      iconBg: 'bg-emerald-600 text-white',
-      link: '/reports',
-    },
-    {
-      label: 'Low-Stock Alerts',
-      value: data.low_stock_count || (data.low_stock ? data.low_stock.length : 0),
-      sub: 'Items below minimum threshold',
-      icon: AlertTriangle,
-      color: 'bg-rose-500/10 text-rose-800 border-rose-200',
-      iconBg: 'bg-rose-600 text-white',
-      badge: (data.low_stock_count > 0) ? 'Action Required' : 'Healthy',
-      link: '/items?low=true',
-    },
-    {
-      label: 'Pending Indents',
-      value: data.pending_indents || 0,
-      sub: 'Awaiting Director S&P approval',
-      icon: ClipboardList,
-      color: 'bg-amber-500/10 text-amber-800 border-amber-200',
-      iconBg: 'bg-amber-600 text-white',
-      link: '/indents',
-    },
-    {
-      label: 'Pending Write-offs',
-      value: data.pending_writeoffs || 0,
-      sub: 'Damaged/expired goods review',
-      icon: Trash2,
-      color: 'bg-purple-500/10 text-purple-800 border-purple-200',
-      link: '/write-offs',
-      iconBg: 'bg-purple-600 text-white',
-    },
-    {
-      label: 'Active Purchase Orders',
-      value: data.open_pos || 0,
-      sub: 'Open / Partially received GRN',
-      icon: FileCheck2,
-      color: 'bg-indigo-500/10 text-indigo-800 border-indigo-200',
-      iconBg: 'bg-indigo-600 text-white',
-      link: '/purchase-orders',
-    },
-  ];
+  const attention = data.attention || {};
+  const isStore = ['store', 'admin'].includes(user.role);
+  const isDirector = user.role === 'approver';
+  const isDept = user.role === 'dept';
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Quick Actions */}
-      <div className="bg-gradient-to-r from-gbu-900 to-gbu-950 rounded-2xl p-5 sm:p-6 text-white shadow-xl shadow-gbu-950/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            Stores & Purchase Portal Live
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-            Welcome back, {user.name}
-          </h2>
-          <p className="text-xs sm:text-sm text-gbu-200 mt-0.5">
-            Role: <strong className="text-white capitalize">{user.role}</strong> • Department: {user.dept || 'Stores & Purchase'}
-          </p>
+      {/* ROW 1: "Needs your attention" panel (role-aware, top priority) */}
+      <div className="bg-surface rounded-panel border border-line overflow-hidden shadow-sm">
+        <div className="p-3.5 px-4 border-b border-line bg-paper flex items-center justify-between">
+          <h2 className="text-[14px] font-semibold text-ink">Needs your attention</h2>
+          <span className="text-[12px] text-ink-muted">
+            {isStore && `${attention.low_stock?.length || 0} items low, ${attention.open_pos?.length || 0} POs waiting`}
+            {isDirector && `${attention.pending_indents?.length || 0} indents, ${attention.pending_writeoffs?.length || 0} write-offs pending`}
+            {isDept && `Last 5 requisitions for ${user.dept || 'your department'}`}
+          </span>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={loadData}
-            title="Refresh dashboard data"
-            className="p-2.5 rounded-xl bg-gbu-800 hover:bg-gbu-700 text-gbu-200 hover:text-white transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-          {['store', 'admin'].includes(user.role) && (
-            <Link
-              to="/issue-stock"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm transition-all shadow-md shadow-amber-500/20"
-            >
-              <ArrowUpRight className="w-4 h-4" />
-              <span>Issue Stock</span>
-            </Link>
-          )}
-          {['dept', 'store', 'admin'].includes(user.role) && (
-            <Link
-              to="/indents"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm transition-colors border border-white/20"
-            >
-              <ClipboardList className="w-4 h-4" />
-              <span>Raise Indent</span>
-            </Link>
-          )}
-        </div>
-      </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5 sm:gap-4">
-        {statCards.map((card, idx) => {
-          const Icon = card.icon;
-          return (
-            <Link
-              key={idx}
-              to={card.link}
-              className={`p-4 rounded-2xl border bg-white shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between ${card.color}`}
-            >
-              <div className="flex items-start justify-between">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${card.iconBg}`}>
-                  <Icon className="w-4 h-4" />
+        <div className="p-4">
+          {/* Store Officer Attention View */}
+          {isStore && (
+            <div className="space-y-4">
+              {attention.low_stock?.length === 0 && attention.open_pos?.length === 0 ? (
+                <div className="py-6 text-center text-[13px] text-ink-muted">
+                  No critical shortages or pending deliveries.
                 </div>
-                {card.badge && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
-                    {card.badge}
-                  </span>
-                )}
-              </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black tracking-tight text-slate-900 block leading-tight">
-                  {card.value}
-                </span>
-                <span className="text-xs font-semibold text-slate-700 block mt-0.5 leading-snug">
-                  {card.label}
-                </span>
-                <span className="text-[11px] text-slate-500 block mt-1 line-clamp-1">
-                  {card.sub}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Low Stock Items */}
+                  <div className="border border-line rounded p-3 bg-surface">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide">
+                        Stock below minimum threshold ({attention.low_stock?.length || 0})
+                      </span>
+                      <Link to="/items?low=true" className="text-[12px] text-primary hover:underline font-medium">
+                        View all
+                      </Link>
+                    </div>
+
+                    <div className="divide-y divide-line/60">
+                      {attention.low_stock?.slice(0, 4).map((i) => (
+                        <div key={i.id} className="py-2 flex items-center justify-between text-[13px]">
+                          <div className="truncate pr-2">
+                            <span className="font-mono text-[11px] text-ink-muted mr-1.5">[{i.code}]</span>
+                            <button
+                              type="button"
+                              onClick={() => openItemDrawer?.(i)}
+                              className="font-medium text-ink hover:text-primary transition-colors text-left"
+                            >
+                              {i.name}
+                            </button>
+                            <span className="text-[12px] text-amber font-medium block">
+                              {i.qty} {i.unit} in stock (deficiency: {i.deficit} {i.unit})
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => navigate('/indents', { state: { prefillItem: i } })}
+                            className="px-2.5 h-7 text-[12px] font-semibold text-primary bg-primary-light hover:bg-blue-100 rounded border border-blue-200 shrink-0"
+                          >
+                            Raise indent
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Open POs waiting for goods */}
+                  <div className="border border-line rounded p-3 bg-surface">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide">
+                        Purchase orders awaiting goods receipt ({attention.open_pos?.length || 0})
+                      </span>
+                      <Link to="/purchase-orders" className="text-[12px] text-primary hover:underline font-medium">
+                        View all
+                      </Link>
+                    </div>
+
+                    <div className="divide-y divide-line/60">
+                      {attention.open_pos?.length === 0 ? (
+                        <div className="py-4 text-[12px] text-ink-muted">No open orders.</div>
+                      ) : (
+                        attention.open_pos?.slice(0, 4).map((po) => (
+                          <div key={po.id} className="py-2 flex items-center justify-between text-[13px]">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-[11px] font-semibold text-ink">
+                                  {po.no}
+                                </span>
+                                <StatusBadge status={po.status} />
+                              </div>
+                              <span className="text-[12px] text-ink-muted block mt-0.5">
+                                Vendor: {po.vendor} • {formatRupees(po.total)}
+                              </span>
+                            </div>
+
+                            <Link
+                              to="/purchase-orders"
+                              className="px-2.5 h-7 text-[12px] font-semibold text-green bg-green-light hover:bg-emerald-100 rounded border border-green-border flex items-center"
+                            >
+                              Receive goods
+                            </Link>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Director Attention View */}
+          {isDirector && (
+            <div className="space-y-4">
+              {attention.pending_indents?.length === 0 && attention.pending_writeoffs?.length === 0 ? (
+                <div className="py-6 text-center text-[13px] text-ink-muted">
+                  All requisitions and condemnations have been sanctioned.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Pending Requisitions */}
+                  <div className="border border-line rounded p-3 bg-surface">
+                    <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide block mb-2">
+                      Requisitions pending sanction ({attention.pending_indents?.length || 0})
+                    </span>
+
+                    <div className="divide-y divide-line/60">
+                      {attention.pending_indents?.map((ind) => (
+                        <div key={ind.id} className="py-2.5 flex items-center justify-between text-[13px]">
+                          <div>
+                            <span className="font-mono text-[11px] font-semibold text-ink mr-2">[{ind.no}]</span>
+                            <span className="font-medium text-ink">{ind.dept}</span>
+                            <span className="text-[11px] text-ink-muted block mt-0.5">
+                              {ind.lines_count} lines • Raised by {ind.by}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setDecisionModal({ isOpen: true, type: 'indent', id: ind.id, no: ind.no, isApprove: false })}
+                              className="px-2 h-7 text-[12px] text-red border border-red-border hover:bg-red-light rounded font-medium"
+                            >
+                              Reject
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDecisionModal({ isOpen: true, type: 'indent', id: ind.id, no: ind.no, isApprove: true })}
+                              className="px-2.5 h-7 text-[12px] text-white bg-green hover:bg-green/90 rounded font-semibold"
+                            >
+                              Approve
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pending Write-offs */}
+                  <div className="border border-line rounded p-3 bg-surface">
+                    <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide block mb-2">
+                      Write-offs pending sanction ({attention.pending_writeoffs?.length || 0})
+                    </span>
+
+                    <div className="divide-y divide-line/60">
+                      {attention.pending_writeoffs?.map((wo) => (
+                        <div key={wo.id} className="py-2.5 flex items-center justify-between text-[13px]">
+                          <div>
+                            <span className="font-mono text-[11px] font-semibold text-ink mr-2">[{wo.no}]</span>
+                            <span className="font-medium text-ink">{wo.item}</span>
+                            <span className="text-[11px] text-amber block mt-0.5">
+                              Condemn {wo.qty} {wo.unit} ({wo.reason})
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setDecisionModal({ isOpen: true, type: 'writeoff', id: wo.id, no: wo.no, isApprove: false })}
+                              className="px-2 h-7 text-[12px] text-red border border-red-border hover:bg-red-light rounded font-medium"
+                            >
+                              Reject
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDecisionModal({ isOpen: true, type: 'writeoff', id: wo.id, no: wo.no, isApprove: true })}
+                              className="px-2.5 h-7 text-[12px] text-white bg-primary hover:bg-primary-hover rounded font-semibold"
+                            >
+                              Sanction
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Department Staff Attention View */}
+          {isDept && (
+            <div>
+              {attention.my_indents?.length === 0 ? (
+                <div className="py-6 text-center text-[13px] text-ink-muted">
+                  No requisitions raised by your department yet.
+                </div>
+              ) : (
+                <div className="divide-y divide-line/60">
+                  {attention.my_indents?.map((ind) => (
+                    <div key={ind.id} className="py-2.5 flex items-center justify-between text-[13px]">
+                      <div>
+                        <span className="font-mono text-[12px] font-semibold text-ink mr-2">{ind.no}</span>
+                        <StatusBadge status={ind.status} />
+                        <span className="text-[11px] text-ink-muted block mt-0.5">
+                          {ind.lines_count} items requested on {new Date(ind.at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                        </span>
+                      </div>
+                      <WorkflowStrip status={ind.status} compact />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Visual Analytics Row: Category Valuation Bar Chart + 30-Day Movement Area Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Category Valuation Bar Chart */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+      {/* ROW 2: Compact stat row (4 figures, plain white surface, 1px border, monochrome) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-surface p-4 rounded border border-line">
+          <span className="text-[12px] font-medium text-ink-muted block">Catalog items</span>
+          <span className="text-[22px] font-semibold text-ink tabular-nums block mt-1">
+            {data.total_items}
+          </span>
+          <Link to="/items" className="text-[11px] text-primary hover:underline font-medium mt-1 inline-block">
+            View stock register →
+          </Link>
+        </div>
+
+        <div className="bg-surface p-4 rounded border border-line">
+          <span className="text-[12px] font-medium text-ink-muted block">Stock valuation</span>
+          <span className="text-[22px] font-semibold text-ink tabular-nums block mt-1">
+            {formatRupees(data.stock_value)}
+          </span>
+          <Link to="/reports" className="text-[11px] text-primary hover:underline font-medium mt-1 inline-block">
+            View stock statement →
+          </Link>
+        </div>
+
+        <div className="bg-surface p-4 rounded border border-line">
+          <span className="text-[12px] font-medium text-ink-muted block">Below minimum</span>
+          <span className="text-[22px] font-semibold text-amber tabular-nums block mt-1">
+            {data.low_stock_count || 0}
+          </span>
+          <Link to="/items?low=true" className="text-[11px] text-amber hover:underline font-medium mt-1 inline-block">
+            {data.low_stock_count} items need refill →
+          </Link>
+        </div>
+
+        <div className="bg-surface p-4 rounded border border-line">
+          <span className="text-[12px] font-medium text-ink-muted block">Open purchase orders</span>
+          <span className="text-[22px] font-semibold text-ink tabular-nums block mt-1">
+            {data.open_pos || 0}
+          </span>
+          <Link to="/purchase-orders" className="text-[11px] text-primary hover:underline font-medium mt-1 inline-block">
+            Track shipments →
+          </Link>
+        </div>
+      </div>
+
+      {/* ROW 3: Two charts side-by-side (Horizontal category valuation + Grouped weekly in vs out) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Horizontal Bar Chart: Category Valuation */}
+        <div className="bg-surface p-4 rounded-panel border border-line">
+          <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900 tracking-tight">Stock Valuation by Category</h3>
-              <p className="text-xs text-slate-500">Total value in Rupees (Qty × Latest Unit Price)</p>
+              <h3 className="text-[14px] font-semibold text-ink">Stock value by category</h3>
+              <span className="text-[12px] text-ink-muted">Sorted high to low</span>
             </div>
-            <span className="text-xs font-bold text-gbu-800 bg-gbu-50 px-2.5 py-1 rounded-lg border border-gbu-100">
-              ₹{(data.stock_value || 0).toLocaleString('en-IN')} Total
+            <span className="text-[13px] font-semibold text-ink tabular-nums">
+              Total {formatRupees(data.stock_value)}
             </span>
           </div>
-          <div className="h-72 w-full">
+
+          <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.value_by_category} margin={{ top: 10, right: 10, left: 10, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <BarChart
+                layout="vertical"
+                data={data.value_by_category || []}
+                margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="2 2" horizontal={false} stroke="#E3E6EC" />
                 <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 11, fill: '#64748b' }}
-                  interval={0}
-                  angle={-20}
-                  textAnchor="end"
+                  type="number"
+                  tick={{ fontSize: 11, fill: '#6B7280' }}
+                  tickFormatter={(val) => formatRupees(val)}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#64748b' }}
-                  tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                  type="category"
+                  dataKey="name"
+                  tick={{ fontSize: 12, fill: '#14213D' }}
+                  width={110}
                 />
                 <Tooltip
-                  formatter={(value) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Valuation']}
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                  formatter={(val) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Valuation']}
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E3E6EC',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    color: '#14213D',
+                  }}
                 />
-                <Bar dataKey="value" fill="#1e3a8a" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="value" fill="#1F3A8A" radius={[0, 4, 4, 0]} barSize={16} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* 30-Day Stock Movement Timeline Chart */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+        {/* Grouped Bar Chart: Weekly In vs Out (8 weeks, strictly no OPENING stock spike) */}
+        <div className="bg-surface p-4 rounded-panel border border-line">
+          <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900 tracking-tight">30-Day Material Movement</h3>
-              <p className="text-xs text-slate-500">Physical inward, issuance, and condemnation trends</p>
+              <h3 className="text-[14px] font-semibold text-ink">Weekly material flow</h3>
+              <span className="text-[12px] text-ink-muted">Inward (GRN) vs Outward (Dispatches) across 8 weeks</span>
             </div>
-            <div className="flex items-center gap-3 text-xs font-semibold">
-              <span className="flex items-center gap-1.5 text-emerald-700">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> In: {data.flow_30d?.IN || 0}
+            <div className="flex items-center gap-3 text-[12px]">
+              <span className="flex items-center gap-1.5 font-medium text-ink">
+                <span className="w-2.5 h-2.5 bg-green rounded-sm" /> In
               </span>
-              <span className="flex items-center gap-1.5 text-blue-700">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Out: {data.flow_30d?.OUT || 0}
-              </span>
-              <span className="flex items-center gap-1.5 text-rose-700">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> W/O: {data.flow_30d?.WRITEOFF || 0}
+              <span className="flex items-center gap-1.5 font-medium text-ink">
+                <span className="w-2.5 h-2.5 bg-primary rounded-sm" /> Out
               </span>
             </div>
           </div>
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.movement_30d || []} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748b' }} interval={4} />
-                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
-                />
-                <Area type="monotone" dataKey="IN" name="Stock In" stroke="#10b981" fillOpacity={1} fill="url(#colorIn)" strokeWidth={2} />
-                <Area type="monotone" dataKey="OUT" name="Stock Out" stroke="#2563eb" fillOpacity={1} fill="url(#colorOut)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+
+          <div className="h-60 w-full">
+            {(!data.weekly_flow || data.weekly_flow.length === 0) ? (
+              <div className="h-full flex items-center justify-center text-[13px] text-ink-muted">
+                No material receipts or issues in the last 8 weeks.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.weekly_flow} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E3E6EC" />
+                  <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#6B7280' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} />
+                  <Tooltip
+                    formatter={(val, name) => [`${val} units`, name === 'in' ? 'Material in' : 'Material out']}
+                    contentStyle={{
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #E3E6EC',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      color: '#14213D',
+                    }}
+                  />
+                  <Bar dataKey="in" fill="#15803D" radius={[3, 3, 0, 0]} barSize={12} />
+                  <Bar dataKey="out" fill="#1F3A8A" radius={[3, 3, 0, 0]} barSize={12} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Two-Column Tables: Low-Stock Alerts + Recent Transactions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Low-Stock Alert Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-rose-50/40">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Low Stock Threshold Warnings</h3>
-                <p className="text-xs text-slate-500">Current Qty ≤ Minimum Reorder Level</p>
-              </div>
-            </div>
-            <Link
-              to="/items?low=true"
-              className="text-xs font-semibold text-rose-700 hover:text-rose-800 flex items-center gap-1"
-            >
-              View All ({data.low_stock?.length || 0})
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="px-4 py-2.5">Item & Code</th>
-                  <th className="px-3 py-2.5">Category</th>
-                  <th className="px-3 py-2.5 text-center">In Stock</th>
-                  <th className="px-3 py-2.5 text-center">Min Level</th>
-                  <th className="px-3 py-2.5 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {(!data.low_stock || data.low_stock.length === 0) ? (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-400">
-                      All item inventory levels are above minimum reorder threshold!
-                    </td>
-                  </tr>
-                ) : (
-                  data.low_stock.slice(0, 6).map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-4 py-2.5">
-                        <button
-                          onClick={() => setSelectedItem(item)}
-                          className="text-left font-semibold text-slate-900 hover:text-gbu-800 truncate block max-w-xs"
-                        >
-                          {item.name}
-                        </button>
-                        <span className="font-mono text-[10px] text-slate-500">{item.code}</span>
-                      </td>
-                      <td className="px-3 py-2.5 text-slate-600">{item.category}</td>
-                      <td className="px-3 py-2.5 text-center font-bold text-rose-700 bg-rose-50/60 rounded">
-                        {item.qty} {item.unit}
-                      </td>
-                      <td className="px-3 py-2.5 text-center text-slate-500 font-medium">
-                        {item.min_stock} {item.unit}
-                      </td>
-                      <td className="px-3 py-2.5 text-right">
-                        <button
-                          onClick={() => setSelectedItem(item)}
-                          className="px-2.5 py-1 text-[11px] font-semibold text-gbu-800 bg-gbu-50 hover:bg-gbu-100 rounded-lg transition-colors border border-gbu-200"
-                        >
-                          Ledger
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+      {/* ROW 4: Recent activity timeline list */}
+      <div className="bg-surface rounded-panel border border-line p-4">
+        <div className="flex items-center justify-between pb-3 border-b border-line mb-3">
+          <h3 className="text-[14px] font-semibold text-ink">Recent store activity</h3>
+          <Link to="/reports" className="text-[12px] text-primary hover:underline font-medium">
+            Export log →
+          </Link>
         </div>
 
-        {/* Recent Transactions Stream */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-                <Activity className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Recent Store Activity</h3>
-                <p className="text-xs text-slate-500">Live feed of inward, outward and condemnations</p>
-              </div>
-            </div>
-            <Link
-              to="/reports"
-              className="text-xs font-semibold text-gbu-800 hover:text-gbu-900 flex items-center gap-1"
-            >
-              Export Log
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+        <div className="divide-y divide-line/60">
+          {(!data.recent || data.recent.length === 0) ? (
+            <div className="py-4 text-[13px] text-ink-muted text-center">No recent activity.</div>
+          ) : (
+            data.recent.slice(0, 6).map((txn) => (
+              <div key={txn.id} className="py-2.5 flex items-center justify-between text-[13px]">
+                <div className="flex items-center gap-3">
+                  <StatusBadge status={txn.kind} />
+                  <div>
+                    <span className="font-medium text-ink">{txn.item}</span>
+                    <span className="text-[11px] text-ink-muted block mt-0.5">
+                      {txn.note} • By {txn.by}
+                    </span>
+                  </div>
+                </div>
 
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
-                <tr>
-                  <th className="px-4 py-2.5">Type</th>
-                  <th className="px-3 py-2.5">Item</th>
-                  <th className="px-3 py-2.5 text-right">Qty</th>
-                  <th className="px-3 py-2.5">Reference / Notes</th>
-                  <th className="px-3 py-2.5">By</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {(!data.recent || data.recent.length === 0) ? (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-400">
-                      No stock activity recorded yet.
-                    </td>
-                  </tr>
-                ) : (
-                  data.recent.slice(0, 6).map((txn) => (
-                    <tr key={txn.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-4 py-2.5 whitespace-nowrap">
-                        <StatusBadge status={txn.kind} />
-                      </td>
-                      <td className="px-3 py-2.5">
-                        <span className="font-semibold text-slate-900 block truncate max-w-xs">{txn.item}</span>
-                        <span className="font-mono text-[10px] text-slate-500">{txn.code}</span>
-                      </td>
-                      <td className={`px-3 py-2.5 text-right font-bold whitespace-nowrap ${
-                        txn.kind === 'IN' ? 'text-emerald-700' : 'text-slate-800'
-                      }`}>
-                        {txn.kind === 'IN' ? `+${txn.qty}` : `-${txn.qty}`} {txn.unit}
-                      </td>
-                      <td className="px-3 py-2.5 text-slate-600 max-w-xs truncate" title={txn.note}>
-                        <span className="font-mono text-[11px] text-slate-700 font-medium mr-1.5">{txn.ref}</span>
-                        {txn.note}
-                      </td>
-                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">
-                        {txn.by}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                <div className="text-right shrink-0">
+                  <span className={`tabular-nums font-semibold ${txn.kind === 'IN' ? 'text-green' : 'text-ink'}`}>
+                    {txn.kind === 'IN' ? `+${txn.qty}` : `-${txn.qty}`} {txn.unit}
+                  </span>
+                  <span className="text-[11px] text-ink-subtle block">
+                    {new Date(txn.at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Item Ledger Modal for quick inspection */}
-      <ItemLedgerModal
-        item={selectedItem}
-        isOpen={!!selectedItem}
-        onClose={() => setSelectedItem(null)}
+      {/* Inline Approval Confirmation Modal */}
+      <ConfirmModal
+        isOpen={decisionModal.isOpen}
+        onClose={() => setDecisionModal({ ...decisionModal, isOpen: false })}
+        onConfirm={handleDecisionConfirm}
+        title={`${decisionModal.isApprove ? 'Approve' : 'Reject'} ${decisionModal.no}`}
+        summary={
+          decisionModal.type === 'indent'
+            ? decisionModal.isApprove
+              ? 'Sanctioning this requisition will permit Stores to generate a Purchase Order.'
+              : 'Rejecting this requisition will return it to the requesting department.'
+            : decisionModal.isApprove
+            ? 'Sanctioning this write-off will immediately deduct the physical items from inventory and record a ledger entry.'
+            : 'Rejecting this write-off will retain the materials on store books.'
+        }
+        confirmText={decisionModal.isApprove ? 'Confirm approval' : 'Confirm rejection'}
+        confirmVariant={decisionModal.isApprove ? 'success' : 'danger'}
+        remarkLabel="Sanction remarks"
       />
     </div>
   );

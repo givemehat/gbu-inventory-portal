@@ -3,7 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 # local = sqlite, hosted = mysql+pymysql://user:pass@host:3306/dbname
-url = os.getenv("DATABASE_URL", "sqlite:///./inv.db")
+# Resolve default sqlite path relative to backend directory so it works from any CWD
+_default_sqlite_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "inv.db"))
+url = os.getenv("DATABASE_URL", f"sqlite:///{_default_sqlite_path}")
 args = {"check_same_thread": False} if url.startswith("sqlite") else {}
 if os.getenv("DB_SSL") == "1" and not url.startswith("sqlite"):
     ca_path = os.getenv("DB_SSL_CA")

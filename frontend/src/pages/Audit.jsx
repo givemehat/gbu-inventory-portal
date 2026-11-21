@@ -1,18 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  History,
-  Shield,
-  Search,
-  User,
-  Clock,
-  Filter,
-  CheckCircle,
-  FileCheck2,
-  Trash2,
-  Package,
-  Layers
-} from 'lucide-react';
-import { api, getCurrentUser } from '../api';
+import { Search } from 'lucide-react';
+import { api } from '../api';
 import { useToast } from '../components/Toast';
 
 export default function Audit() {
@@ -20,7 +8,6 @@ export default function Audit() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const user = getCurrentUser() || {};
   const toast = useToast();
 
   useEffect(() => {
@@ -38,79 +25,69 @@ export default function Audit() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
-              Audit & Governance
-            </span>
-            <span className="text-xs text-slate-400">Strictly Approver & Admin Only</span>
-          </div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">University Audit Trail & Compliance Log</h2>
-          <p className="text-xs text-slate-500">
-            Immutable log of all storekeeper issuances, director approvals, purchase orders, and material write-offs.
-          </p>
-        </div>
+      {/* Header */}
+      <div>
+        <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
+          Audit Trail
+        </h1>
+        <p className="text-[14px] text-ink-muted mt-1">
+          Immutable event log of all store transactions, sanctions, and procurements.
+        </p>
       </div>
 
       {/* Search Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+      <div className="bg-surface p-4 rounded-panel border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search audit trail by user, action, or document reference..."
-            className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-gbu-600 outline-none"
+            placeholder="Search audit trail by user, document, or action..."
+            className="w-full h-9 pl-9 pr-3 text-[13px] rounded border border-line bg-surface text-ink outline-none focus:border-primary placeholder:text-ink-subtle"
           />
         </div>
 
-        <span className="text-xs text-slate-500 font-medium">
-          Showing <strong>{filteredLogs.length}</strong> of {logs.length} audit records
+        <span className="text-[13px] text-ink-muted">
+          Showing <span className="font-medium text-ink tabular-nums">{filteredLogs.length}</span> of <span className="tabular-nums">{logs.length}</span> records
         </span>
       </div>
 
-      {/* Audit Timeline Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* Audit Table */}
+      <div className="bg-surface rounded-panel border border-line overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+          <table className="w-full text-left text-[13px]">
+            <thead className="bg-paper text-ink-muted font-medium border-b border-line text-[12px]">
               <tr>
-                <th className="px-4 py-3">Event Timestamp</th>
-                <th className="px-4 py-3">Authorized User</th>
-                <th className="px-4 py-3">Action Description</th>
-                <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-2.5 w-48">Timestamp</th>
+                <th className="px-4 py-2.5 w-44">User</th>
+                <th className="px-4 py-2.5">Action description</th>
+                <th className="px-4 py-2.5 text-center w-32">Classification</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-line text-ink">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-12 text-center text-slate-400">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="w-6 h-6 border-2 border-gbu-800 border-t-transparent rounded-full animate-spin" />
-                      <span>Loading immutable audit records...</span>
-                    </div>
+                  <td colSpan={4} className="py-12 text-center text-ink-muted">
+                    Loading audit trail...
                   </td>
                 </tr>
               ) : filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-12 text-center text-slate-400">
-                    No audit records match the search query.
+                  <td colSpan={4} className="py-12 text-center text-ink-muted">
+                    No matching audit records found.
                   </td>
                 </tr>
               ) : (
                 filteredLogs.map((log) => {
                   const isApproved = log.action.includes('APPROVED');
                   const isRejected = log.action.includes('REJECTED');
-                  const isCreated = log.action.includes('Created') || log.action.includes('Raised');
                   const isIssued = log.action.includes('Issued');
                   const isReceived = log.action.includes('Received');
 
                   return (
-                    <tr key={log.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap text-slate-500 font-mono text-[11px]">
+                    <tr key={log.id} className="h-10 hover:bg-paper/40 transition-colors">
+                      <td className="px-4 py-2 whitespace-nowrap text-ink-muted text-[12px] tabular-nums">
                         {new Date(log.at).toLocaleString('en-IN', {
                           day: '2-digit',
                           month: 'short',
@@ -121,39 +98,34 @@ export default function Audit() {
                         })}
                       </td>
 
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[10px]">
-                            {log.user ? log.user.charAt(0) : 'U'}
-                          </div>
-                          <span className="font-semibold text-slate-900">{log.user}</span>
-                        </div>
+                      <td className="px-4 py-2 whitespace-nowrap font-medium text-ink">
+                        {log.user}
                       </td>
 
-                      <td className="px-4 py-3">
-                        <span className="font-medium text-slate-800">{log.action}</span>
+                      <td className="px-4 py-2 text-ink">
+                        {log.action}
                       </td>
 
-                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                      <td className="px-4 py-2 text-center whitespace-nowrap">
                         {isApproved ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-green/10 text-green border border-green/20">
                             Sanctioned
                           </span>
                         ) : isRejected ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                          <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-red/10 text-red border border-red/20">
                             Rejected
                           </span>
                         ) : isReceived ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                          <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-primary-light text-primary border border-blue-200">
                             Goods Inward
                           </span>
                         ) : isIssued ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
-                            Dispatched
+                          <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-paper text-ink border border-line">
+                            Stock Issue
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                            Logged
+                          <span className="inline-block px-2 py-0.5 text-[11px] font-medium rounded bg-paper text-ink-muted border border-line">
+                            Event Log
                           </span>
                         )}
                       </td>

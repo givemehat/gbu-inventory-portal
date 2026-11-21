@@ -3,21 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList,
   Plus,
-  CheckCircle2,
-  XCircle,
   FileCheck2,
   Trash2,
-  Filter,
-  Layers,
-  Calendar,
-  User,
-  Building2,
-  MessageSquare,
-  X
+  X,
+  ChevronRight,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { api, getCurrentUser } from '../api';
 import StatusBadge from '../components/StatusBadge';
 import ConfirmModal from '../components/ConfirmModal';
+import WorkflowStrip from '../components/WorkflowStrip';
+import Combobox from '../components/Combobox';
 import { useToast } from '../components/Toast';
 
 export default function Indents() {
@@ -31,9 +28,8 @@ export default function Indents() {
   // Approval modal state
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
-    indentId: null,
+    indent: null,
     isApprove: true,
-    indentNo: '',
   });
 
   // Create form state
@@ -68,7 +64,6 @@ export default function Indents() {
     loadData();
   }, [selectedStatus]);
 
-  // Form line helpers
   const handleAddLine = () => {
     const firstItemId = items[0]?.id || '';
     setLines([...lines, { item_id: firstItemId, qty: 10 }]);
@@ -109,7 +104,7 @@ export default function Indents() {
         note: note.trim(),
         lines: validLines,
       });
-      toast.success(`Indent ${res.no} raised successfully!`);
+      toast.success(`Indent ${res.no} raised successfully`);
       setIsCreateOpen(false);
       setNote('');
       setLines([{ item_id: items[0]?.id || '', qty: 10 }]);
@@ -124,17 +119,17 @@ export default function Indents() {
   const handleOpenDecision = (indent, isApprove) => {
     setConfirmModal({
       isOpen: true,
-      indentId: indent.id,
+      indent,
       isApprove,
-      indentNo: indent.no,
     });
   };
 
   const handleConfirmDecision = async (remark) => {
+    if (!confirmModal.indent) return;
     try {
-      await api.decideIndent(confirmModal.indentId, confirmModal.isApprove, remark);
+      await api.decideIndent(confirmModal.indent.id, confirmModal.isApprove, remark);
       toast.success(
-        `Indent ${confirmModal.indentNo} has been ${confirmModal.isApprove ? 'APPROVED' : 'REJECTED'}.`
+        `Indent ${confirmModal.indent.no} ${confirmModal.isApprove ? 'approved' : 'rejected'}`
       );
       loadData();
     } catch (err) {
@@ -145,14 +140,14 @@ export default function Indents() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Material Requisitions (Indents)</h2>
-          <p className="text-xs text-slate-500">
-            {user.role === 'dept'
-              ? 'Your departmental requisitions awaiting approval and procurement.'
-              : 'University requisitions raised by academic schools and administrative units.'}
+          <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
+            Material Requisitions
+          </h1>
+          <p className="text-[14px] text-ink-muted mt-1">
+            Departmental indents submitted to Stores & Purchase for administrative approval.
           </p>
         </div>
 
@@ -163,29 +158,29 @@ export default function Indents() {
             }
             setIsCreateOpen(true);
           }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gbu-900 hover:bg-gbu-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-gbu-950/20 transition-all self-start sm:self-auto"
+          className="h-9 px-4 rounded bg-primary hover:bg-primary-hover text-surface font-medium text-[14px] transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>Raise New Indent</span>
+          <span>Raise indent</span>
         </button>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 overflow-x-auto shadow-sm">
+      <div className="flex items-center gap-1 p-1 bg-surface rounded border border-line overflow-x-auto">
         {[
-          { label: 'All Indents', value: '' },
-          { label: 'Pending Approval', value: 'PENDING' },
+          { label: 'All indents', value: '' },
+          { label: 'Pending approval', value: 'PENDING' },
           { label: 'Approved', value: 'APPROVED' },
-          { label: 'PO Created', value: 'ORDERED' },
+          { label: 'Ordered', value: 'ORDERED' },
           { label: 'Rejected', value: 'REJECTED' },
         ].map((tab) => (
           <button
             key={tab.value}
             onClick={() => setSelectedStatus(tab.value)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded text-[13px] font-medium whitespace-nowrap transition-colors ${
               selectedStatus === tab.value
-                ? 'bg-gbu-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                ? 'bg-ink text-surface'
+                : 'text-ink-muted hover:text-ink hover:bg-paper'
             }`}
           >
             {tab.label}
@@ -195,45 +190,40 @@ export default function Indents() {
 
       {/* Indents List */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-2 text-slate-400">
-          <div className="w-6 h-6 border-2 border-gbu-800 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-medium">Fetching indents...</span>
+        <div className="py-20 text-center text-[13px] text-ink-muted">
+          Loading requisitions...
         </div>
       ) : indents.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
-          <ClipboardList className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-sm font-bold text-slate-800">No Indents Found</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            {selectedStatus ? `No indents with status "${selectedStatus}".` : 'No requisitions have been raised yet.'}
+        <div className="bg-surface rounded-panel border border-line p-12 text-center text-ink-muted">
+          <ClipboardList className="w-10 h-10 text-ink-subtle mx-auto mb-2 stroke-[1.5]" />
+          <p className="text-[14px] font-medium text-ink">No requisitions found</p>
+          <p className="text-[12px] text-ink-muted mt-0.5">
+            {selectedStatus ? `No indents matching filter "${selectedStatus}".` : 'No material requisitions on record.'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-4">
           {indents.map((ind) => (
             <div
               key={ind.id}
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 hover:border-slate-300 transition-all"
+              className="bg-surface rounded-panel border border-line p-5 transition-colors"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              {/* Header row */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-line">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
-                    <ClipboardList className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
-                        {ind.no}
-                      </span>
-                      <StatusBadge status={ind.status} />
-                    </div>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Dept: <strong className="text-slate-800">{ind.dept}</strong> • Raised by: {ind.by}
-                    </p>
-                  </div>
+                  <span className="font-mono text-[13px] font-semibold text-ink px-2 py-0.5 rounded bg-paper border border-line">
+                    {ind.no}
+                  </span>
+                  <StatusBadge status={ind.status} />
+                  <span className="text-[13px] text-ink-muted">
+                    Dept: <span className="font-medium text-ink">{ind.dept}</span>
+                  </span>
                 </div>
 
-                <div className="text-left sm:text-right text-xs text-slate-400 flex sm:flex-col items-center sm:items-end justify-between">
-                  <span>
+                <div className="text-[12px] text-ink-muted flex items-center gap-3">
+                  <span>Raised by: <span className="text-ink">{ind.by}</span></span>
+                  <span>•</span>
+                  <span className="tabular-nums">
                     {new Date(ind.at).toLocaleDateString('en-IN', {
                       day: '2-digit',
                       month: 'short',
@@ -242,41 +232,46 @@ export default function Indents() {
                       minute: '2-digit',
                     })}
                   </span>
-                  {ind.decided_by && (
-                    <span className="text-[11px] text-slate-500 font-medium">
-                      Decided by: <strong>{ind.decided_by}</strong>
-                    </span>
-                  )}
                 </div>
+              </div>
+
+              {/* Progress Flow */}
+              <div className="py-2">
+                <WorkflowStrip status={ind.status} compact />
               </div>
 
               {/* Note / Remarks if any */}
               {ind.note && (
-                <p className="mt-3 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <strong className="text-slate-700">Requisition Note:</strong> {ind.note}
-                </p>
+                <div className="text-[13px] text-ink-muted bg-paper p-2.5 rounded border border-line my-2">
+                  <span className="font-medium text-ink">Purpose: </span>
+                  {ind.note}
+                </div>
               )}
 
               {ind.remark && (
-                <p className="mt-2 text-xs text-amber-900 bg-amber-50/70 p-2.5 rounded-xl border border-amber-200/60">
-                  <strong className="text-amber-800">Director Remark:</strong> {ind.remark}
-                </p>
+                <div className="text-[13px] text-amber bg-amber/5 p-2.5 rounded border border-amber/20 my-2">
+                  <span className="font-medium">Director remark: </span>
+                  {ind.remark}
+                  {ind.decided_by && (
+                    <span className="text-[11px] text-ink-muted ml-2">({ind.decided_by})</span>
+                  )}
+                </div>
               )}
 
               {/* Line items table */}
-              <div className="mt-3.5 border border-slate-100 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50/80 text-slate-500 font-semibold text-[10px] uppercase tracking-wider">
+              <div className="mt-3 border border-line rounded overflow-hidden">
+                <table className="w-full text-left text-[13px]">
+                  <thead className="bg-paper text-ink-muted font-medium border-b border-line text-[12px]">
                     <tr>
-                      <th className="px-3 py-2">Item Name</th>
-                      <th className="px-3 py-2 text-right">Requested Quantity</th>
+                      <th className="px-3 py-2">Item</th>
+                      <th className="px-3 py-2 text-right">Requested quantity</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                  <tbody className="divide-y divide-line text-ink">
                     {ind.lines.map((l, i) => (
-                      <tr key={i} className="hover:bg-slate-50/50">
-                        <td className="px-3 py-2 font-medium">{l.item}</td>
-                        <td className="px-3 py-2 text-right font-bold text-slate-900">
+                      <tr key={i} className="hover:bg-paper/40">
+                        <td className="px-3 py-2">{l.item}</td>
+                        <td className="px-3 py-2 text-right font-medium tabular-nums">
                           {l.qty} {l.unit}
                         </td>
                       </tr>
@@ -285,10 +280,10 @@ export default function Indents() {
                 </table>
               </div>
 
-              {/* Action buttons footer */}
-              <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                <span className="text-xs text-slate-400 font-medium">
-                  {ind.lines.length} material requirement lines
+              {/* Footer action bar */}
+              <div className="mt-4 pt-3 border-t border-line flex flex-wrap items-center justify-between gap-3">
+                <span className="text-[12px] text-ink-muted">
+                  {ind.lines.length} {ind.lines.length === 1 ? 'item' : 'items'} requisitioned
                 </span>
 
                 <div className="flex items-center gap-2">
@@ -297,29 +292,29 @@ export default function Indents() {
                     <>
                       <button
                         onClick={() => handleOpenDecision(ind, false)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition-colors"
+                        className="h-8 px-3 rounded border border-line text-red hover:bg-red/5 text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
                       >
                         <XCircle className="w-3.5 h-3.5" />
                         <span>Reject</span>
                       </button>
                       <button
                         onClick={() => handleOpenDecision(ind, true)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-colors"
+                        className="h-8 px-3.5 rounded bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Approve Indent</span>
+                        <span>Approve indent</span>
                       </button>
                     </>
                   )}
 
-                  {/* Store Officer action on APPROVED indent: Create PO */}
+                  {/* Store Officer action on APPROVED: Create PO */}
                   {isStore && ind.status === 'APPROVED' && (
                     <button
                       onClick={() => navigate('/purchase-orders', { state: { createFromIndent: ind } })}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-sm transition-all"
+                      className="h-8 px-3.5 rounded bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
                     >
                       <FileCheck2 className="w-3.5 h-3.5" />
-                      <span>Create Purchase Order →</span>
+                      <span>Create purchase order →</span>
                     </button>
                   )}
                 </div>
@@ -331,67 +326,75 @@ export default function Indents() {
 
       {/* Raise New Indent Modal */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-[2px]">
+          <div className="bg-surface rounded-panel max-w-xl w-full border border-line shadow-sm overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-line flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Raise Material Indent (Requisition)</h3>
-                <p className="text-xs text-slate-500">Requires sanction by the Director, Stores & Purchase</p>
+                <h3 className="font-serif text-[18px] font-semibold text-ink">Raise Material Indent</h3>
+                <p className="text-[12px] text-ink-muted">Requisition for Stores & Purchase approval</p>
               </div>
-              <button onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-                <X className="w-5 h-5" />
+              <button
+                type="button"
+                onClick={() => setIsCreateOpen(false)}
+                className="text-ink-muted hover:text-ink p-1 rounded"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateSubmit} className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
+            <form onSubmit={handleCreateSubmit} className="p-5 overflow-y-auto space-y-4 flex-1">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Requesting School / Department *</label>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Requesting school or department
+                </label>
                 <input
                   type="text"
                   required
                   value={deptName}
                   onChange={(e) => setDeptName(e.target.value)}
-                  placeholder="e.g. School of ICT, Exam Cell"
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none"
+                  placeholder="e.g. School of ICT"
+                  className="w-full h-9 text-[14px] px-3 rounded border border-line focus:border-primary outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Purpose / Notes</label>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Purpose / Requisition justification
+                </label>
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="e.g. End-semester examination papers, toners and lab consumables"
+                  placeholder="e.g. Department requirement for end-semester laboratory sessions"
                   rows={2}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none placeholder:text-slate-400"
+                  className="w-full text-[14px] p-2.5 rounded border border-line focus:border-primary outline-none placeholder:text-ink-subtle"
                 />
               </div>
 
-              {/* Multi-line items table */}
+              {/* Items List */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Required Material Items ({lines.length})
+                  <label className="block text-[12px] font-medium text-ink-muted">
+                    Requested items ({lines.length})
                   </label>
                   <button
                     type="button"
                     onClick={handleAddLine}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gbu-50 hover:bg-gbu-100 text-gbu-800 text-xs font-semibold border border-gbu-200 transition-colors"
+                    className="text-[12px] font-medium text-primary hover:underline inline-flex items-center gap-1"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>Add Item</span>
+                    <span>Add item</span>
                   </button>
                 </div>
 
-                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                   {lines.map((line, idx) => (
-                    <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200">
+                    <div key={idx} className="flex items-center gap-2 p-2 bg-paper rounded border border-line">
                       <div className="flex-1">
                         <select
                           required
                           value={line.item_id}
                           onChange={(e) => handleLineChange(idx, 'item_id', e.target.value)}
-                          className="w-full text-xs py-2 px-2.5 rounded-lg border border-slate-300 bg-white focus:border-gbu-600 outline-none"
+                          className="w-full h-8 text-[13px] px-2 rounded border border-line bg-surface text-ink outline-none focus:border-primary"
                         >
                           {items.map((i) => (
                             <option key={i.id} value={i.id}>
@@ -410,7 +413,7 @@ export default function Indents() {
                           value={line.qty}
                           onChange={(e) => handleLineChange(idx, 'qty', e.target.value)}
                           placeholder="Qty"
-                          className="w-full text-xs text-center py-2 px-2 rounded-lg border border-slate-300 focus:border-gbu-600 outline-none"
+                          className="w-full h-8 text-[13px] text-right px-2 rounded border border-line focus:border-primary outline-none tabular-nums"
                         />
                       </div>
 
@@ -418,7 +421,8 @@ export default function Indents() {
                         type="button"
                         disabled={lines.length <= 1}
                         onClick={() => handleRemoveLine(idx)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 disabled:opacity-30 rounded-lg"
+                        className="p-1 text-ink-muted hover:text-red disabled:opacity-30 rounded"
+                        title="Remove line"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -427,20 +431,20 @@ export default function Indents() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="h-9 px-4 text-[13px] font-medium text-ink-muted hover:bg-paper rounded border border-line"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-gbu-900 hover:bg-gbu-800 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50"
+                  className="h-9 px-4 bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium rounded transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Requisition'}
+                  {submitting ? 'Submitting...' : 'Submit requisition'}
                 </button>
               </div>
             </form>
@@ -448,21 +452,26 @@ export default function Indents() {
         </div>
       )}
 
-      {/* Confirmation Modal for Approvals/Rejections */}
+      {/* Decision Modal */}
       <ConfirmModal
         isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false, indent: null })}
         onConfirm={handleConfirmDecision}
-        title={confirmModal.isApprove ? `Approve Indent ${confirmModal.indentNo}` : `Reject Indent ${confirmModal.indentNo}`}
-        message={
+        title={confirmModal.isApprove ? `Approve Indent ${confirmModal.indent?.no}` : `Reject Indent ${confirmModal.indent?.no}`}
+        summary={
           confirmModal.isApprove
-            ? `Are you sure you want to approve indent ${confirmModal.indentNo}? Stores will be permitted to raise a Purchase Order against this requisition.`
-            : `Are you sure you want to reject indent ${confirmModal.indentNo}? Please provide remarks for the requesting department.`
+            ? `Approving ${confirmModal.indent?.no} will authorize Stores & Purchase to raise a Purchase Order against university vendors.`
+            : `Rejecting ${confirmModal.indent?.no} will terminate this requisition. The requesting department will see your remarks.`
         }
-        confirmText={confirmModal.isApprove ? 'Confirm Approval' : 'Confirm Rejection'}
-        confirmVariant={confirmModal.isApprove ? 'success' : 'danger'}
-        remarkLabel="Director Remarks / Budget Sanction Reference"
-        remarkPlaceholder={confirmModal.isApprove ? 'e.g. Sanctioned against academic year budget head' : 'e.g. Budget limit exhausted, please resubmit in next quarter'}
+        confirmText={confirmModal.isApprove ? 'Approve indent' : 'Reject indent'}
+        confirmVariant={confirmModal.isApprove ? 'primary' : 'danger'}
+        remarkLabel="Director remarks"
+        remarkPlaceholder={
+          confirmModal.isApprove
+            ? 'e.g. Sanctioned under 2026-27 departmental operating budget'
+            : 'e.g. Current stock adequate or quota exceeded'
+        }
+        requireRemark={!confirmModal.isApprove}
       />
     </div>
   );

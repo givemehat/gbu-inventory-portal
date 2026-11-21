@@ -2,19 +2,15 @@ import React, { useEffect, useState } from 'react';
 import {
   Trash2,
   Plus,
-  AlertTriangle,
+  AlertCircle,
+  X,
   CheckCircle2,
   XCircle,
-  Package,
-  Calendar,
-  Layers,
-  FileText,
-  X,
-  ShieldAlert
 } from 'lucide-react';
 import { api, getCurrentUser } from '../api';
 import StatusBadge from '../components/StatusBadge';
 import ConfirmModal from '../components/ConfirmModal';
+import Combobox from '../components/Combobox';
 import { useToast } from '../components/Toast';
 
 export default function WriteOffs() {
@@ -32,9 +28,8 @@ export default function WriteOffs() {
   // Decision Modal State
   const [decisionModal, setDecisionModal] = useState({
     isOpen: false,
-    woId: null,
+    wo: null,
     isApprove: true,
-    woNo: '',
   });
 
   const user = getCurrentUser() || {};
@@ -43,7 +38,7 @@ export default function WriteOffs() {
   const toast = useToast();
 
   const commonReasons = [
-    'Damaged by moisture / water leakage',
+    'Damaged by moisture or water leakage',
     'Shelf-life expired / dried up',
     'Damaged during physical handling',
     'Obsolete specification / unserviceable',
@@ -100,7 +95,7 @@ export default function WriteOffs() {
         qty: numericQty,
         reason: reason.trim(),
       });
-      toast.success(`Write-off proposal ${res.no} submitted for Director sanction.`);
+      toast.success(`Write-off proposal ${res.no} submitted for Director sanction`);
       setIsRequestOpen(false);
       setQty('');
       setReason('');
@@ -115,17 +110,17 @@ export default function WriteOffs() {
   const handleOpenDecision = (wo, isApprove) => {
     setDecisionModal({
       isOpen: true,
-      woId: wo.id,
+      wo,
       isApprove,
-      woNo: wo.no,
     });
   };
 
   const handleConfirmDecision = async (remark) => {
+    if (!decisionModal.wo) return;
     try {
-      await api.decideWriteOff(decisionModal.woId, decisionModal.isApprove, remark);
+      await api.decideWriteOff(decisionModal.wo.id, decisionModal.isApprove, remark);
       toast.success(
-        `Write-off ${decisionModal.woNo} has been ${decisionModal.isApprove ? 'APPROVED (Stock deducted)' : 'REJECTED'}.`
+        `Write-off ${decisionModal.wo.no} ${decisionModal.isApprove ? 'sanctioned (stock deducted)' : 'rejected'}`
       );
       loadData();
     } catch (err) {
@@ -134,52 +129,49 @@ export default function WriteOffs() {
     }
   };
 
-  const pendingCount = writeoffs.filter((w) => w.status === 'PENDING').length;
-
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Material Condemnation & Write-offs</h2>
-          <p className="text-xs text-slate-500">
-            Formal disposal protocol for expired, obsolete, or physically damaged store items.
+          <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
+            Condemnations & Write-offs
+          </h1>
+          <p className="text-[14px] text-ink-muted mt-1">
+            Formal disposal protocol for expired, obsolete, or physically damaged store inventory.
           </p>
         </div>
 
         {isStore && (
           <button
             onClick={() => setIsRequestOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-900/20 transition-all self-start sm:self-auto"
+            className="h-9 px-4 rounded bg-red hover:bg-red/90 text-surface font-medium text-[14px] transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto"
           >
             <Plus className="w-4 h-4" />
-            <span>Request Write-off</span>
+            <span>Propose write-off</span>
           </button>
         )}
       </div>
 
-      {/* Info Card */}
-      <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-900">
-        <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+      {/* Protocol Note */}
+      <div className="bg-paper border border-line rounded-panel p-4 text-[13px] text-ink flex items-start gap-3">
+        <AlertCircle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
         <div>
-          <p className="font-bold text-amber-950">University Stores Audit Rule:</p>
-          <p className="mt-0.5 text-amber-800 leading-relaxed">
-            Store inventory is NOT reduced upon raising a write-off proposal. The system ledger entry and physical deduction occur strictly upon Director sanction.
-          </p>
+          <span className="font-medium text-ink">Stores audit protocol: </span>
+          Inventory stock is not reduced upon raising a write-off proposal. Physical stock deduction and ledger entries occur strictly upon Director sanction.
         </div>
       </div>
 
       {/* Write-offs List */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-2 text-slate-400">
-          <div className="w-6 h-6 border-2 border-gbu-800 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-medium">Loading write-off records...</span>
+        <div className="py-20 text-center text-[13px] text-ink-muted">
+          Loading write-off records...
         </div>
       ) : writeoffs.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
-          <Trash2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-sm font-bold text-slate-800">No Write-off Proposals</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+        <div className="bg-surface rounded-panel border border-line p-12 text-center text-ink-muted">
+          <Trash2 className="w-10 h-10 text-ink-subtle mx-auto mb-2 stroke-[1.5]" />
+          <p className="text-[14px] font-medium text-ink">No write-off proposals</p>
+          <p className="text-[12px] text-ink-muted mt-0.5">
             No damaged or expired goods proposals on record.
           </p>
         </div>
@@ -188,31 +180,27 @@ export default function WriteOffs() {
           {writeoffs.map((wo) => (
             <div
               key={wo.id}
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 hover:border-slate-300 transition-all"
+              className="bg-surface rounded-panel border border-line p-5 transition-colors"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                <div className="flex items-start sm:items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 flex items-center justify-center font-bold shrink-0">
-                    <Trash2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
-                        {wo.no}
-                      </span>
-                      <StatusBadge status={wo.status} />
-                    </div>
-                    <p className="text-xs text-slate-600 mt-1">
-                      Material: <strong className="text-slate-900">{wo.item}</strong> • Proposed by: {wo.by}
-                    </p>
-                  </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-line">
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-[13px] font-semibold text-ink px-2 py-0.5 rounded bg-paper border border-line">
+                    {wo.no}
+                  </span>
+                  <StatusBadge status={wo.status} />
+                  <span className="text-[13px] text-ink">
+                    Item: <span className="font-medium">{wo.item}</span>
+                  </span>
                 </div>
 
-                <div className="text-left sm:text-right">
-                  <span className="text-base font-extrabold text-rose-700 block">
-                    {wo.qty} {wo.unit}
+                <div className="flex items-center gap-3 text-[12px] text-ink-muted">
+                  <span className="text-[14px] font-semibold text-red tabular-nums">
+                    -{wo.qty} {wo.unit}
                   </span>
-                  <span className="text-[11px] text-slate-400 block">
+                  <span>•</span>
+                  <span>Proposed by: <span className="text-ink">{wo.by}</span></span>
+                  <span>•</span>
+                  <span className="tabular-nums">
                     {new Date(wo.at).toLocaleDateString('en-IN', {
                       day: '2-digit',
                       month: 'short',
@@ -225,38 +213,39 @@ export default function WriteOffs() {
               </div>
 
               {/* Reason / Remarks */}
-              <div className="mt-3.5 space-y-2">
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                  <span className="font-semibold text-slate-700">Reason for Condemnation:</span>
-                  <p className="text-slate-600 mt-0.5">{wo.reason}</p>
+              <div className="mt-3 space-y-2">
+                <div className="p-3 bg-paper rounded border border-line text-[13px]">
+                  <span className="font-medium text-ink">Reason for condemnation: </span>
+                  <span className="text-ink-muted">{wo.reason}</span>
                 </div>
 
                 {wo.remark && (
-                  <div className="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-xs text-amber-900">
-                    <span className="font-semibold text-amber-800">
-                      Director Decision Remark ({wo.decided_by || 'Director S&P'}):
-                    </span>
-                    <p className="mt-0.5 text-amber-950">{wo.remark}</p>
+                  <div className="p-3 bg-amber/5 rounded border border-amber/20 text-[13px] text-amber">
+                    <span className="font-medium">Director decision remark: </span>
+                    <span>{wo.remark}</span>
+                    {wo.decided_by && (
+                      <span className="text-[11px] text-ink-muted ml-2">({wo.decided_by})</span>
+                    )}
                   </div>
                 )}
               </div>
 
               {/* Action buttons footer */}
               {isApprover && wo.status === 'PENDING' && (
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <div className="mt-4 pt-3 border-t border-line flex items-center justify-end gap-2">
                   <button
                     onClick={() => handleOpenDecision(wo, false)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition-colors"
+                    className="h-8 px-3 rounded border border-line text-red hover:bg-red/5 text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
                   >
                     <XCircle className="w-3.5 h-3.5" />
-                    <span>Reject Proposal</span>
+                    <span>Reject proposal</span>
                   </button>
                   <button
                     onClick={() => handleOpenDecision(wo, true)}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-colors"
+                    className="h-8 px-3.5 rounded bg-red hover:bg-red/90 text-surface text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Approve & Write Off Stock</span>
+                    <span>Sanction write-off</span>
                   </button>
                 </div>
               )}
@@ -265,45 +254,43 @@ export default function WriteOffs() {
         </div>
       )}
 
-      {/* Request Write-off Modal */}
+      {/* Propose Write-off Modal */}
       {isRequestOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-[2px]">
+          <div className="bg-surface rounded-panel max-w-lg w-full border border-line shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-line flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Propose Material Write-off</h3>
-                <p className="text-xs text-slate-500">Requires sanction from Director, Stores & Purchase</p>
+                <h3 className="font-serif text-[18px] font-semibold text-ink">Propose Material Write-off</h3>
+                <p className="text-[12px] text-ink-muted">Submit condemnation request for Director sanction</p>
               </div>
-              <button onClick={() => setIsRequestOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-                <X className="w-5 h-5" />
+              <button
+                type="button"
+                onClick={() => setIsRequestOpen(false)}
+                className="text-ink-muted hover:text-ink p-1 rounded"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleRequestSubmit} className="p-5 sm:p-6 space-y-4">
-              {/* Item Selection */}
+            <form onSubmit={handleRequestSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Select Store Item *</label>
-                <select
-                  required
+                <label className="block text-[12px] font-medium text-ink-muted mb-1.5">
+                  Select store item
+                </label>
+                <Combobox
+                  items={items}
                   value={selectedItemId}
-                  onChange={(e) => setSelectedItemId(e.target.value)}
-                  className="w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none bg-white"
-                >
-                  {items.map((i) => (
-                    <option key={i.id} value={i.id}>
-                      [{i.code}] {i.name} ({i.qty} {i.unit} in stock)
-                    </option>
-                  ))}
-                </select>
+                  onChange={(id) => setSelectedItemId(id)}
+                  placeholder="Select item..."
+                />
               </div>
 
-              {/* Quantity */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-700">Quantity to Condemn *</label>
+                  <label className="block text-[12px] font-medium text-ink-muted">Quantity to condemn</label>
                   {selectedItem && (
-                    <span className="text-[11px] text-slate-500">
-                      Available in Store: <strong className="text-slate-800">{selectedItem.qty} {selectedItem.unit}</strong>
+                    <span className="text-[12px] text-ink-muted">
+                      In store: <span className="font-medium text-ink tabular-nums">{selectedItem.qty} {selectedItem.unit}</span>
                     </span>
                   )}
                 </div>
@@ -315,27 +302,27 @@ export default function WriteOffs() {
                   required
                   value={qty}
                   onChange={(e) => setQty(e.target.value)}
-                  placeholder={`Max: ${selectedItem?.qty || 0}`}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none"
+                  placeholder={selectedItem ? `Max: ${selectedItem.qty}` : 'Quantity'}
+                  className="w-full h-9 text-[14px] px-3 rounded border border-line focus:border-primary outline-none tabular-nums"
                 />
                 {isOverStock && (
-                  <p className="text-xs text-rose-600 mt-1">
+                  <p className="text-[12px] text-red mt-1">
                     Cannot condemn {numericQty}. Only {selectedItem.qty} {selectedItem.unit} currently in stock.
                   </p>
                 )}
               </div>
 
-              {/* Reason */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Condemnation Justification / Reason *</label>
-                {/* Quick tags */}
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Condemnation reason or justification
+                </label>
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {commonReasons.map((r, i) => (
                     <button
                       key={i}
                       type="button"
                       onClick={() => setReason(r)}
-                      className="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors"
+                      className="px-2 py-0.5 text-[11px] bg-paper hover:bg-line text-ink-muted rounded border border-line transition-colors"
                     >
                       {r}
                     </button>
@@ -345,26 +332,26 @@ export default function WriteOffs() {
                   required
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Detailed inspection findings and cause of material condemnation..."
+                  placeholder="Inspection findings and cause for material condemnation..."
                   rows={3}
-                  className="w-full text-xs px-3.5 py-2 rounded-xl border border-slate-300 focus:border-gbu-600 outline-none placeholder:text-slate-400"
+                  className="w-full text-[13px] p-2.5 rounded border border-line focus:border-primary outline-none placeholder:text-ink-subtle"
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsRequestOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="h-9 px-4 text-[13px] font-medium text-ink-muted hover:bg-paper rounded border border-line"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || isOverStock || numericQty <= 0}
-                  className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50"
+                  className="h-9 px-4 bg-red hover:bg-red/90 text-surface text-[13px] font-medium rounded transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Proposal'}
+                  {submitting ? 'Submitting...' : 'Propose write-off'}
                 </button>
               </div>
             </form>
@@ -375,18 +362,19 @@ export default function WriteOffs() {
       {/* Decision Modal */}
       <ConfirmModal
         isOpen={decisionModal.isOpen}
-        onClose={() => setDecisionModal({ ...decisionModal, isOpen: false })}
+        onClose={() => setDecisionModal({ ...decisionModal, isOpen: false, wo: null })}
         onConfirm={handleConfirmDecision}
-        title={decisionModal.isApprove ? `Sanction Write-off ${decisionModal.woNo}` : `Reject Write-off ${decisionModal.woNo}`}
-        message={
+        title={decisionModal.isApprove ? `Sanction Write-off ${decisionModal.wo?.no}` : `Reject Write-off ${decisionModal.wo?.no}`}
+        summary={
           decisionModal.isApprove
-            ? `Sanctioning this condemnation will immediately deduct the items from central university inventory and log a permanent WRITEOFF ledger transaction.`
-            : `Are you sure you want to reject write-off ${decisionModal.woNo}? Physical items will remain on store books.`
+            ? `Stock of ${decisionModal.wo?.item} will permanently reduce by ${decisionModal.wo?.qty} ${decisionModal.wo?.unit}. A ledger entry 'WRITEOFF' will be permanently recorded in the university stock register.`
+            : `Proposal will be rejected. The items remain on store registers without change.`
         }
-        confirmText={decisionModal.isApprove ? 'Sanction & Deduct Stock' : 'Confirm Rejection'}
+        confirmText={decisionModal.isApprove ? 'Sanction & deduct stock' : 'Reject proposal'}
         confirmVariant={decisionModal.isApprove ? 'danger' : 'primary'}
-        remarkLabel="Director Sanction / Rejection Remark"
-        remarkPlaceholder="e.g. Inspected by board on 24 Nov 2026, confirmed unserviceable"
+        remarkLabel="Director sanction remarks"
+        remarkPlaceholder="e.g. Inspected by board, confirmed unserviceable and approved for disposal"
+        requireRemark={!decisionModal.isApprove}
       />
     </div>
   );
