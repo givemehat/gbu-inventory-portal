@@ -142,64 +142,71 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Top Institutional Header: Prominent Administrative Block Hero */}
-      <div className="bg-surface rounded-panel border border-line overflow-hidden shadow-xs">
-        <div className="grid grid-cols-1 md:grid-cols-12">
-          {/* Prominent Campus Landmark Image */}
-          <div className="md:col-span-5 relative h-52 sm:h-60 md:h-auto min-h-[190px] bg-slate-900 overflow-hidden">
-            <img
-              src="/gbu-campus.webp"
-              alt="GBU Administrative Block (प्रशासनिक भवन)"
-              className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent flex items-end p-4">
-              <span className="text-white text-[12px] font-medium flex items-center gap-1.5 drop-shadow">
-                <Building2 className="w-3.5 h-3.5 text-blue-300" />
-                Administrative Building (प्रशासनिक भवन) • Central Campus
+      {/* Top Institutional Header: Grand Panoramic GBU Administrative Block Hero */}
+      <div className="bg-surface rounded-panel border border-line overflow-hidden shadow-sm">
+        {/* Full-Width Panoramic Landmark Photo */}
+        <div className="relative w-full h-72 sm:h-80 md:h-96 bg-slate-900 overflow-hidden">
+          <img
+            src="/gbu-campus.webp"
+            alt="GBU Administrative Block (प्रशासनिक भवन)"
+            className="w-full h-full object-cover object-center transform hover:scale-102 transition-transform duration-700"
+          />
+          {/* Rich Ambient Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 flex flex-col justify-between p-4 sm:p-6 text-white">
+            {/* Top Badges */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span className="text-[11px] px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/20 font-medium">
+                Academic Session 2026–2027
               </span>
-            </div>
-          </div>
-
-          {/* Right: University & Portal Information */}
-          <div className="md:col-span-7 p-4 sm:p-5 flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="font-serif text-[18px] sm:text-[21px] font-semibold text-ink leading-snug">
-                  Gautam Buddha University
-                </span>
-                <span className="text-[11px] px-2 py-0.5 rounded bg-blue-50 text-primary border border-blue-200 font-medium">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] px-2.5 py-1 rounded-full bg-primary/90 text-white font-medium border border-blue-400/30">
                   Central Stores & Purchase
                 </span>
+                <span className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-300 font-mono font-semibold border border-emerald-500/30">
+                  Health: 94.8% Nominal
+                </span>
               </div>
-              <p className="text-[13px] text-ink-muted leading-relaxed">
-                Centralised digital stock ledger, material indents, purchase orders, goods receipt notes (GRN), and asset condemnation records across university schools.
+            </div>
+
+            {/* Bottom Titles & Location */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-blue-200 text-[12px] font-medium tracking-wide">
+                <Building2 className="w-4 h-4 text-amber-300" />
+                <span>प्रशासनिक भवन (Administrative Block) • Gautam Buddha University</span>
+              </div>
+              <h1 className="font-serif text-[22px] sm:text-[28px] md:text-[32px] font-semibold text-white tracking-tight leading-tight drop-shadow-md">
+                Stores & Purchase Inventory Management Portal
+              </h1>
+              <p className="text-[12px] sm:text-[13px] text-slate-200/90 max-w-2xl drop-shadow">
+                Digital stock ledger, institutional indents, goods receipt verification (GRN), and condemnation workflows across all 8 university schools.
               </p>
             </div>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-3 border-t border-line text-[12px]">
-              <div>
-                <span className="text-ink-muted block text-[11px]">Academic Session</span>
-                <strong className="text-ink font-medium">2026–2027</strong>
-              </div>
-              <div>
-                <span className="text-ink-muted block text-[11px]">Active Official</span>
-                <strong className="text-ink font-medium truncate block">{user.name} ({user.role})</strong>
-              </div>
-              <div>
-                <span className="text-ink-muted block text-[11px]">Stock Health Index</span>
-                <strong className="text-green font-mono font-bold block">94.8% Nominal</strong>
-              </div>
-            </div>
+        {/* Quick Institutional Metadata Footer Strip */}
+        <div className="p-3.5 sm:px-6 bg-surface border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px]">
+          <div className="flex items-center gap-4 text-ink-muted flex-wrap">
+            <span>Official: <strong className="text-ink font-semibold">{user.name}</strong> ({user.role})</span>
+            <span>•</span>
+            <span>Department: <strong className="text-ink font-semibold">{user.dept}</strong></span>
+            <span>•</span>
+            <span>Greater Noida, UP — 201312</span>
+          </div>
 
-            <div className="flex items-center justify-between pt-2.5 border-t border-line/60">
-              <span className="text-[11px] text-ink-subtle">Opp. Yamuna Expressway, Greater Noida — 201312</span>
-              <Link
-                to="/items"
-                className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded text-[12px] font-medium transition-colors shadow-xs"
-              >
-                Open stock register
-              </Link>
-            </div>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/items"
+              className="px-3 py-1.5 bg-paper hover:bg-slate-100 border border-line rounded text-[12px] font-medium text-ink transition-colors"
+            >
+              Stock register
+            </Link>
+            <Link
+              to="/indents"
+              className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded text-[12px] font-medium transition-colors shadow-xs"
+            >
+              Raise indent
+            </Link>
           </div>
         </div>
       </div>
