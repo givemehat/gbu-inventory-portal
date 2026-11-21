@@ -56,7 +56,8 @@ export default {
         panel: '8px',
       },
       fontFamily: {
-        sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', '"IBM Plex Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
         serif: ['"Source Serif 4"', 'Georgia', 'serif'],
       },
       boxShadow: {

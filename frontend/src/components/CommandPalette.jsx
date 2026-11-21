@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { api, getCurrentUser } from '../api';
+import { EmptyBoxIllustration } from './Illustrations';
 
 export default function CommandPalette({ isOpen, setIsOpen, onItemSelect }) {
   const [query, setQuery] = useState('');
@@ -304,8 +305,8 @@ export default function CommandPalette({ isOpen, setIsOpen, onItemSelect }) {
           )}
 
           {allInteractive.length === 0 && !loading && (
-            <div className="py-8 text-center text-[13px] text-ink-muted">
-              No matching pages or items found for "{query}".
+            <div className="py-4 text-center">
+              <EmptyBoxIllustration message={`No matching pages or items found for "${query}".`} />
             </div>
           )}
         </div>

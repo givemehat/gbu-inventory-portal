@@ -6,6 +6,7 @@ import UtilityBar from './UtilityBar';
 import Footer from './Footer';
 import ItemDrawer from './ItemDrawer';
 import CommandPalette from './CommandPalette';
+import ShortcutsModal from './ShortcutsModal';
 import { getToken, getCurrentUser } from '../api';
 import { ChevronRight, Home } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [drawerItem, setDrawerItem] = useState(null);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const location = useLocation();
   const token = getToken();
   const user = getCurrentUser();
@@ -41,7 +43,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-paper flex flex-col text-ink">
+    <div className="min-h-screen bg-paper flex flex-col text-ink font-sans">
       <div className="flex-1 flex">
         {/* 232px Sidebar */}
         <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
@@ -58,6 +60,7 @@ export default function Layout() {
             group={currentMeta.group}
             onItemSelect={(item) => setDrawerItem(item)}
             onOpenCommand={() => setCommandOpen(true)}
+            onOpenShortcuts={() => setShortcutsOpen(true)}
           />
 
           <main className="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-6">
@@ -81,6 +84,12 @@ export default function Layout() {
         isOpen={commandOpen}
         setIsOpen={setCommandOpen}
         onItemSelect={(item) => setDrawerItem(item)}
+      />
+
+      {/* Keyboard Shortcuts Cheat Sheet Modal (?) */}
+      <ShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { Plus, Search, ChevronLeft, ChevronRight, X, ArrowUpDown } from 'lucide-
 import { api, getCurrentUser } from '../api';
 import StockLevelBar from '../components/StockLevelBar';
 import { useToast } from '../components/Toast';
+import { EmptyBoxIllustration } from '../components/Illustrations';
 
 export default function Items() {
   const [items, setItems] = useState([]);
@@ -269,8 +270,8 @@ export default function Items() {
                 </tr>
               ) : paginatedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-ink-muted text-[13px]">
-                    No items match the search filters.
+                  <td colSpan={8} className="py-8 text-center">
+                    <EmptyBoxIllustration message="No catalog items found matching your filters." />
                   </td>
                 </tr>
               ) : (

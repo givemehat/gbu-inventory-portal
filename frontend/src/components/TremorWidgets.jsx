@@ -90,3 +90,64 @@ export function TremorBarList({ items = [] }) {
     </div>
   );
 }
+
+/**
+ * Tremor-style Metric Card with Sparkline & Delta Badge
+ */
+export function TremorMetricCard({
+  title,
+  value,
+  delta,
+  deltaType = 'increase', // 'increase' | 'decrease' | 'neutral'
+  subtext = 'vs. previous cycle',
+  sparklineData = [35, 42, 40, 58, 62, 70, 75],
+  icon: Icon,
+}) {
+  const isPositive = deltaType === 'increase';
+  const points = sparklineData.map((val, idx) => {
+    const min = Math.min(...sparklineData);
+    const max = Math.max(...sparklineData) || 1;
+    const x = (idx / (sparklineData.length - 1)) * 60;
+    const y = 20 - ((val - min) / (max - min || 1)) * 16;
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <div className="p-4 bg-surface border border-line rounded-panel shadow-2xs hover:shadow-xs transition-shadow space-y-2">
+      <div className="flex items-center justify-between text-[12px] text-ink-muted">
+        <span className="font-medium truncate">{title}</span>
+        {Icon && <Icon className="w-4 h-4 text-ink-subtle" />}
+      </div>
+
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="font-mono text-[22px] sm:text-[24px] font-bold text-ink tabular-nums">
+          {value}
+        </span>
+
+        {/* Micro Sparkline */}
+        <div className="shrink-0 w-16 h-6 flex items-center justify-end">
+          <svg className="w-14 h-5 overflow-visible" viewBox="0 0 60 20">
+            <polyline
+              fill="none"
+              stroke={isPositive ? '#10B981' : '#F59E0B'}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points={points}
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Delta badge */}
+      <div className="flex items-center gap-1.5 text-[11px] pt-0.5">
+        <span className={`px-1.5 py-0.2 rounded font-mono font-semibold flex items-center gap-0.5 ${
+          isPositive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+        }`}>
+          {isPositive ? '↑' : '↓'} {delta}
+        </span>
+        <span className="text-ink-subtle truncate">{subtext}</span>
+      </div>
+    </div>
+  );
+}

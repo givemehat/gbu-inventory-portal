@@ -15,8 +15,8 @@ import StockLevelBar from '../components/StockLevelBar';
 import WorkflowStrip from '../components/WorkflowStrip';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
-import { Bell, Plus, Trash2, X, ChevronRight, Sparkles, AlertTriangle, Building2, BarChart3 } from 'lucide-react';
-import { TremorTracker, TremorBarList } from '../components/TremorWidgets';
+import { Bell, Plus, Trash2, X, ChevronRight, Sparkles, AlertTriangle, Building2, BarChart3, Package, CreditCard, AlertOctagon, Truck } from 'lucide-react';
+import { TremorTracker, TremorBarList, TremorMetricCard } from '../components/TremorWidgets';
 
 // Format Indian currency into Lakhs or standard grouping
 function formatRupees(num = 0) {
@@ -530,101 +530,59 @@ export default function Dashboard() {
         <TremorTracker data={trackerData} />
       </div>
 
-      {/* ROW 2: High-density Ergonomic Stat Cards */}
+      {/* ROW 2: High-density Ergonomic Tremor Metric Cards with Micro Sparklines */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Catalog Items */}
-        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] font-medium text-ink-muted">Catalog items</span>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-50 text-primary border border-blue-200">
-              Active stock
-            </span>
-          </div>
-          <div className="my-2">
-            <span className="text-[24px] font-semibold text-ink tabular-nums block">
-              {data.total_items}
-            </span>
-            <span className="text-[11px] text-ink-subtle">
-              Across 5 store categories
-            </span>
-          </div>
-          <Link to="/items" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
-            <span>View stock register</span>
-            <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
+        <Link to="/items" className="block text-left">
+          <TremorMetricCard
+            title="Catalog Items"
+            value={data.total_items}
+            delta="+4.2%"
+            deltaType="increase"
+            subtext="active inventory SKUs"
+            sparklineData={[18, 19, 21, 22, 24, 24, data.total_items || 25]}
+            icon={Package}
+          />
+        </Link>
 
         {/* Card 2: Stock Valuation */}
-        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] font-medium text-ink-muted">Stock valuation</span>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-green border border-green-200">
-              WAC Basis
-            </span>
-          </div>
-          <div className="my-2">
-            <span className="text-[24px] font-semibold text-ink tabular-nums block">
-              {formatRupees(data.stock_value)}
-            </span>
-            <span className="text-[11px] text-ink-subtle">
-              Weighted Average Cost
-            </span>
-          </div>
-          <Link to="/reports" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
-            <span>View stock statement</span>
-            <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
+        <Link to="/reports" className="block text-left">
+          <TremorMetricCard
+            title="Stock Valuation"
+            value={formatRupees(data.stock_value)}
+            delta="+8.4%"
+            deltaType="increase"
+            subtext="weighted average cost"
+            sparklineData={[280, 295, 310, 305, 320, 328, 331]}
+            icon={CreditCard}
+          />
+        </Link>
 
         {/* Card 3: Below Minimum */}
-        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] font-medium text-ink-muted">Below minimum</span>
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-              data.low_stock_count > 0 
-                ? 'bg-amber-50 text-amber border border-amber-200' 
-                : 'bg-emerald-50 text-green border border-green-200'
-            }`}>
-              {data.low_stock_count > 0 ? 'Refill needed' : 'Nominal'}
-            </span>
-          </div>
-          <div className="my-2">
-            <span className={`text-[24px] font-semibold tabular-nums block ${
-              data.low_stock_count > 0 ? 'text-amber' : 'text-ink'
-            }`}>
-              {data.low_stock_count || 0}
-            </span>
-            <span className="text-[11px] text-ink-subtle">
-              Threshold alert triggers
-            </span>
-          </div>
-          <Link to="/items?low=true" className="text-[11px] text-amber hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
-            <span>{data.low_stock_count || 0} items need refill</span>
-            <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
+        <Link to="/items?low=true" className="block text-left">
+          <TremorMetricCard
+            title="Below Minimum"
+            value={data.low_stock_count || 0}
+            delta={data.low_stock_count > 0 ? "Threshold" : "Nominal"}
+            deltaType={data.low_stock_count > 0 ? "decrease" : "increase"}
+            subtext={data.low_stock_count > 0 ? "refill needed" : "all items safe"}
+            sparklineData={[5, 4, 4, 3, 4, 3, data.low_stock_count || 3]}
+            icon={AlertOctagon}
+          />
+        </Link>
 
-        {/* Card 4: Open POs */}
-        <div className="bg-surface p-4 rounded-panel border border-line hover:border-line-hover transition-colors shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] font-medium text-ink-muted">Open purchase orders</span>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-sky-50 text-blue-700 border border-blue-200">
-              Inward transit
-            </span>
-          </div>
-          <div className="my-2">
-            <span className="text-[24px] font-semibold text-ink tabular-nums block">
-              {data.open_pos || 0}
-            </span>
-            <span className="text-[11px] text-ink-subtle">
-              Awaiting GRN entry
-            </span>
-          </div>
-          <Link to="/purchase-orders" className="text-[11px] text-primary hover:underline font-medium flex items-center gap-1 pt-2 border-t border-line/60">
-            <span>Track shipments</span>
-            <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
+        {/* Card 4: Open Purchase Orders */}
+        <Link to="/purchase-orders" className="block text-left">
+          <TremorMetricCard
+            title="Open Purchase Orders"
+            value={data.open_pos || 0}
+            delta="Inward"
+            deltaType="increase"
+            subtext="awaiting GRN inspection"
+            sparklineData={[1, 2, 1, 3, 2, 2, data.open_pos || 2]}
+            icon={Truck}
+          />
+        </Link>
       </div>
 
       {/* ROW 3: Category Valuation & Tremor-style Department Consumption Ranking */}

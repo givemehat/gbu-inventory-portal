@@ -1,24 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Search, LogOut, ChevronDown, Package, Home, ChevronRight } from 'lucide-react';
+import { Menu, Search, LogOut, ChevronDown, Package, Home, ChevronRight, Keyboard } from 'lucide-react';
 import { getCurrentUser, logout, api } from '../api';
+import NotificationPopover from './NotificationPopover';
 
-export default function Header({ setMobileOpen, title, group = 'Portal', onItemSelect, onOpenCommand }) {
+export default function Header({ setMobileOpen, title, group = 'Portal', onItemSelect, onOpenCommand, onOpenShortcuts }) {
   const user = getCurrentUser() || { name: 'User', role: 'store', dept: 'Stores & Purchase' };
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Global keyboard shortcut: press / to open command
+  // Global keyboard shortcuts: / for command, ? for shortcuts cheat sheet
   useEffect(() => {
     function handleKeyDown(e) {
-      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (e.key === '/') {
         e.preventDefault();
         onOpenCommand?.();
+      } else if (e.key === '?') {
+        e.preventDefault();
+        onOpenShortcuts?.();
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onOpenCommand]);
+  }, [onOpenCommand, onOpenShortcuts]);
 
   // Click outside listener for menu
   useEffect(() => {
@@ -83,20 +88,37 @@ export default function Header({ setMobileOpen, title, group = 'Portal', onItemS
         </button>
       </div>
 
-      {/* Right: Consolidated User Menu */}
-      <div ref={menuRef} className="relative shrink-0">
+      {/* Right: Actions, Notifications & Consolidated User Menu */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Keyboard Shortcuts Trigger */}
         <button
           type="button"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="User account menu"
-          className="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-paper transition-colors"
+          onClick={onOpenShortcuts}
+          aria-label="View keyboard shortcuts (press ?)"
+          className="hidden sm:flex items-center gap-1 p-1.5 px-2 rounded hover:bg-paper text-ink-muted hover:text-ink text-[12px] font-mono transition-colors border border-transparent hover:border-line"
+          title="Keyboard shortcuts (?)"
         >
-          <div className="w-7 h-7 rounded bg-primary text-white flex items-center justify-center font-bold text-[12px] uppercase">
-            {user.name.charAt(0)}
-          </div>
-          <span className="text-[13px] font-medium text-ink hidden sm:inline">{user.name}</span>
-          <ChevronDown className="w-3.5 h-3.5 text-ink-muted" />
+          <Keyboard className="w-3.5 h-3.5" />
+          <span className="text-[11px] text-ink-subtle">?</span>
         </button>
+
+        {/* Shadcn-Admin Notification Popover */}
+        <NotificationPopover />
+
+        {/* User Menu */}
+        <div ref={menuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="User account menu"
+            className="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-paper transition-colors"
+          >
+            <div className="w-7 h-7 rounded bg-primary text-white flex items-center justify-center font-bold text-[12px] uppercase">
+              {user.name.charAt(0)}
+            </div>
+            <span className="text-[13px] font-medium text-ink hidden sm:inline">{user.name}</span>
+            <ChevronDown className="w-3.5 h-3.5 text-ink-muted" />
+          </button>
 
         {/* User Dropdown */}
         {menuOpen && (
@@ -124,6 +146,7 @@ export default function Header({ setMobileOpen, title, group = 'Portal', onItemS
           </div>
         )}
       </div>
-    </header>
+    </div>
+  </header>
   );
 }
