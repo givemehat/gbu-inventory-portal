@@ -25,12 +25,12 @@ export default function ItemLedgerModal({ item, isOpen, onClose }) {
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-slate-200 bg-slate-50 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-gbu-900 text-white flex items-center justify-center font-bold shadow-md shadow-gbu-950/20">
+            <div className="w-11 h-11 rounded bg-primary text-white flex items-center justify-center font-bold">
               <Package className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-gbu-700 bg-gbu-100/80 px-2 py-0.5 rounded">
+                <span className="font-mono text-[12px] font-bold text-primary bg-primary-light px-2 py-0.5 rounded">
                   {item.code}
                 </span>
                 <span className="text-xs text-slate-500 font-medium">{item.category}</span>
@@ -71,7 +71,7 @@ export default function ItemLedgerModal({ item, isOpen, onClose }) {
           </div>
           <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
             <span className="text-slate-500 block font-medium">Inventory Value</span>
-            <span className="text-base font-bold text-gbu-800">₹{(item.qty * item.price).toLocaleString()}</span>
+            <span className="text-base font-bold text-primary">₹{(item.qty * item.price).toLocaleString()}</span>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ export default function ItemLedgerModal({ item, isOpen, onClose }) {
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-              <History className="w-4 h-4 text-gbu-700" />
+              <History className="w-4 h-4 text-primary" />
               Stock Movement History
             </h4>
             <span className="text-xs text-slate-500 font-medium">{txns.length} records</span>
@@ -87,7 +87,7 @@ export default function ItemLedgerModal({ item, isOpen, onClose }) {
 
           {loading ? (
             <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-2">
-              <div className="w-6 h-6 border-2 border-gbu-700 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <span className="text-xs font-medium">Loading stock ledger...</span>
             </div>
           ) : txns.length === 0 ? (

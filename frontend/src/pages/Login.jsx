@@ -18,28 +18,28 @@ export default function Login() {
       email: 'store@gbu.demo',
       pw: 'demo123',
       dept: 'Stores & Purchase',
-      desc: 'Stock ledger, material issues, PO generation, goods inward (GRN), write-off proposals.',
+      desc: 'Stock ledger, material issues, PO generation, goods inward (GRN), and write-off proposals.',
     },
     {
       role: 'Director (S&P)',
       email: 'director@gbu.demo',
       pw: 'demo123',
       dept: 'Stores & Purchase',
-      desc: 'Requisition approvals, write-off sanctions, PO review, audit log inspection.',
+      desc: 'Requisition approvals, write-off sanctions, PO review, and audit log inspection.',
     },
     {
       role: 'Department Staff',
       email: 'dept@gbu.demo',
       pw: 'demo123',
       dept: 'School of ICT',
-      desc: 'Raise departmental material requisitions and check status.',
+      desc: 'Raise departmental material requisitions and track approval status.',
     },
     {
       role: 'System Admin',
       email: 'admin@gbu.demo',
       pw: 'demo123',
       dept: 'IT Cell',
-      desc: 'Master administration across all university departments.',
+      desc: 'Master administration, user management, and system governance.',
     },
   ];
 
@@ -80,36 +80,39 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-paper flex items-center justify-center p-4 sm:p-6 lg:p-8 text-ink">
-      <div className="max-w-4xl w-full bg-surface border border-line rounded-panel shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-2">
-        {/* Left Column: University Identity */}
-        <div className="p-8 sm:p-10 bg-primary text-white flex flex-col justify-between">
+      <div className="max-w-[1100px] w-full bg-surface border border-line rounded-panel md:shadow-card overflow-hidden grid grid-cols-1 md:grid-cols-12">
+        {/* Left Column: University Identity (stacked header on mobile, full-height blue panel on desktop) */}
+        <div className="md:col-span-5 bg-primary text-white p-6 sm:p-8 md:p-10 flex flex-col justify-between">
           <div>
-            <div className="w-12 h-12 rounded bg-white text-primary flex items-center justify-center font-black text-[18px] mb-6">
+            <div className="w-12 h-12 rounded bg-white text-primary flex items-center justify-center font-black text-[18px] mb-4 md:mb-6 shadow-sm">
               GBU
             </div>
-            <h1 className="font-serif text-[24px] sm:text-[28px] font-semibold tracking-tight leading-tight">
+            <h1 className="font-serif text-[22px] sm:text-[26px] md:text-[28px] font-semibold tracking-tight leading-snug text-white">
               Gautam Buddha University
             </h1>
-            <p className="font-serif text-[16px] text-blue-200 mt-1">
+            <p className="font-serif text-[15px] sm:text-[16px] text-blue-100 mt-1">
               Stores & Purchase Department
             </p>
-            <p className="text-[13px] text-blue-100/90 mt-4 leading-relaxed">
-              Digital stock register, material requisitions, purchase orders and asset write-offs for university stores.
+            <p className="hidden md:block text-[13px] text-blue-100/90 mt-4 leading-relaxed">
+              Digital stock register, departmental material requisitions, purchase order procurement, and asset condemnation records.
             </p>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-blue-400/30 text-[12px] text-blue-200">
+          <div className="mt-4 md:mt-8 pt-4 md:pt-6 border-t border-blue-400/30 text-[12px] text-blue-200">
             Greater Noida, Uttar Pradesh — 201312
           </div>
         </div>
 
-        {/* Right Column: Login Form & Demo Selectors */}
-        <div className="p-8 sm:p-10 flex flex-col justify-between">
+        {/* Right Column: Sign In Form & Demo Role Selectors */}
+        <div className="md:col-span-7 p-6 sm:p-8 md:p-10 flex flex-col justify-between bg-surface">
           <div>
-            <h2 className="font-serif text-[20px] font-semibold text-ink">Sign in</h2>
-            <p className="text-[13px] text-ink-muted mt-0.5">
-              Enter your university credentials to continue.
-            </p>
+            <div>
+              <h2 className="font-serif text-[22px] font-semibold text-ink">Sign in</h2>
+              <div className="w-10 h-0.5 bg-primary mt-2 mb-3" />
+              <p className="text-[13px] text-ink-muted">
+                Enter your university credentials to access the stores portal.
+              </p>
+            </div>
 
             {wakingUp && (
               <div className="mt-3 p-2.5 bg-amber-light border border-amber-border rounded text-[12px] text-amber">
@@ -117,9 +120,9 @@ export default function Login() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-5 space-y-3.5">
+            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <label className="block text-[13px] font-medium text-ink mb-1">
+                <label className="block text-[13px] font-medium text-ink mb-1.5">
                   Email address
                 </label>
                 <input
@@ -128,12 +131,12 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@gbu.demo"
-                  className="w-full h-9 px-3 rounded border border-line text-[14px] outline-none focus:border-primary placeholder:text-ink-subtle"
+                  className="w-full h-10 px-3.5 rounded border border-line bg-surface text-ink text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-ink-subtle transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-medium text-ink mb-1">
+                <label className="block text-[13px] font-medium text-ink mb-1.5">
                   Password
                 </label>
                 <input
@@ -142,49 +145,61 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-9 px-3 rounded border border-line text-[14px] outline-none focus:border-primary placeholder:text-ink-subtle"
+                  className="w-full h-10 px-3.5 rounded border border-line bg-surface text-ink text-[14px] outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-ink-subtle transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-9 mt-2 bg-primary hover:bg-primary-hover text-white text-[13px] font-semibold rounded transition-colors disabled:opacity-50"
+                className="w-full h-10 mt-1 bg-primary hover:bg-primary-hover text-white text-[14px] font-medium rounded transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  'Sign in'
+                )}
               </button>
             </form>
 
-            {/* Try a role list */}
+            {/* Try a demo role list */}
             <div className="mt-6 pt-5 border-t border-line">
-              <span className="text-[11px] uppercase tracking-wide font-semibold text-ink-subtle block mb-2">
-                Try a role (one-click fill)
+              <span className="text-[13px] font-medium text-ink block mb-2.5">
+                Try a demo role
               </span>
 
-              <div className="space-y-1.5">
-                {demoAccounts.map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => handleFill(acc)}
-                    className={`w-full p-2 text-left rounded border transition-colors flex items-center justify-between text-[12px] ${
-                      email === acc.email
-                        ? 'border-primary bg-primary-light text-primary font-medium'
-                        : 'border-line hover:bg-paper text-ink'
-                    }`}
-                  >
-                    <div>
-                      <span className="font-semibold block">{acc.role}</span>
-                      <span className="text-[11px] text-ink-muted truncate block max-w-[240px]">
+              <div className="space-y-2">
+                {demoAccounts.map((acc) => {
+                  const isSelected = email === acc.email;
+                  return (
+                    <button
+                      key={acc.email}
+                      type="button"
+                      onClick={() => handleFill(acc)}
+                      className={`w-full p-3 text-left rounded border transition-colors flex flex-col gap-1 text-[13px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                        isSelected
+                          ? 'border-primary bg-primary-light/60 text-ink ring-1 ring-primary'
+                          : 'border-line hover:bg-paper/80 hover:border-slate-300 text-ink'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-[13px] text-ink">{acc.role}</span>
+                        <span className="text-[11px] font-mono text-ink-muted">{acc.email}</span>
+                      </div>
+                      <p className="text-[12px] text-ink-muted leading-relaxed">
                         {acc.desc}
-                      </span>
-                    </div>
-                    <span className="font-mono text-[11px] text-ink-subtle shrink-0">
-                      demo123
-                    </span>
-                  </button>
-                ))}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
+
+              <p className="text-[12px] text-ink-muted mt-3">
+                All demo accounts use the password <code className="font-mono font-semibold text-ink px-1.5 py-0.5 bg-paper rounded border border-line">demo123</code>.
+              </p>
             </div>
           </div>
         </div>

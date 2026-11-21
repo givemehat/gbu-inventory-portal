@@ -22,7 +22,7 @@ export default function StatusBadge({ status }) {
     },
     PARTIAL: {
       label: 'Partial',
-      className: 'border border-[#C4B5FD] text-[#6D28D9] bg-[#F5F3FF]',
+      className: 'border border-blue-200 text-primary bg-primary-light',
     },
     OPEN: {
       label: 'Open',

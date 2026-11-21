@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-ink: #14213D;
+  --color-primary: #1F3A8A;
+  --color-primary-hover: #172554;
+  --color-primary-light: #EFF6FF;
+  --color-paper: #F7F8FA;
+  --color-surface: #FFFFFF;
+  --color-line: #E3E6EC;
+  --color-amber: #B45309;
+  --color-green: #15803D;
+  --color-red: #B91C1C;
+}
+
 @layer base {
   body {
     font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -16,6 +29,39 @@
     font-feature-settings: 'tnum';
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Explicit fallback utilities ensuring brand colors always resolve */
+.bg-primary {
+  background-color: #1F3A8A !important;
+}
+
+.hover\:bg-primary-hover:hover {
+  background-color: #172554 !important;
+}
+
+.bg-surface {
+  background-color: #FFFFFF !important;
+}
+
+.bg-paper {
+  background-color: #F7F8FA !important;
+}
+
+.border-line {
+  border-color: #E3E6EC !important;
+}
+
+.text-ink {
+  color: #14213D !important;
+}
+
+.text-primary {
+  color: #1F3A8A !important;
+}
+
+.rounded-panel {
+  border-radius: 8px !important;
 }
 
 /* Slide in drawer transition */

@@ -34,21 +34,21 @@ export function ToastProvider({ children }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl shadow-lg border backdrop-blur-sm transition-all duration-300 animate-slide-up ${
+            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded border shadow-card transition-all duration-300 bg-surface ${
               t.type === 'success'
-                ? 'bg-emerald-50/95 border-emerald-200 text-emerald-900'
+                ? 'border-green/30 text-ink'
                 : t.type === 'error'
-                ? 'bg-rose-50/95 border-rose-200 text-rose-900'
-                : 'bg-blue-50/95 border-blue-200 text-blue-900'
+                ? 'border-red/30 text-ink'
+                : 'border-line text-ink'
             }`}
           >
-            {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />}
-            {t.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />}
-            {t.type === 'info' && <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />}
-            <div className="flex-1 text-sm font-medium leading-tight pt-0.5">{t.message}</div>
+            {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-green shrink-0 mt-0.5" />}
+            {t.type === 'error' && <AlertCircle className="w-5 h-5 text-red shrink-0 mt-0.5" />}
+            {t.type === 'info' && <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />}
+            <div className="flex-1 text-[13px] font-medium leading-snug pt-0.5">{t.message}</div>
             <button
               onClick={() => removeToast(t.id)}
-              className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 rounded"
+              className="text-ink-muted hover:text-ink transition-colors p-0.5 rounded"
             >
               <X className="w-4 h-4" />
             </button>

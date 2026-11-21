@@ -17,9 +17,24 @@ export default {
           hover: '#172554',
           light: '#EFF6FF',
         },
+        gbu: {
+          DEFAULT: '#1F3A8A',
+          blue: '#1F3A8A',
+          dark: '#172554',
+          light: '#EFF6FF',
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          700: '#1D4ED8',
+          800: '#1E40AF',
+          900: '#1F3A8A',
+          950: '#172554',
+        },
         paper: '#F7F8FA',
         surface: '#FFFFFF',
-        line: '#E3E6EC',
+        line: {
+          DEFAULT: '#E3E6EC',
+          border: '#E3E6EC',
+        },
         amber: {
           DEFAULT: '#B45309',
           light: '#FEF3C7',
@@ -36,9 +51,17 @@ export default {
           border: '#FECACA',
         },
       },
+      borderRadius: {
+        DEFAULT: '6px',
+        panel: '8px',
+      },
       fontFamily: {
         sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'sans-serif'],
         serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+      },
+      boxShadow: {
+        sm: '0 1px 2px 0 rgba(20, 33, 61, 0.05)',
+        card: '0 1px 3px 0 rgba(20, 33, 61, 0.08), 0 1px 2px -1px rgba(20, 33, 61, 0.04)',
       },
     },
   },
