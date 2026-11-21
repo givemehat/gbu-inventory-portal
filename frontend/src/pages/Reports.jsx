@@ -688,9 +688,11 @@ export default function Reports() {
                       className="rounded border border-line bg-surface overflow-hidden transition-all duration-200 shadow-2xs"
                     >
                       {/* Department Summary Row */}
-                      <div
+                      <button
+                        type="button"
                         onClick={() => setExpandedDept(isExpanded && selectedSchoolFilter === 'ALL' ? null : dept.department)}
-                        className="p-3.5 bg-paper/40 hover:bg-paper cursor-pointer flex items-center justify-between gap-4 transition-colors"
+                        aria-expanded={isExpanded}
+                        className="w-full text-left p-3.5 bg-paper/40 hover:bg-paper cursor-pointer flex items-center justify-between gap-4 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/40"
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center justify-center shrink-0">
@@ -720,7 +722,7 @@ export default function Reports() {
                             {isExpanded ? 'Hide items' : 'View consumed items'} →
                           </span>
                         </div>
-                      </div>
+                      </button>
 
                       {/* Progress bar */}
                       <div className="w-full h-1.5 bg-line overflow-hidden">
