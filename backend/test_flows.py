@@ -11,7 +11,11 @@ if os.path.exists(TEST_DB):
 os.environ["DATABASE_URL"] = f"sqlite:///./{TEST_DB}"
 
 from fastapi.testclient import TestClient
-from backend.app.main import app, boot
+
+try:
+    from app.main import app, boot
+except ImportError:
+    from backend.app.main import app, boot
 
 # Boot the app so tables and seed data are initialized
 boot()

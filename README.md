@@ -84,14 +84,20 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate       # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn backend.app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
 - API Documentation (Swagger UI): `http://localhost:8000/docs`
 - On first start, SQLite database `inv.db` is created and automatically populated with realistic demo seed data.
 
 #### 2. Run Automated Verification Tests
+Run directly from inside `backend`:
 ```bash
-PYTHONPATH=. backend/.venv/bin/pytest -v backend/test_flows.py
+cd backend
+pytest -v test_flows.py
+```
+Or from root:
+```bash
+PYTHONPATH=backend pytest -v backend/test_flows.py
 ```
 *Executes all 7 end-to-end integration tests: health, auth, role enforcement, stock issues, procurement, write-offs, and dashboard reports.*
 
@@ -133,11 +139,15 @@ Open `http://localhost:5173` in your browser. The Vite development proxy forward
    - **Environment:** `Python 3`
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-5. Under **Environment Variables**, add:
+5. Under **Environment Variables**, configure:
    - `DATABASE_URL`: `mysql+pymysql://<user>:<password>@<host>:<port>/<database>?charset=utf8mb4`
    - `DB_SSL`: `1`
-   - `SECRET_KEY`: `gbu-inventory-jwt-secret-key-production-super-secure-min32`
-   - `ORIGINS`: `https://your-frontend-app.vercel.app,http://localhost:5173`
+   - `SECRET_KEY`: Generate a random 64-character hex key via:
+     ```bash
+     python3 -c "import secrets; print(secrets.token_hex(32))"
+     ```
+     *(Paste output directly into Render env vars; never commit this to GitHub!)*
+   - `ORIGINS`: `https://gbu-inventory-portal.vercel.app,http://localhost:5173` (set your actual Vercel domain)
 6. Click **Deploy Web Service**. The database tables and seed data will be initialized on first boot.
 
 > **Handling the Free-Tier Cold-Start Problem:**  

@@ -1,0 +1,97 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{listings}
+
+\definecolor{gbublue}{RGB}{30, 58, 138}
+\definecolor{gbugold}{RGB}{217, 119, 6}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=gbublue,
+    urlcolor=gbublue
+}
+
+\titleformat{\section}{\Large\bfseries\color{gbublue}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{gbublue}}{}{0em}{}
+
+\begin{document}
+
+\begin{center}
+    {\Huge\bfseries Gautam Buddha University}\\[0.3em]
+    {\Large\bfseries Stores \& Purchase (S\&P) Department}\\[0.2em]
+    {\large Central Inventory Management System --- Project Report}\\[0.5em]
+    \textbf{Author:} Senior Full-Stack Engineer Candidate \quad | \quad \textbf{Date:} 24 November 2026\\[0.2em]
+    \textbf{Version:} 1.0 (Working Demo Prototype)
+\end{center}
+\vspace{1em}
+\hrule
+\vspace{1.5em}
+
+\section{1. Executive Summary \& Problem Statement}
+The Stores \& Purchase (S\&P) Department at Gautam Buddha University manages thousands of consumable and capital inventory items across 8 academic schools (ICT, Engineering, Biotechnology, Management, Humanities, Vocational Studies, Law) and administrative divisions. 
+
+Prior manual workflows suffered from:
+\begin{itemize}[noitemsep]
+    \item \textbf{Stock Ledger Discrepancies:} Paper-based tracking risked negative inventory balances and unverified physical counts.
+    \item \textbf{Procurement Lapses:} Purchase orders raised without formal administrative requisition approval.
+    \item \textbf{Delayed Condemnations:} Damaged or expired materials remaining on books without formal Director sanction.
+    \item \textbf{Audit Deficits:} Difficulty in tracking immutable chronological histories of storekeeper dispatches and managerial approvals.
+\end{itemize}
+
+\textbf{Solution:} A full-stack web application implementing strict role-based access control (RBAC), real-time stock ledgering, multi-line requisition workflows, purchase orders tied to approved indents, Goods Receipt Notes (GRN) with partial deliveries, and Director-sanctioned write-offs.
+
+\section{2. System Architecture \& Stack}
+\begin{itemize}[noitemsep]
+    \item \textbf{Frontend:} React 18, Vite 6, Tailwind CSS, React Router v6, Recharts, Lucide Icons.
+    \item \textbf{Backend:} Python 3.14+, FastAPI, SQLAlchemy 2.0 ORM, Pydantic v2.
+    \item \textbf{Database:} SQLite (local development) / MySQL (TiDB Cloud Serverless or Aiven in production via PyMySQL with TLS/SSL).
+    \item \textbf{Authentication:} JWT (12-hour expiry), Bcrypt password hashing.
+    \item \textbf{Hosting Architecture:} Frontend deployed on Vercel CDN; Backend hosted on Render; Database on TiDB Cloud.
+\end{itemize}
+
+\section{3. Role-Based Access Control (RBAC)}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Capability} & \textbf{Dept Staff} & \textbf{Store Officer} & \textbf{Director (S\&P)} & \textbf{Admin} \\ \midrule
+Dashboard \& Visual Charts & View & Full & Full & Full \\
+Item Catalog Master & View & Add / Edit / Open & View \& Ledger & Full \\
+Stock Issuance (\texttt{/issue-stock}) & Denied & Full Issuance & Denied & Full \\
+Requisitions (\texttt{/indents}) & Raise \& View Own & Raise \& View All & Approve / Reject & Full \\
+Purchase Orders (\texttt{/purchase-orders}) & Denied & Create PO, Receive GRN & View Sanctioned & Full \\
+Condemnations (\texttt{/write-offs}) & Denied & Propose Write-off & Approve / Reject & Full \\
+Reports \& CSV Statements & View \& Download & Full Access & Full Access \& Sign & Full \\
+Audit Log (\texttt{/audit}) & Denied & Denied & Full Access & Full \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\section{4. Core University Business Logic \& Integrity Rules}
+\begin{enumerate}[noitemsep]
+    \item \textbf{Non-Negative Stock Rule:} Inventory cannot be issued or written off beyond current physical stock. Enforced via pre-commit transactional checks returning HTTP 400.
+    \item \textbf{Sanctioned Procurement Gate:} Purchase Orders strictly require an approved indent (\texttt{status == "APPROVED"}). PO creation automatically transitions the indent to \texttt{ORDERED}.
+    \item \textbf{Goods Receipt Note (GRN):} Line-by-line partial delivery tracking (\texttt{OPEN} $\rightarrow$ \texttt{PARTIAL} $\rightarrow$ \texttt{RECEIVED}). Receipt immediately increments physical stock and updates catalog price to latest purchase rate.
+    \item \textbf{Director Condemnation Gate:} Proposing a write-off does not alter inventory. Stock deduction and ledger entry occur strictly upon Director approval.
+    \item \textbf{Cold-Start Resilience:} Frontend client includes health ping detection to notify users during Render standby wakeups without throwing unhandled exceptions.
+\end{enumerate}
+
+\section{5. Automated Verification Results}
+All 7 integration test suites executed successfully via \texttt{pytest test\_flows.py}:
+\begin{itemize}[noitemsep]
+    \item \texttt{test\_health}: HTTP 200 OK verification.
+    \item \texttt{test\_auth}: Verified 12h JWT token issue, bcrypt matching, and 401 unauthorized rejection.
+    \item \texttt{test\_role\_permissions}: Verified HTTP 403 Forbidden enforcement on restricted endpoints.
+    \item \texttt{test\_stores\_flow}: Add item, duplicate code rejection, stock issuance, over-issue rejection.
+    \item \texttt{test\_procurement\_flow}: Requisition $\rightarrow$ Director approval $\rightarrow$ PO generation $\rightarrow$ Partial GRN $\rightarrow$ Full GRN.
+    \item \texttt{test\_writeoff\_flow}: Proposal $\rightarrow$ Invariance check $\rightarrow$ Director sanction $\rightarrow$ Stock reduction.
+    \item \texttt{test\_dashboard\_and\_reports}: Verified KPI cards, 30-day timeline series, and CSV exports.
+\end{itemize}
+
+\end{document}

@@ -5,7 +5,7 @@
 **Author:** Senior Full-Stack Engineer Candidate  
 **Target Organization:** Gautam Buddha University, Greater Noida, UP  
 **Presentation Date:** 24 November 2026  
-**System Version:** 2.6 (Production Release)  
+**System Version:** 1.0 (Working Demo Prototype)  
 
 ---
 
