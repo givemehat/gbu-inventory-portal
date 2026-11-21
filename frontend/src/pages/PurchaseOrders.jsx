@@ -14,6 +14,7 @@ import { api, getCurrentUser } from '../api';
 import StatusBadge from '../components/StatusBadge';
 import WorkflowStrip from '../components/WorkflowStrip';
 import { useToast } from '../components/Toast';
+import ShipmentTracker from '../components/ShipmentTracker';
 
 export default function PurchaseOrders() {
   const [pos, setPos] = useState([]);
@@ -353,6 +354,16 @@ export default function PurchaseOrders() {
                       </button>
                     </div>
                   </div>
+                </div>
+
+                {/* Milestone Stepper (Magic UI / Origin UI Style) */}
+                <div className="px-5 pb-4">
+                  <ShipmentTracker
+                    status={po.status}
+                    poNumber={po.no}
+                    vendorName={po.vendor}
+                    date={po.date}
+                  />
                 </div>
 
                 {/* Bill of Quantities Accordion */}

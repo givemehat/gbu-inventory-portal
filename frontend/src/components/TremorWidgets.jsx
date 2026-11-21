@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatInr } from '../lib/utils';
 import { TrendingUp, ShieldCheck, AlertCircle } from 'lucide-react';
+import NumberTicker from './NumberTicker';
 
 /**
  * Tremor-style Segmented Inventory Health Tracker
@@ -121,7 +122,7 @@ export function TremorMetricCard({
 
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-mono text-[22px] sm:text-[24px] font-bold text-ink tabular-nums">
-          {value}
+          {typeof value === 'number' ? <NumberTicker value={value} /> : value}
         </span>
 
         {/* Micro Sparkline */}

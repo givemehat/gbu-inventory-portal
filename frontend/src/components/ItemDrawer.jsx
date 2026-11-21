@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { X, History, Info, Package, ArrowUpRight, ClipboardList, Printer } from 'lucide-react';
+import { X, History, Info, Package, ArrowUpRight, ClipboardList, Printer, QrCode } from 'lucide-react';
 import { api } from '../api';
 import StatusBadge from './StatusBadge';
 import StockLevelBar from './StockLevelBar';
+import { BarcodeSvg, BinQrSvg } from './BarcodeSvg';
 
 export default function ItemDrawer({ item, isOpen, onClose, onActionClick }) {
   const [tab, setTab] = useState('details'); // 'details' | 'ledger'
@@ -150,6 +151,30 @@ export default function ItemDrawer({ item, isOpen, onClose, onActionClick }) {
                   <div className="p-3 bg-surface rounded border border-line">
                     <span className="text-[12px] text-ink-muted block">Unit of measure</span>
                     <span className="font-medium text-ink mt-0.5 block">{item.unit}</span>
+                  </div>
+                </div>
+
+                {/* Central Store Physical Identification (Code-128 & Bin QR) */}
+                <div className="p-3.5 bg-paper/60 rounded border border-line space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] uppercase tracking-wide font-semibold text-ink-muted flex items-center gap-1.5">
+                      <QrCode className="w-3.5 h-3.5 text-primary" />
+                      Physical Store Barcode & Bin Tag
+                    </span>
+                    <span className="text-[10px] font-mono text-ink-subtle">
+                      {item.location || 'Central Stores'}
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-surface rounded border border-line/80 flex items-center justify-between gap-4">
+                    <BarcodeSvg code={item.code} height={38} />
+                    <div className="flex items-center gap-2 border-l border-line pl-3">
+                      <BinQrSvg code={`${item.code}-${item.location || 'STORES'}`} size={46} />
+                      <div className="text-[10px] text-ink-muted hidden sm:block leading-tight">
+                        <span className="font-semibold text-ink block">Scan Bin</span>
+                        <span>Auto-verify on dock</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

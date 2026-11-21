@@ -33,35 +33,56 @@ Department-by-department material consumption tracking across university schools
 
 ---
 
-### 3. Shadcn Command Palette (`⌘K` / `/`)
+### 3. Central Stores Bay & Rack Visualizer (Origin UI Pattern)
+An interactive 2D spatial map of Central Stores Aisles and Bays (Bay A Stationery, Bay B Computing, Bay C Lab Sciences, Bay D Electricals, Bay E Housekeeping). Shows real-time rack capacity, fullness percentages, SKU counts, and allows one-click rack-based inventory filtering.
+
+![Warehouse Rack Visualizer](docs/screenshots/warehouse_rack_visualizer.png)
+
+---
+
+### 4. Physical Store Tagging: Code-128 Barcodes & Bin QR Matrix
+Vector-rendered, scannable **Code-128 Barcodes** and store bin matrix QR codes embedded in the slide-out item inspector and printable slips for physical receiving dock verification.
+
+![Store Barcode & Bin Tag](docs/screenshots/item_drawer_barcode_qr.png)
+
+---
+
+### 5. Purchase Order & Shipment Milestone Stepper (Magic UI Pattern)
+Visual multi-stage milestone tracker for open procurement orders (`PO Sanctioned` → `Vendor Transit` → `Dock Inspection` → `GRN Inward`) ensuring complete transparency over vendor deliveries.
+
+![Shipment Stepper](docs/screenshots/purchase_orders_stepper.png)
+
+---
+
+### 6. Shadcn Command Palette (`⌘K` / `/`)
 Instant fuzzy keyboard launcher enabling zero-latency item search, active quantity inspection, direct page jumps, and fast action triggers (Raise Indent, Draft PO, Export Ledger).
 
 ![Shadcn Command Palette](docs/screenshots/command_palette_shadcn.png)
 
 ---
 
-### 4. Real-Time Action Notifications & Low-Stock Alerts
+### 7. Real-Time Action Notifications & Low-Stock Alerts
 Header notification popover aggregating threshold alerts (e.g. items falling below reorder level) and pending administrative approvals (indents and condemnation sanctions).
 
 ![Notifications Popover](docs/screenshots/notifications_popover_clean.png)
 
 ---
 
-### 5. Keyboard Navigation & Shortcuts Cheat Sheet (`?`)
+### 8. Keyboard Navigation & Shortcuts Cheat Sheet (`?`)
 Full accessibility and ergonomic power-user shortcuts dialog supporting quick keyboard-driven navigation (`G+D`, `G+I`, `G+P`, `G+R`, `⌘K`, `Esc`).
 
 ![Keyboard Shortcuts Dialog](docs/screenshots/shortcuts_modal.png)
 
 ---
 
-### 6. Standard A4 Printable University Slips (`S&P-01` to `S&P-04`)
+### 9. Standard A4 Printable University Slips (`S&P-01` to `S&P-04`)
 Standardized A4 university store voucher formats with auto-fill from existing database records (Indents, Store Issues, Purchase Orders, and Write-off Sanctions) with clean print preview and browser print integration.
 
 ![A4 University Slip Preview](docs/screenshots/forms_preview_modal_1440.png)
 
 ---
 
-### 7. Storyset Vector Empty States & Modern Design Ergonomics
+### 10. Storyset Vector Empty States & Modern Design Ergonomics
 Handcrafted SVG vector illustrations for zero-result queries and empty states, coupled with **Plus Jakarta Sans** UI typography and **JetBrains Mono** tabular figures (`tabular-nums`) for currency and codes.
 
 ![Empty State Illustration](docs/screenshots/empty_illustration.png)

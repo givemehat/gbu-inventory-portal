@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useOutletContext } from 'react-router-dom';
-import { Plus, Search, ChevronLeft, ChevronRight, X, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, ChevronLeft, ChevronRight, X, ArrowUpDown, Layers } from 'lucide-react';
 import { api, getCurrentUser } from '../api';
 import StockLevelBar from '../components/StockLevelBar';
 import { useToast } from '../components/Toast';
 import { EmptyBoxIllustration } from '../components/Illustrations';
+import WarehouseRackGrid from '../components/WarehouseRackGrid';
 
 export default function Items() {
   const [items, setItems] = useState([]);
@@ -16,6 +17,8 @@ export default function Items() {
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [selectedCat, setSelectedCat] = useState(searchParams.get('category_id') || '');
   const [lowOnly, setLowOnly] = useState(searchParams.get('low') === 'true');
+  const [showWarehouseMap, setShowWarehouseMap] = useState(false);
+  const [selectedRack, setSelectedRack] = useState(null);
 
   // Sorting
   const [sortField, setSortField] = useState('name');
@@ -85,8 +88,12 @@ export default function Items() {
     }
   };
 
-  // Sort and paginate
-  const sortedItems = [...items].sort((a, b) => {
+  // Filter by selected warehouse rack if set, then sort and paginate
+  const rackFiltered = selectedRack
+    ? items.filter((it) => it.location === selectedRack)
+    : items;
+
+  const sortedItems = [...rackFiltered].sort((a, b) => {
     let vA = a[sortField];
     let vB = b[sortField];
     if (typeof vA === 'string') {
@@ -221,8 +228,55 @@ export default function Items() {
             <span>Below minimum</span>
             <span className="tabular-nums text-[11px] font-semibold">({lowCount})</span>
           </button>
+
+          {/* Warehouse Rack Map Toggle (Origin UI / 21st.dev style) */}
+          <button
+            type="button"
+            onClick={() => setShowWarehouseMap(!showWarehouseMap)}
+            className={`h-8 px-2.5 rounded text-[13px] font-medium border transition-colors flex items-center gap-1.5 ${
+              showWarehouseMap || selectedRack
+                ? 'border-primary bg-primary-light text-primary font-semibold'
+                : 'border-line bg-surface text-ink hover:bg-paper'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Bay & Rack Map</span>
+            {selectedRack && (
+              <span className="font-mono text-[10px] bg-primary text-white px-1.5 py-0.2 rounded">
+                {selectedRack}
+              </span>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Warehouse Visualizer Panel */}
+      {showWarehouseMap && (
+        <div className="p-4 bg-surface rounded-panel border border-line shadow-2xs space-y-3 animate-in fade-in duration-150">
+          <WarehouseRackGrid
+            items={items}
+            activeRack={selectedRack}
+            onSelectRack={(rackId) => {
+              setSelectedRack(rackId);
+              setPage(1);
+            }}
+          />
+          {selectedRack && (
+            <div className="flex items-center justify-between text-[12px] p-2 bg-blue-50/70 border border-blue-200 rounded text-primary">
+              <span>
+                Filtering stock items located in <strong>{selectedRack}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedRack(null)}
+                className="text-[11px] underline font-medium hover:text-ink"
+              >
+                Clear rack filter
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Main Stock Register Table (Desktop / Tablet) */}
       <div className="bg-surface border border-line rounded overflow-hidden">
