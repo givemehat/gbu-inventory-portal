@@ -3,6 +3,7 @@ import { ArrowUpRight, Clock, AlertCircle } from 'lucide-react';
 import { api } from '../api';
 import Combobox from '../components/Combobox';
 import { useToast } from '../components/Toast';
+import { DEPARTMENT_NAMES } from '../constants/departments';
 
 export default function IssueStock() {
   const [items, setItems] = useState([]);
@@ -13,28 +14,12 @@ export default function IssueStock() {
   // Form State
   const [selectedItemId, setSelectedItemId] = useState('');
   const [qty, setQty] = useState('');
-  const [dept, setDept] = useState('School of ICT');
+  const [dept, setDept] = useState(DEPARTMENT_NAMES[0] || 'School of Information & Communication Technology');
   const [note, setNote] = useState('');
   const [touched, setTouched] = useState(false);
   const toast = useToast();
 
-  const universityDepts = [
-    'School of ICT',
-    'School of Engineering',
-    'School of Management',
-    'School of Biotechnology',
-    'School of Humanities',
-    'School of Vocational Studies',
-    'School of Law, Justice & Governance',
-    'Registrar Office',
-    'Finance & Accounts Department',
-    'Examination Cell',
-    'Stores & Purchase Central Office',
-    'Central Computer Centre (CCC)',
-    'Central Library',
-    'Estate & Maintenance Department',
-    'Hostel Administration Block',
-  ];
+  const universityDepts = DEPARTMENT_NAMES;
 
   const loadData = () => {
     setLoading(true);

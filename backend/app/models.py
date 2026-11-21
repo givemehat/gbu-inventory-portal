@@ -131,3 +131,13 @@ class Audit(Base):
     action: Mapped[str] = mapped_column(String(255))
     at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     user: Mapped[User] = relationship()
+
+
+class Notice(Base):
+    __tablename__ = "notices"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(200))
+    content: Mapped[str] = mapped_column(Text)
+    ref_no: Mapped[str] = mapped_column(String(50), default="")
+    by: Mapped[str] = mapped_column(String(100), default="Stores & Purchase Office")
+    at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

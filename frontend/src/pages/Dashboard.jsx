@@ -15,6 +15,7 @@ import StockLevelBar from '../components/StockLevelBar';
 import WorkflowStrip from '../components/WorkflowStrip';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
+import { Bell, Plus, Trash2, X, ChevronRight } from 'lucide-react';
 
 // Format Indian currency into Lakhs or standard grouping
 function formatRupees(num = 0) {
@@ -28,8 +29,13 @@ function formatRupees(num = 0) {
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
+  const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+  const [newNotice, setNewNotice] = useState({ title: '', content: '', ref_no: '' });
+  const [submittingNotice, setSubmittingNotice] = useState(false);
   const user = getCurrentUser() || {};
+  const isOfficer = ['store', 'approver', 'admin'].includes(user.role);
   const toast = useToast();
   const navigate = useNavigate();
   const { openItemDrawer } = useOutletContext() || {};
@@ -45,8 +51,14 @@ export default function Dashboard() {
 
   const loadDashboard = () => {
     setLoading(true);
-    api.getDashboard()
-      .then((res) => setData(res))
+    Promise.all([
+      api.getDashboard(),
+      api.getNotices().catch(() => []),
+    ])
+      .then(([res, noticesData]) => {
+        setData(res);
+        setNotices(noticesData || []);
+      })
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
   };
@@ -54,6 +66,36 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboard();
   }, []);
+
+  const handleCreateNotice = async (e) => {
+    e.preventDefault();
+    if (!newNotice.title.trim() || !newNotice.content.trim()) {
+      toast.error('Title and content are required.');
+      return;
+    }
+    try {
+      setSubmittingNotice(true);
+      await api.addNotice(newNotice);
+      toast.success('Store circular published');
+      setIsNoticeModalOpen(false);
+      setNewNotice({ title: '', content: '', ref_no: '' });
+      api.getNotices().then(setNotices);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSubmittingNotice(false);
+    }
+  };
+
+  const handleDeleteNotice = async (id) => {
+    try {
+      await api.deleteNotice(id);
+      toast.success('Notice archived');
+      setNotices(notices.filter((n) => n.id !== id));
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
 
   const handleDecisionConfirm = async (remark) => {
     try {
@@ -459,7 +501,80 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ROW 4: Recent activity timeline list */}
+      {/* ROW 4: Circulars & Notices (Matching GBU Website Tenders/Notices style) */}
+      <div className="bg-surface rounded-panel border border-line p-4 sm:p-5">
+        <div className="flex items-center justify-between pb-3 border-b border-line mb-3">
+          <div className="flex items-center gap-2">
+            <Bell className="w-4 h-4 text-primary" />
+            <h3 className="text-[14px] font-semibold text-ink">University Store Circulars & Notices</h3>
+            <span className="text-[11px] text-ink-muted bg-paper px-2 py-0.5 rounded border border-line font-medium hidden sm:inline">
+              Stores & Purchase Office
+            </span>
+          </div>
+
+          {isOfficer && (
+            <button
+              type="button"
+              onClick={() => setIsNoticeModalOpen(true)}
+              className="h-7 px-2.5 rounded bg-primary hover:bg-primary-hover text-white text-[12px] font-medium transition-colors inline-flex items-center gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Post notice</span>
+            </button>
+          )}
+        </div>
+
+        {notices.length === 0 ? (
+          <div className="py-6 text-center text-[13px] text-ink-muted">
+            No active store circulars at this moment.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {notices.map((n) => (
+              <div
+                key={n.id}
+                className="p-3.5 rounded border border-line bg-paper/50 hover:bg-paper transition-colors flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="font-mono text-[10px] font-semibold text-primary bg-primary-light px-1.5 py-0.5 rounded border border-blue-200">
+                      {n.ref_no || 'GBU/S&P/CIRCULAR'}
+                    </span>
+                    <div className="flex items-center gap-2 text-[11px] text-ink-muted">
+                      <span className="tabular-nums">
+                        {new Date(n.at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+                      {isOfficer && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteNotice(n.id)}
+                          className="text-ink-subtle hover:text-red p-0.5"
+                          title="Archive notice"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <h4 className="font-serif text-[14px] font-semibold text-ink leading-snug">
+                    {n.title}
+                  </h4>
+                  <p className="text-[12px] text-ink-muted mt-1.5 leading-relaxed">
+                    {n.content}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-line/60 text-[11px] text-ink-subtle flex items-center justify-between">
+                  <span>Issued by: <strong className="text-ink">{n.by}</strong></span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ROW 5: Recent activity timeline list */}
       <div className="bg-surface rounded-panel border border-line p-4">
         <div className="flex items-center justify-between pb-3 border-b border-line mb-3">
           <h3 className="text-[14px] font-semibold text-ink">Recent store activity</h3>
@@ -517,6 +632,87 @@ export default function Dashboard() {
         confirmVariant={decisionModal.isApprove ? 'success' : 'danger'}
         remarkLabel="Sanction remarks"
       />
+
+      {/* Post Official Notice Modal */}
+      {isNoticeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-[2px]">
+          <div className="bg-surface rounded-panel max-w-lg w-full border border-line shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-line flex items-center justify-between">
+              <div>
+                <h3 className="font-serif text-[18px] font-semibold text-ink">Publish Store Notice / Circular</h3>
+                <p className="text-[12px] text-ink-muted">Official notification visible across university stores portal</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsNoticeModalOpen(false)}
+                className="text-ink-muted hover:text-ink p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateNotice} className="p-5 space-y-4">
+              <div>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Circular Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newNotice.title}
+                  onChange={(e) => setNewNotice({ ...newNotice, title: e.target.value })}
+                  placeholder="e.g. Schedule for Annual Stock Verification 2026"
+                  className="w-full h-9 text-[13px] px-3 rounded border border-line focus:border-primary outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Reference Number (optional)
+                </label>
+                <input
+                  type="text"
+                  value={newNotice.ref_no}
+                  onChange={(e) => setNewNotice({ ...newNotice, ref_no: e.target.value })}
+                  placeholder="e.g. GBU/S&P/2026/NOT-086"
+                  className="w-full h-9 text-[13px] px-3 rounded border border-line focus:border-primary outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[12px] font-medium text-ink-muted mb-1">
+                  Circular Content / Directives *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={newNotice.content}
+                  onChange={(e) => setNewNotice({ ...newNotice, content: e.target.value })}
+                  placeholder="Enter details of circular directives for schools, labs, and vendors..."
+                  className="w-full text-[13px] p-2.5 rounded border border-line focus:border-primary outline-none placeholder:text-ink-subtle"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-line flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsNoticeModalOpen(false)}
+                  className="h-8 px-3 text-[13px] text-ink-muted hover:bg-paper rounded border border-line"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingNotice}
+                  className="h-8 px-4 bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium rounded transition-colors disabled:opacity-50"
+                >
+                  {submittingNotice ? 'Publishing...' : 'Publish circular'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

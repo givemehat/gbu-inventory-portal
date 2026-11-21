@@ -8,6 +8,7 @@ import {
   ChevronUp,
   X,
   Truck,
+  Printer,
 } from 'lucide-react';
 import { api, getCurrentUser } from '../api';
 import StatusBadge from '../components/StatusBadge';
@@ -40,6 +41,7 @@ export default function PurchaseOrders() {
   // Quick Vendor Add Modal
   const [isVendorOpen, setIsVendorOpen] = useState(false);
   const [newVendor, setNewVendor] = useState({ name: '', phone: '', email: '' });
+  const [printPo, setPrintPo] = useState(null);
 
   const location = useLocation();
   const user = getCurrentUser() || {};
@@ -322,6 +324,16 @@ export default function PurchaseOrders() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPrintPo(po)}
+                        className="h-8 px-2.5 rounded border border-line text-ink hover:bg-paper text-[12px] font-medium transition-colors inline-flex items-center gap-1"
+                        title="Print Official Purchase Order"
+                      >
+                        <Printer className="w-3.5 h-3.5 text-primary" />
+                        <span>Print PO</span>
+                      </button>
+
                       {canReceive && (
                         <button
                           onClick={() => handleOpenGrn(po)}
@@ -699,6 +711,172 @@ export default function PurchaseOrders() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Printable Purchase Order Modal */}
+      {printPo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-[2px] overflow-y-auto">
+          <div className="bg-surface rounded-panel max-w-3xl w-full border border-line shadow-xl overflow-hidden my-6">
+            <div className="no-print p-4 border-b border-line bg-paper flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[12px] font-bold text-primary bg-primary-light px-2 py-0.5 rounded border border-blue-200">
+                  PO VOUCHER
+                </span>
+                <span className="font-semibold text-ink text-[14px]">
+                  Purchase Order ({printPo.no})
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="h-8 px-3 rounded bg-primary hover:bg-primary-hover text-white text-[12px] font-medium transition-colors inline-flex items-center gap-1.5"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print PO</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrintPo(null)}
+                  className="p-1.5 text-ink-muted hover:text-ink rounded"
+                  title="Close preview"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-8 sm:p-12 space-y-6 bg-surface print-container">
+              {/* Header */}
+              <div className="border-b-2 border-ink pb-4 text-center">
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <img
+                    src="/gbu-logo.jpg"
+                    alt="GBU Logo"
+                    className="w-14 h-14 rounded-full object-contain border border-line"
+                  />
+                  <div className="text-left">
+                    <h2 className="font-serif text-[22px] font-bold text-ink uppercase tracking-tight leading-tight">
+                      Gautam Buddha University
+                    </h2>
+                    <p className="text-[11px] text-ink-muted uppercase tracking-wider">
+                      Opp. Yamuna Expressway, Greater Noida, Gautam Buddha Nagar, UP — 201312
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-semibold text-ink uppercase tracking-wider">
+                  Stores & Purchase Department • Official Purchase Order
+                </div>
+              </div>
+
+              {/* PO Meta */}
+              <div className="grid grid-cols-3 gap-4 text-[12px] text-ink pb-3 border-b border-line bg-paper/50 p-3 rounded">
+                <div>
+                  <span className="text-ink-muted block text-[11px]">Purchase Order No:</span>
+                  <span className="font-mono font-bold text-primary">{printPo.no}</span>
+                </div>
+                <div>
+                  <span className="text-ink-muted block text-[11px]">Authorized Vendor / Firm:</span>
+                  <span className="font-semibold">{printPo.vendor}</span>
+                </div>
+                <div>
+                  <span className="text-ink-muted block text-[11px]">Sanctioned Indent Ref:</span>
+                  <span className="font-mono font-medium">{printPo.indent_no || '—'}</span>
+                </div>
+                <div>
+                  <span className="text-ink-muted block text-[11px]">Order Date:</span>
+                  <span className="font-medium">
+                    {new Date(printPo.at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-ink-muted block text-[11px]">Fulfillment Status:</span>
+                  <span className="font-bold text-ink">{printPo.status}</span>
+                </div>
+                <div>
+                  <span className="text-ink-muted block text-[11px]">Issued By:</span>
+                  <span className="font-medium">{printPo.by || 'Stores & Purchase'}</span>
+                </div>
+              </div>
+
+              {/* Bill of Quantities */}
+              <div>
+                <h4 className="text-[12px] font-bold uppercase tracking-wider text-ink mb-2">
+                  Bill of Quantities & Contracted Rates
+                </h4>
+                <table className="w-full text-left text-[11px] border border-line">
+                  <thead className="bg-paper border-b border-line text-ink-muted uppercase">
+                    <tr>
+                      <th className="p-2 border-r border-line w-10 text-center">#</th>
+                      <th className="p-2 border-r border-line">Item Description</th>
+                      <th className="p-2 border-r border-line text-right w-24">Ordered</th>
+                      <th className="p-2 border-r border-line text-right w-24">Unit Rate</th>
+                      <th className="p-2 border-r border-line text-right w-24">Received (GRN)</th>
+                      <th className="p-2 text-right w-28">Total Valuation</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line text-ink">
+                    {printPo.lines.map((l, idx) => (
+                      <tr key={l.id || idx}>
+                        <td className="p-2 border-r border-line text-center font-mono">{idx + 1}</td>
+                        <td className="p-2 border-r border-line font-medium">{l.item}</td>
+                        <td className="p-2 border-r border-line text-right font-mono font-semibold">
+                          {l.qty} {l.unit}
+                        </td>
+                        <td className="p-2 border-r border-line text-right font-mono">
+                          ₹{l.rate.toLocaleString('en-IN')}
+                        </td>
+                        <td className="p-2 border-r border-line text-right font-mono text-green font-semibold">
+                          {l.got} {l.unit}
+                        </td>
+                        <td className="p-2 text-right font-mono font-semibold">
+                          ₹{(l.qty * l.rate).toLocaleString('en-IN')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-paper font-bold border-t border-line text-[12px]">
+                      <td colSpan={5} className="p-2 text-right uppercase tracking-wider text-ink">
+                        Grand Contract Value:
+                      </td>
+                      <td className="p-2 text-right font-mono text-primary">
+                        ₹{(printPo.total || 0).toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              {/* Delivery Terms */}
+              <div className="p-3 bg-paper rounded border border-line text-[11px] text-ink-muted space-y-1">
+                <span className="font-semibold text-ink uppercase block text-[10px]">Standard Delivery Terms:</span>
+                <p>1. Delivery must be made to Central Stores, Gautam Buddha University, Greater Noida within 15 working days.</p>
+                <p>2. Physical inspection will be conducted by the University Technical Inspection Committee upon arrival prior to GRN entry.</p>
+                <p>3. Invoices must reference this PO number in all correspondence and billing submissions.</p>
+              </div>
+
+              {/* Signatures */}
+              <div className="pt-8 border-t border-line grid grid-cols-3 gap-6 text-center text-[11px]">
+                <div className="space-y-8">
+                  <div className="border-b border-line pb-1"></div>
+                  <span className="font-semibold text-ink uppercase block">Vendor Acknowledgement</span>
+                  <span className="text-ink-muted block text-[10px]">{printPo.vendor}</span>
+                </div>
+                <div className="space-y-8">
+                  <div className="border-b border-line pb-1"></div>
+                  <span className="font-semibold text-ink uppercase block">Store Officer (S&P)</span>
+                  <span className="text-ink-muted block text-[10px]">Procurement Section</span>
+                </div>
+                <div className="space-y-8">
+                  <div className="border-b border-line pb-1"></div>
+                  <span className="font-semibold text-ink uppercase block">Finance Officer / Registrar</span>
+                  <span className="text-ink-muted block text-[10px]">Financial Concurrence</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

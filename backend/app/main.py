@@ -551,6 +551,53 @@ def audit(db: Session = Depends(get_db), u: User = Depends(need("approver"))):
             for a in db.scalars(select(Audit).order_by(Audit.id.desc()).limit(200))]
 
 
+class NoticeIn(BaseModel):
+    title: str = Field(min_length=3, max_length=200)
+    content: str = Field(min_length=5)
+    ref_no: str = Field(default="", max_length=50)
+
+
+@app.get("/api/notices")
+def get_notices(db: Session = Depends(get_db)):
+    return [
+        dict(
+            id=n.id,
+            title=n.title,
+            content=n.content,
+            ref_no=n.ref_no,
+            by=n.by,
+            at=n.at.isoformat()
+        )
+        for n in db.scalars(select(Notice).order_by(Notice.id.desc())).all()
+    ]
+
+
+@app.post("/api/notices")
+def create_notice(payload: NoticeIn, db: Session = Depends(get_db), u: User = Depends(need("store", "approver"))):
+    n = Notice(
+        title=payload.title.strip(),
+        content=payload.content.strip(),
+        ref_no=payload.ref_no.strip() or f"GBU/S&P/2026/NOT-{(db.scalar(select(func.count(Notice.id))) or 0) + 1:03d}",
+        by=f"{u.name} ({u.role.title()})",
+    )
+    db.add(n)
+    log(db, u, f"Published store circular/notice: {n.title}")
+    db.commit()
+    db.refresh(n)
+    return dict(id=n.id, title=n.title, content=n.content, ref_no=n.ref_no, by=n.by, at=n.at.isoformat())
+
+
+@app.delete("/api/notices/{id}")
+def delete_notice(id: int, db: Session = Depends(get_db), u: User = Depends(need("store", "approver"))):
+    n = db.get(Notice, id)
+    if not n:
+        raise HTTPException(404, "Notice not found")
+    log(db, u, f"Archived store notice: {n.title}")
+    db.delete(n)
+    db.commit()
+    return {"ok": True}
+
+
 @app.get("/api/health")
 def health():
     return {"ok": True}

@@ -145,4 +145,37 @@ def run(db):
     db.add(Audit(user_id=us["approver"].id, action=f"APPROVED indent {b.no}", at=b.at))
     db.add(Audit(user_id=us["store"].id, action=f"Created purchase order {p.no} for Rajdhani Computers", at=p.at))
     db.add(Audit(user_id=us["store"].id, action=f"Requested write-off {w.no} for damaged goods", at=w.at))
+
+    # Sample circulars/notices reflecting university Stores & Purchase operations
+    sample_notices = [
+        Notice(
+            title="Annual Physical Stock Verification Commences 1 Dec 2026",
+            content="All Schools, Centres of Excellence, and administrative sections are requested to keep their stock registers updated. The University Audit Committee will inspect physical balances starting 1st December 2026.",
+            ref_no="GBU/S&P/2026/NOT-084",
+            by="Director, Stores & Purchase",
+            at=now_utc - timedelta(days=2)
+        ),
+        Notice(
+            title="Deadline for End-Semester Material Requisitions: 15 Dec 2026",
+            content="To ensure timely procurement and delivery before semester-end examinations, all academic departments must submit their consumable and lab requisitions via the portal by 15th December 2026.",
+            ref_no="GBU/S&P/2026/NOT-085",
+            by="Store Officer",
+            at=now_utc - timedelta(days=5)
+        ),
+        Notice(
+            title="Empanelment of University Rate-Contract Vendors for FY 2026-27",
+            content="Approved rate contracts for stationery, laboratory reagents, computer hardware, and electrical fittings are active. All purchase orders will adhere strictly to negotiated university rates.",
+            ref_no="GBU/S&P/2026/NOT-081",
+            by="Stores & Purchase Committee",
+            at=now_utc - timedelta(days=12)
+        ),
+        Notice(
+            title="Condemnation & Disposal Protocol for Obsolete IT Equipment",
+            content="Schools possessing unserviceable computers, printers, or lab electronics must submit formal Write-off proposals through the portal for board inspection before 20th December 2026.",
+            ref_no="GBU/S&P/2026/NOT-078",
+            by="Director, Stores & Purchase",
+            at=now_utc - timedelta(days=18)
+        )
+    ]
+    db.add_all(sample_notices)
     db.commit()

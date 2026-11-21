@@ -9,7 +9,10 @@ import {
   Trash2,
   FileSpreadsheet,
   History,
-  X
+  X,
+  Building2,
+  FileText,
+  HelpCircle
 } from 'lucide-react';
 import { getCurrentUser } from '../api';
 
@@ -26,7 +29,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     {
       title: 'Stores',
       items: [
-        { to: '/items', label: 'Items', icon: Package, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/items', label: 'Items register', icon: Package, roles: ['admin', 'store', 'approver', 'dept'] },
         { to: '/issue-stock', label: 'Issue stock', icon: ArrowUpRight, roles: ['admin', 'store'] },
       ],
     },
@@ -43,6 +46,14 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         { to: '/write-offs', label: 'Write-offs', icon: Trash2, roles: ['admin', 'store', 'approver'] },
         { to: '/reports', label: 'Reports', icon: FileSpreadsheet, roles: ['admin', 'store', 'approver', 'dept'] },
         { to: '/audit', label: 'Audit log', icon: History, roles: ['admin', 'approver'] },
+      ],
+    },
+    {
+      title: 'Help & Resources',
+      items: [
+        { to: '/directory', label: 'Directory', icon: Building2, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/forms', label: 'Forms', icon: FileText, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/help', label: 'Help & FAQ', icon: HelpCircle, roles: ['admin', 'store', 'approver', 'dept'] },
       ],
     },
   ];

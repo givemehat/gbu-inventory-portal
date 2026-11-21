@@ -215,4 +215,14 @@ export const api = {
 
   // Audit
   getAuditLogs: () => request('/api/audit'),
+
+  // Circulars & Notices
+  getNotices: () => request('/api/notices'),
+  addNotice: (data) => request('/api/notices', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  deleteNotice: (id) => request(`/api/notices/${id}`, {
+    method: 'DELETE',
+  }),
 };

@@ -11,6 +11,9 @@ import PurchaseOrders from './pages/PurchaseOrders';
 import WriteOffs from './pages/WriteOffs';
 import Reports from './pages/Reports';
 import Audit from './pages/Audit';
+import Directory from './pages/Directory';
+import Forms from './pages/Forms';
+import Help from './pages/Help';
 import { getCurrentUser } from './api';
 
 // Simple Role Guard helper
@@ -77,6 +80,11 @@ export default function App() {
                 </RoleGuard>
               }
             />
+
+            {/* University Resource & Help routes */}
+            <Route path="directory" element={<Directory />} />
+            <Route path="forms" element={<Forms />} />
+            <Route path="help" element={<Help />} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

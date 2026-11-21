@@ -328,5 +328,37 @@ def test_dashboard_and_reports():
     assert "text/csv" in txn_csv.headers["content-type"]
     assert "Date,Item,Type,Qty,Ref,Note,By" in txn_csv.text
 
+def test_notices_flow():
+    store_headers, _ = login("store@gbu.demo")
+    dept_headers, _ = login("dept@gbu.demo")
+    dir_headers, _ = login("director@gbu.demo")
+
+    # 1. Anyone can read notices
+    res = client.get("/api/notices")
+    assert res.status_code == 200
+    notices = res.json()
+    assert len(notices) >= 4
+
+    # 2. Dept cannot publish notice (403)
+    bad_post = client.post("/api/notices", json={
+        "title": "Unauthorized notice",
+        "content": "Trying to post notice"
+    }, headers=dept_headers)
+    assert bad_post.status_code == 403
+
+    # 3. Store officer can publish notice
+    post_res = client.post("/api/notices", json={
+        "title": "Test Circular on Office Stationery",
+        "content": "All requests must be submitted online through the portal.",
+        "ref_no": "GBU/TEST/001"
+    }, headers=store_headers)
+    assert post_res.status_code == 200
+    created = post_res.json()
+    assert created["title"] == "Test Circular on Office Stationery"
+
+    # 4. Director can delete notice
+    del_res = client.delete(f"/api/notices/{created['id']}", headers=dir_headers)
+    assert del_res.status_code == 200
+
 if __name__ == "__main__":
     pytest.main(["-v", "backend/test_flows.py"])
