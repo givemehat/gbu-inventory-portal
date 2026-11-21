@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Search, LogOut, ChevronDown, Package } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, Search, LogOut, ChevronDown, Package, Home, ChevronRight } from 'lucide-react';
 import { getCurrentUser, logout, api } from '../api';
 
-export default function Header({ setMobileOpen, title, onItemSelect }) {
+export default function Header({ setMobileOpen, title, group = 'Portal', onItemSelect }) {
   const user = getCurrentUser() || { name: 'User', role: 'store', dept: 'Stores & Purchase' };
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,8 +64,8 @@ export default function Header({ setMobileOpen, title, onItemSelect }) {
 
   return (
     <header className="sticky top-0 z-30 h-14 bg-surface border-b border-line px-4 sm:px-6 flex items-center justify-between gap-4">
-      {/* Left: Mobile trigger & Page Title (Serif) */}
-      <div className="flex items-center gap-3 shrink-0">
+      {/* Left: Mobile trigger & Merged Breadcrumbs Trail */}
+      <div className="flex items-center gap-2.5 shrink-0 min-w-0">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
@@ -73,13 +74,21 @@ export default function Header({ setMobileOpen, title, onItemSelect }) {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <h1 className="font-serif text-[18px] sm:text-[20px] font-semibold text-ink tracking-tight">
-          {title}
-        </h1>
+
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[12px] text-ink-muted truncate">
+          <Link to="/dashboard" className="hover:text-primary transition-colors flex items-center gap-1 shrink-0">
+            <Home className="w-3.5 h-3.5 text-ink-subtle" />
+            <span className="hidden sm:inline">Home</span>
+          </Link>
+          <ChevronRight className="w-3 h-3 text-line shrink-0" />
+          <span className="text-ink-muted hidden md:inline shrink-0">{group}</span>
+          <ChevronRight className="w-3 h-3 text-line shrink-0 hidden md:inline" />
+          <span className="font-serif font-semibold text-ink text-[16px] truncate">{title}</span>
+        </nav>
       </div>
 
-      {/* Middle: Global Search */}
-      <div ref={searchRef} className="relative flex-1 max-w-md hidden md:block">
+      {/* Middle: Global Search (Item 12: placeholder="Search items", aria-label full, / hint) */}
+      <div ref={searchRef} className="relative flex-1 max-w-sm hidden md:block">
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" />
           <input
@@ -88,7 +97,8 @@ export default function Header({ setMobileOpen, title, onItemSelect }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => searchQuery.length >= 2 && setSearchOpen(true)}
-            placeholder="Search items by name or code (press / to focus)..."
+            placeholder="Search items"
+            aria-label="Search items by name or code (press / to focus)"
             className="w-full h-8 pl-9 pr-8 text-[13px] bg-paper rounded border border-line focus:border-primary focus:bg-surface outline-none transition-colors placeholder:text-ink-subtle"
           />
           <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-ink-subtle border border-line bg-surface px-1 py-0.2 rounded pointer-events-none">

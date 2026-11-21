@@ -104,7 +104,11 @@
 
 /* Print statement stylesheet */
 @media print {
-  aside, header, nav, .no-print, button {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+  aside, header, nav, footer, .no-print, button {
     display: none !important;
   }
   body, main {
@@ -120,6 +124,7 @@
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
+    margin: 0 !important;
     max-width: 100% !important;
   }
 }

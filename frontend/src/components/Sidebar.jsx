@@ -29,7 +29,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
     {
       title: 'Stores',
       items: [
-        { to: '/items', label: 'Items register', icon: Package, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/items', label: 'Stock register', icon: Package, roles: ['admin', 'store', 'approver', 'dept'] },
         { to: '/issue-stock', label: 'Issue stock', icon: ArrowUpRight, roles: ['admin', 'store'] },
       ],
     },
@@ -49,11 +49,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       ],
     },
     {
-      title: 'Help & Resources',
+      title: 'Help & resources',
       items: [
         { to: '/directory', label: 'Directory', icon: Building2, roles: ['admin', 'store', 'approver', 'dept'] },
-        { to: '/forms', label: 'Forms', icon: FileText, roles: ['admin', 'store', 'approver', 'dept'] },
-        { to: '/help', label: 'Help & FAQ', icon: HelpCircle, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/forms', label: 'Forms and slips', icon: FileText, roles: ['admin', 'store', 'approver', 'dept'] },
+        { to: '/help', label: 'Help', icon: HelpCircle, roles: ['admin', 'store', 'approver', 'dept'] },
       ],
     },
   ];
@@ -105,7 +105,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
             return (
               <div key={section.title} className="px-2">
-                <span className="px-2.5 text-[11px] font-semibold text-ink-subtle uppercase tracking-wider block mb-1">
+                <span className="px-2.5 text-[12px] font-semibold text-ink-muted block mb-1">
                   {section.title}
                 </span>
                 <div className="space-y-0.5">
@@ -136,7 +136,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         </nav>
 
         {/* Minimal Footer */}
-        <div className="p-3 border-t border-line text-[11px] text-ink-subtle">
+        <div className="px-4 py-3 border-t border-line text-[11px] text-ink-muted">
           Central Stores Portal
         </div>
       </aside>

@@ -12,14 +12,14 @@ const routeMetadata = {
   '/dashboard': { title: 'Dashboard', group: 'Overview' },
   '/items': { title: 'Stock register', group: 'Stores' },
   '/issue-stock': { title: 'Issue stock', group: 'Stores' },
-  '/indents': { title: 'Material Requisitions', group: 'Procurement' },
+  '/indents': { title: 'Requisitions & indents', group: 'Procurement' },
   '/purchase-orders': { title: 'Purchase orders & GRN', group: 'Procurement' },
-  '/write-offs': { title: 'Condemnations & Write-offs', group: 'Control' },
+  '/write-offs': { title: 'Condemnations & write-offs', group: 'Control' },
   '/reports': { title: 'Reports & statements', group: 'Control' },
   '/audit': { title: 'Audit log', group: 'Control' },
-  '/directory': { title: 'University Directory', group: 'Help & Resources' },
-  '/forms': { title: 'Printable Forms & Slips', group: 'Help & Resources' },
-  '/help': { title: 'Stores & Purchase Help', group: 'Help & Resources' },
+  '/directory': { title: 'Directory', group: 'Help & resources' },
+  '/forms': { title: 'Forms and slips', group: 'Help & resources' },
+  '/help': { title: 'Help', group: 'Help & resources' },
 };
 
 export default function Layout() {
@@ -40,38 +40,28 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-paper flex flex-col text-ink">
-      {/* 32px GBU Dark Blue Utility Bar at top */}
-      <UtilityBar />
-
       <div className="flex-1 flex">
         {/* 232px Sidebar */}
         <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
         {/* Main Body */}
         <div className="flex-1 lg:pl-[232px] flex flex-col min-w-0">
+          {/* Top Utility Bar starts at content edge, never clipped by sidebar */}
+          <UtilityBar />
+
+          {/* Clean 56px Merged Header: Breadcrumbs + Search + User */}
           <Header
             setMobileOpen={setMobileOpen}
             title={currentMeta.title}
+            group={currentMeta.group}
             onItemSelect={(item) => setDrawerItem(item)}
           />
-
-          {/* Breadcrumbs Trail under Header */}
-          <div className="no-print bg-surface/60 border-b border-line px-4 sm:px-6 py-1.5 text-[11px] text-ink-muted flex items-center gap-1.5">
-            <Link to="/dashboard" className="hover:text-primary transition-colors flex items-center gap-1">
-              <Home className="w-3 h-3 text-ink-subtle" />
-              <span>Home</span>
-            </Link>
-            <ChevronRight className="w-3 h-3 text-line" />
-            <span className="text-ink-subtle">{currentMeta.group}</span>
-            <ChevronRight className="w-3 h-3 text-line" />
-            <span className="font-medium text-ink">{currentMeta.title}</span>
-          </div>
 
           <main className="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-6">
             <Outlet context={{ openItemDrawer: (item) => setDrawerItem(item) }} />
           </main>
 
-          {/* GBU Standard 3-Column Footer */}
+          {/* Standard 3-Column Footer */}
           <Footer />
         </div>
       </div>

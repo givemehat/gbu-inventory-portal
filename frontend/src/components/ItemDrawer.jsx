@@ -278,27 +278,27 @@ export default function ItemDrawer({ item, isOpen, onClose, onActionClick }) {
                     className="w-14 h-14 rounded-full object-contain border border-line"
                   />
                   <div className="text-left">
-                    <h2 className="font-serif text-[22px] font-bold text-ink uppercase tracking-tight leading-tight">
+                    <h2 className="font-serif text-[22px] font-semibold text-ink tracking-tight leading-tight">
                       Gautam Buddha University
                     </h2>
-                    <p className="text-[11px] text-ink-muted uppercase tracking-wider">
+                    <p className="text-[11px] text-ink-muted">
                       Opp. Yamuna Expressway, Greater Noida, Gautam Buddha Nagar, UP — 201312
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-semibold text-ink uppercase tracking-wider">
-                  Stores & Purchase Department • Central Stock Bin Card (FORM S&P-05)
+                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-medium text-ink">
+                  Stores & Purchase Department • Central Stock Bin Card (S&P-05 (sample))
                 </div>
               </div>
 
               {/* Item Metadata */}
               <div className="grid grid-cols-3 gap-4 text-[12px] text-ink pb-3 border-b border-line bg-paper/50 p-3 rounded">
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Item Code / Ref:</span>
+                  <span className="text-ink-muted block text-[11px]">Item code / ref:</span>
                   <span className="font-mono font-bold text-primary">{item.code}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Nomenclature / Description:</span>
+                  <span className="text-ink-muted block text-[11px]">Nomenclature / description:</span>
                   <span className="font-semibold">{item.name}</span>
                 </div>
                 <div>
@@ -306,38 +306,38 @@ export default function ItemDrawer({ item, isOpen, onClose, onActionClick }) {
                   <span className="font-medium">{item.category}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Unit of Measure:</span>
+                  <span className="text-ink-muted block text-[11px]">Unit of measure:</span>
                   <span className="font-medium">{item.unit}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Storage Rack / Bay:</span>
+                  <span className="text-ink-muted block text-[11px]">Storage rack / bay:</span>
                   <span className="font-medium">{item.location || 'Central Stores'}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Re-order Threshold:</span>
+                  <span className="text-ink-muted block text-[11px]">Re-order threshold:</span>
                   <span className="font-medium text-amber font-mono">{item.min_stock} {item.unit}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Current Available Stock:</span>
+                  <span className="text-ink-muted block text-[11px]">Current available stock:</span>
                   <span className="font-mono font-bold text-ink text-[14px]">{item.qty} {item.unit}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Last Procurement Rate:</span>
+                  <span className="text-ink-muted block text-[11px]">Last procurement rate:</span>
                   <span className="font-mono font-medium">₹{item.price.toLocaleString('en-IN')}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Total Book Valuation:</span>
+                  <span className="text-ink-muted block text-[11px]">Total book valuation:</span>
                   <span className="font-mono font-bold text-ink">₹{(item.value || item.qty * item.price).toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
               {/* Movement History */}
               <div>
-                <h4 className="text-[12px] font-bold uppercase tracking-wider text-ink mb-2">
+                <h4 className="text-[12px] font-semibold text-ink mb-2">
                   Chronological Transaction Ledger
                 </h4>
                 <table className="w-full text-left text-[11px] border border-line">
-                  <thead className="bg-paper border-b border-line text-ink-muted uppercase">
+                  <thead className="bg-paper border-b border-line text-ink-muted font-medium">
                     <tr>
                       <th className="p-2 border-r border-line">Date</th>
                       <th className="p-2 border-r border-line">Voucher Type</th>
@@ -378,17 +378,17 @@ export default function ItemDrawer({ item, isOpen, onClose, onActionClick }) {
               <div className="pt-8 border-t border-line grid grid-cols-3 gap-6 text-center text-[11px]">
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Store Keeper (Section)</span>
+                  <span className="font-semibold text-ink block">Store keeper (Section)</span>
                   <span className="text-ink-muted block text-[10px]">Physical Custodian</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Verification Officer</span>
+                  <span className="font-semibold text-ink block">Verification officer</span>
                   <span className="text-ink-muted block text-[10px]">Internal Audit / Stock Verification</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Store Officer (S&P)</span>
+                  <span className="font-semibold text-ink block">Store officer (S&P)</span>
                   <span className="text-ink-muted block text-[10px]">Authorized Signatory</span>
                 </div>
               </div>

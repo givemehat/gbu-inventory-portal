@@ -83,25 +83,15 @@ export default function Help() {
             Need further assistance?
           </h2>
           <p className="text-[13px] text-ink-muted mt-0.5">
-            Visit Central Stores & Purchase Office or contact university IT Cell.
+            Visit the Central Stores counter in the Administrative Block during office hours (9:30 AM – 5:30 PM, Mon–Fri).
           </p>
-          <div className="flex flex-wrap items-center gap-4 mt-3 text-[12px] text-ink-muted">
-            <span className="flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-primary" />
-              <span>0120-2344297 (Stores)</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-primary" />
-              <span>stores@gbu.ac.in</span>
-            </span>
-          </div>
         </div>
 
         <Link
           to="/directory"
           className="h-9 px-4 rounded bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium transition-colors inline-flex items-center gap-1.5 shrink-0"
         >
-          <span>View University Directory</span>
+          <span>University Directory</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </Link>
       </div>

@@ -434,45 +434,45 @@ export default function WriteOffs() {
                     className="w-14 h-14 rounded-full object-contain border border-line"
                   />
                   <div className="text-left">
-                    <h2 className="font-serif text-[22px] font-bold text-ink uppercase tracking-tight leading-tight">
+                    <h2 className="font-serif text-[22px] font-semibold text-ink tracking-tight leading-tight">
                       Gautam Buddha University
                     </h2>
-                    <p className="text-[11px] text-ink-muted uppercase tracking-wider">
+                    <p className="text-[11px] text-ink-muted">
                       Opp. Yamuna Expressway, Greater Noida, Gautam Buddha Nagar, UP — 201312
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-semibold text-ink uppercase tracking-wider">
-                  Stores & Purchase Department • Material Condemnation & Write-off Proposal (FORM S&P-04)
+                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-medium text-ink">
+                  Stores & Purchase Department • Material Condemnation & Write-off Proposal (S&P-04 (sample))
                 </div>
               </div>
 
               {/* Proposal Meta */}
               <div className="grid grid-cols-3 gap-4 text-[12px] text-ink pb-3 border-b border-line bg-paper/50 p-3 rounded">
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Proposal Ref No:</span>
+                  <span className="text-ink-muted block text-[11px]">Proposal ref no:</span>
                   <span className="font-mono font-bold text-red">{printWo.no}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Item Description:</span>
+                  <span className="text-ink-muted block text-[11px]">Item description:</span>
                   <span className="font-semibold">{printWo.item}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Item Code:</span>
+                  <span className="text-ink-muted block text-[11px]">Item code:</span>
                   <span className="font-mono font-medium">{printWo.item_code || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Date Submitted:</span>
+                  <span className="text-ink-muted block text-[11px]">Date submitted:</span>
                   <span className="font-medium">
                     {new Date(printWo.at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Proposed By:</span>
+                  <span className="text-ink-muted block text-[11px]">Proposed by:</span>
                   <span className="font-medium">{printWo.by}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Sanction Status:</span>
+                  <span className="text-ink-muted block text-[11px]">Sanction status:</span>
                   <span className="font-bold text-ink">{printWo.status}</span>
                 </div>
               </div>
@@ -480,20 +480,20 @@ export default function WriteOffs() {
               {/* Condemnation Particulars */}
               <div className="space-y-3 text-[12px]">
                 <div className="p-3 bg-paper rounded border border-line">
-                  <span className="font-semibold text-ink block text-[11px] uppercase">Quantity Proposed for Condemnation:</span>
+                  <span className="font-semibold text-ink block text-[11px]">Quantity proposed for condemnation:</span>
                   <span className="font-mono font-bold text-[15px] text-red mt-1 block">
                     {printWo.qty} {printWo.unit}
                   </span>
                 </div>
 
                 <div className="p-3 bg-paper rounded border border-line">
-                  <span className="font-semibold text-ink block text-[11px] uppercase">Cause / Justification of Condemnation:</span>
+                  <span className="font-semibold text-ink block text-[11px]">Cause / justification of condemnation:</span>
                   <p className="text-ink-muted mt-1 leading-relaxed">{printWo.reason}</p>
                 </div>
 
                 {printWo.remark && (
                   <div className="p-3 bg-amber/5 rounded border border-amber/20 text-amber">
-                    <span className="font-semibold block text-[11px] uppercase">Competent Authority (Director) Remarks:</span>
+                    <span className="font-semibold block text-[11px]">Competent authority (Director) remarks:</span>
                     <p className="mt-1 leading-relaxed">{printWo.remark}</p>
                     {printWo.decided_by && (
                       <span className="text-[11px] text-ink-muted block mt-1">Decided by: {printWo.decided_by}</span>
@@ -504,11 +504,11 @@ export default function WriteOffs() {
 
               {/* Physical Verification Board Findings */}
               <div className="border border-line rounded p-4 text-[11px] space-y-2">
-                <span className="font-semibold uppercase tracking-wider text-ink block">
+                <span className="font-semibold text-ink block">
                   Physical Verification & Condemnation Board Findings
                 </span>
                 <p className="text-ink-muted leading-relaxed">
-                  The undersigned Inspection Board has physically verified the aforesaid material in the presence of the section custodian. The materials have been found unserviceable / unfit for university laboratory or administrative use beyond economical repair and are recommended for formal write-off and disposal by auction/destruction as per GFR norms.
+                  The undersigned Inspection Board has physically verified the aforesaid material in the presence of the section custodian. The materials have been found unserviceable / unfit for university laboratory or administrative use beyond economical repair and are recommended for formal write-off and disposal by auction/destruction in accordance with store disposal procedures.
                 </p>
               </div>
 
@@ -516,19 +516,23 @@ export default function WriteOffs() {
               <div className="pt-8 border-t border-line grid grid-cols-3 gap-6 text-center text-[11px]">
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Section Store Keeper</span>
+                  <span className="font-semibold text-ink block">Section store keeper</span>
                   <span className="text-ink-muted block text-[10px]">Material Custodian</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Store Officer (S&P)</span>
+                  <span className="font-semibold text-ink block">Store Officer (S&P)</span>
                   <span className="text-ink-muted block text-[10px]">Member Secretary, Board</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Director (Stores & Purchase)</span>
+                  <span className="font-semibold text-ink block">Director (Stores & Purchase)</span>
                   <span className="text-ink-muted block text-[10px]">Sanctioning Authority</span>
                 </div>
+              </div>
+
+              <div className="pt-2 text-center text-[10px] text-ink-subtle">
+                Sample format · Gautam Buddha University Stores & Purchase Prototype
               </div>
             </div>
           </div>

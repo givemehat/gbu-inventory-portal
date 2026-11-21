@@ -152,8 +152,6 @@ export const GBU_DEPARTMENTS = [
     category: 'Procurement & Logistics',
     location: 'Ground Floor, Administrative Building',
     contactRole: 'Store Officer / Custodian',
-    phone: '0120-2344297',
-    email: 'stores@gbu.ac.in',
   },
   {
     name: 'Registrar Office & Administrative Building',

@@ -533,45 +533,45 @@ export default function Indents() {
                     className="w-14 h-14 rounded-full object-contain border border-line"
                   />
                   <div className="text-left">
-                    <h2 className="font-serif text-[22px] font-bold text-ink uppercase tracking-tight leading-tight">
+                    <h2 className="font-serif text-[22px] font-semibold text-ink tracking-tight leading-tight">
                       Gautam Buddha University
                     </h2>
-                    <p className="text-[11px] text-ink-muted uppercase tracking-wider">
+                    <p className="text-[11px] text-ink-muted">
                       Opp. Yamuna Expressway, Greater Noida, Gautam Buddha Nagar, UP — 201312
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-semibold text-ink uppercase tracking-wider">
-                  Stores & Purchase Department • Material Requisition Indent (FORM S&P-01)
+                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-medium text-ink">
+                  Stores & Purchase Department • Material Requisition Indent (S&P-01 (sample))
                 </div>
               </div>
 
               {/* Indent Meta */}
               <div className="grid grid-cols-3 gap-4 text-[12px] text-ink pb-3 border-b border-line bg-paper/50 p-3 rounded">
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Requisition Slip No:</span>
+                  <span className="text-ink-muted block text-[11px]">Requisition slip no:</span>
                   <span className="font-mono font-bold text-primary">{printIndent.no}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Requisitioning Department / School:</span>
+                  <span className="text-ink-muted block text-[11px]">Requisitioning department / school:</span>
                   <span className="font-semibold">{printIndent.dept}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Date of Submission:</span>
+                  <span className="text-ink-muted block text-[11px]">Date of submission:</span>
                   <span className="font-medium">
                     {new Date(printIndent.at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Requisitioned By:</span>
+                  <span className="text-ink-muted block text-[11px]">Requisitioned by:</span>
                   <span className="font-medium">{printIndent.by}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Sanction Status:</span>
+                  <span className="text-ink-muted block text-[11px]">Sanction status:</span>
                   <span className="font-bold text-ink">{printIndent.status}</span>
                 </div>
                 <div>
-                  <span className="text-ink-muted block text-[11px]">Sanction Authority:</span>
+                  <span className="text-ink-muted block text-[11px]">Sanction authority:</span>
                   <span className="font-medium">{printIndent.decided_by || 'Director (Stores & Purchase)'}</span>
                 </div>
               </div>
@@ -579,12 +579,12 @@ export default function Indents() {
               {/* Purpose / Remarks */}
               <div className="text-[12px] text-ink space-y-2">
                 <div className="p-2.5 bg-paper rounded border border-line">
-                  <span className="font-semibold text-ink block text-[11px] uppercase">Purpose / Requisition Justification:</span>
+                  <span className="font-semibold text-ink block text-[11px]">Purpose / requisition justification:</span>
                   <span className="text-ink-muted mt-0.5 block">{printIndent.note || 'General departmental store requirement.'}</span>
                 </div>
                 {printIndent.remark && (
                   <div className="p-2.5 bg-amber/5 rounded border border-amber/20 text-amber">
-                    <span className="font-semibold block text-[11px] uppercase">Sanctioning Remarks:</span>
+                    <span className="font-semibold block text-[11px]">Sanctioning remarks:</span>
                     <span className="mt-0.5 block">{printIndent.remark}</span>
                   </div>
                 )}
@@ -592,11 +592,11 @@ export default function Indents() {
 
               {/* Line Items */}
               <div>
-                <h4 className="text-[12px] font-bold uppercase tracking-wider text-ink mb-2">
+                <h4 className="text-[12px] font-semibold text-ink mb-2">
                   Bill of Requisitioned Material
                 </h4>
                 <table className="w-full text-left text-[11px] border border-line">
-                  <thead className="bg-paper border-b border-line text-ink-muted uppercase">
+                  <thead className="bg-paper border-b border-line text-ink-muted font-medium">
                     <tr>
                       <th className="p-2 border-r border-line w-12 text-center">S.No.</th>
                       <th className="p-2 border-r border-line">Item Description / Nomenclature</th>
@@ -625,19 +625,23 @@ export default function Indents() {
               <div className="pt-8 border-t border-line grid grid-cols-3 gap-6 text-center text-[11px]">
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Indenting Official / HoD</span>
+                  <span className="font-semibold text-ink block">Indenting official / HoD</span>
                   <span className="text-ink-muted block text-[10px]">{printIndent.dept}</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Store Officer (S&P)</span>
+                  <span className="font-semibold text-ink block">Store Officer (S&P)</span>
                   <span className="text-ink-muted block text-[10px]">Stock Availability Checked</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Director (Stores & Purchase)</span>
+                  <span className="font-semibold text-ink block">Director (Stores & Purchase)</span>
                   <span className="text-ink-muted block text-[10px]">Sanctioning Authority</span>
                 </div>
+              </div>
+
+              <div className="pt-2 text-center text-[10px] text-ink-subtle">
+                Sample format · Gautam Buddha University Stores & Purchase Prototype
               </div>
             </div>
           </div>

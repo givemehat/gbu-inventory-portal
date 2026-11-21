@@ -348,16 +348,16 @@ export default function Reports() {
                   className="w-14 h-14 rounded-full object-contain border border-line"
                 />
                 <div className="text-left">
-                  <h2 className="font-serif text-[22px] sm:text-[24px] font-semibold text-ink uppercase tracking-tight leading-tight">
+                  <h2 className="font-serif text-[22px] sm:text-[24px] font-semibold text-ink tracking-tight leading-tight">
                     Gautam Buddha University
                   </h2>
-                  <p className="text-[11px] text-ink-muted uppercase tracking-wider">
+                  <p className="text-[11px] text-ink-muted">
                     Greater Noida, Gautam Buddha Nagar, Uttar Pradesh — 201312
                   </p>
                 </div>
               </div>
-              <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[13px] font-medium text-ink uppercase tracking-wider">
-                Stores & Purchase Department • Official Stock Position Statement
+              <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[13px] font-medium text-ink">
+                Stores & Purchase Department • Stock Position Statement (Sample format)
               </div>
 
               <div className="mt-4 flex flex-col sm:flex-row items-center justify-between text-[12px] text-ink-muted border-t border-line pt-2 gap-2">
@@ -376,7 +376,7 @@ export default function Reports() {
             {/* Statement Items Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-[12px]">
-                <thead className="bg-paper text-ink font-semibold border-y border-line text-[11px] uppercase tracking-wider">
+                <thead className="bg-paper text-ink font-semibold border-y border-line text-[11px]">
                   <tr>
                     <th className="px-3 py-2 text-center w-12">S.No.</th>
                     <th className="px-3 py-2">Item Code</th>
@@ -442,7 +442,7 @@ export default function Reports() {
 
               <div className="flex flex-col items-center justify-center">
                 <div className="w-16 h-16 rounded-full border border-dashed border-line flex items-center justify-center text-[10px] text-ink-muted uppercase">
-                  Official Seal
+                  Seal
                 </div>
               </div>
 
@@ -453,6 +453,10 @@ export default function Reports() {
                 <p className="font-medium text-ink">Director, Stores & Purchase</p>
                 <p className="text-[11px] text-ink-muted">Gautam Buddha University</p>
               </div>
+            </div>
+
+            <div className="pt-2 text-center text-[10px] text-ink-subtle">
+              Sample format · Gautam Buddha University Stores & Purchase Prototype
             </div>
           </div>
         </div>
@@ -516,7 +520,7 @@ export default function Reports() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="font-serif text-[22px] font-semibold text-ink">
-                      Official Bin Card (Form S&P-05)
+                      Bin Card — S&P-05 (Sample format)
                     </h2>
                     <p className="text-[12px] text-ink-muted">
                       Central Stores & Purchase • Gautam Buddha University
@@ -553,7 +557,7 @@ export default function Reports() {
               {/* Ledger Entries Table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[12px]">
-                  <thead className="bg-paper text-ink font-semibold border-y border-line text-[11px] uppercase tracking-wider">
+                  <thead className="bg-paper text-ink font-semibold border-y border-line text-[11px]">
                     <tr>
                       <th className="px-3 py-2">Date</th>
                       <th className="px-3 py-2">Doc / Ref No.</th>
@@ -730,7 +734,7 @@ export default function Reports() {
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-[12px]">
-                <thead className="bg-paper text-ink font-semibold border-y border-line text-[11px] uppercase tracking-wider">
+                <thead className="bg-paper text-ink font-semibold border-y border-line text-[11px]">
                   <tr>
                     <th className="px-3 py-2 text-center w-12">Class</th>
                     <th className="px-3 py-2">Item Code</th>

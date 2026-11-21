@@ -163,7 +163,7 @@ export default function Dashboard() {
                   {/* Low Stock Items */}
                   <div className="border border-line rounded p-3 bg-surface">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide">
+                      <span className="text-[12px] font-semibold text-ink-muted">
                         Stock below minimum threshold ({attention.low_stock?.length || 0})
                       </span>
                       <Link to="/items?low=true" className="text-[12px] text-primary hover:underline font-medium">
@@ -203,7 +203,7 @@ export default function Dashboard() {
                   {/* Open POs waiting for goods */}
                   <div className="border border-line rounded p-3 bg-surface">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide">
+                      <span className="text-[12px] font-semibold text-ink-muted">
                         Purchase orders awaiting goods receipt ({attention.open_pos?.length || 0})
                       </span>
                       <Link to="/purchase-orders" className="text-[12px] text-primary hover:underline font-medium">
@@ -256,7 +256,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Pending Requisitions */}
                   <div className="border border-line rounded p-3 bg-surface">
-                    <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide block mb-2">
+                    <span className="text-[12px] font-semibold text-ink-muted block mb-2">
                       Requisitions pending sanction ({attention.pending_indents?.length || 0})
                     </span>
 
@@ -294,7 +294,7 @@ export default function Dashboard() {
 
                   {/* Pending Write-offs */}
                   <div className="border border-line rounded p-3 bg-surface">
-                    <span className="text-[12px] font-semibold uppercase text-ink-muted tracking-wide block mb-2">
+                    <span className="text-[12px] font-semibold text-ink-muted block mb-2">
                       Write-offs pending sanction ({attention.pending_writeoffs?.length || 0})
                     </span>
 
@@ -640,7 +640,7 @@ export default function Dashboard() {
             <div className="p-4 border-b border-line flex items-center justify-between">
               <div>
                 <h3 className="font-serif text-[18px] font-semibold text-ink">Publish Store Notice / Circular</h3>
-                <p className="text-[12px] text-ink-muted">Official notification visible across university stores portal</p>
+                <p className="text-[12px] text-ink-muted">Announcement visible across the stores portal</p>
               </div>
               <button
                 type="button"

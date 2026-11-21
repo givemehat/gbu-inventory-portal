@@ -111,7 +111,7 @@ export default function Login() {
             </div>
             
             <p className="hidden md:block text-[13px] text-blue-100/90 mt-3 leading-relaxed">
-              Official digital portal for departmental material requisitions, purchase orders, digital stock registers, and asset condemnation records.
+              Digital inventory portal prototype for departmental material requisitions, purchase orders, stock registers, and asset condemnation records.
             </p>
 
             {/* Campus Landmark Photo */}
@@ -129,7 +129,7 @@ export default function Login() {
 
           <div className="mt-4 md:mt-6 pt-3 md:pt-4 border-t border-blue-400/30 text-[11px] text-blue-200 flex items-center justify-between">
             <span>Greater Noida, UP — 201312</span>
-            <span>EPABX: 0120-2344200</span>
+            <span>University EPABX: 0120-2344200</span>
           </div>
         </div>
 

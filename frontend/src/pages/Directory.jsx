@@ -38,11 +38,11 @@ export default function Directory() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
+        <h1 className="font-serif text-[26px] sm:text-[28px] font-medium text-ink leading-tight">
           University Directory
         </h1>
-        <p className="text-[14px] text-ink-muted mt-1">
-          Official departmental contact directory, academic schools, research centres, and approved university suppliers.
+        <p className="text-[13px] text-ink-muted mt-1">
+          Directory of academic schools, research centres, administrative departments, and empanelled suppliers.
         </p>
       </div>
 

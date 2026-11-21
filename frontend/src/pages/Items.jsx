@@ -228,7 +228,7 @@ export default function Items() {
         {/* Table view (>= 640px) */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-[13px]">
-            <thead className="bg-paper border-b border-line text-[11px] font-semibold text-ink-muted uppercase tracking-wider sticky top-0">
+            <thead className="bg-paper border-b border-line text-[12px] font-semibold text-ink-muted sticky top-0">
               <tr>
                 <th className="px-3 py-2.5 cursor-pointer select-none" onClick={() => handleSort('code')}>
                   <span className="flex items-center gap-1">

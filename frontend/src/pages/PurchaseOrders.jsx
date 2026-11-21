@@ -758,16 +758,16 @@ export default function PurchaseOrders() {
                     className="w-14 h-14 rounded-full object-contain border border-line"
                   />
                   <div className="text-left">
-                    <h2 className="font-serif text-[22px] font-bold text-ink uppercase tracking-tight leading-tight">
+                    <h2 className="font-serif text-[22px] font-semibold text-ink tracking-tight leading-tight">
                       Gautam Buddha University
                     </h2>
-                    <p className="text-[11px] text-ink-muted uppercase tracking-wider">
+                    <p className="text-[11px] text-ink-muted">
                       Opp. Yamuna Expressway, Greater Noida, Gautam Buddha Nagar, UP — 201312
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-semibold text-ink uppercase tracking-wider">
-                  Stores & Purchase Department • Official Purchase Order
+                <div className="mt-2 py-1 px-4 bg-paper rounded border border-line inline-block text-[12px] font-medium text-ink">
+                  Stores & Purchase Department • Purchase Order (Sample format)
                 </div>
               </div>
 
@@ -803,11 +803,11 @@ export default function PurchaseOrders() {
 
               {/* Bill of Quantities */}
               <div>
-                <h4 className="text-[12px] font-bold uppercase tracking-wider text-ink mb-2">
+                <h4 className="text-[12px] font-semibold text-ink mb-2">
                   Bill of Quantities & Contracted Rates
                 </h4>
                 <table className="w-full text-left text-[11px] border border-line">
-                  <thead className="bg-paper border-b border-line text-ink-muted uppercase">
+                  <thead className="bg-paper border-b border-line text-ink-muted font-medium">
                     <tr>
                       <th className="p-2 border-r border-line w-10 text-center">#</th>
                       <th className="p-2 border-r border-line">Item Description</th>
@@ -852,7 +852,7 @@ export default function PurchaseOrders() {
 
               {/* Delivery Terms */}
               <div className="p-3 bg-paper rounded border border-line text-[11px] text-ink-muted space-y-1">
-                <span className="font-semibold text-ink uppercase block text-[10px]">Standard Delivery Terms:</span>
+                <span className="font-semibold text-ink block text-[11px]">Standard delivery terms:</span>
                 <p>1. Delivery must be made to Central Stores, Gautam Buddha University, Greater Noida within 15 working days.</p>
                 <p>2. Physical inspection will be conducted by the University Technical Inspection Committee upon arrival prior to GRN entry.</p>
                 <p>3. Invoices must reference this PO number in all correspondence and billing submissions.</p>
@@ -862,19 +862,23 @@ export default function PurchaseOrders() {
               <div className="pt-8 border-t border-line grid grid-cols-3 gap-6 text-center text-[11px]">
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Vendor Acknowledgement</span>
+                  <span className="font-semibold text-ink block">Vendor acknowledgement</span>
                   <span className="text-ink-muted block text-[10px]">{printPo.vendor}</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Store Officer (S&P)</span>
+                  <span className="font-semibold text-ink block">Store Officer (S&P)</span>
                   <span className="text-ink-muted block text-[10px]">Procurement Section</span>
                 </div>
                 <div className="space-y-8">
                   <div className="border-b border-line pb-1"></div>
-                  <span className="font-semibold text-ink uppercase block">Finance Officer / Registrar</span>
+                  <span className="font-semibold text-ink block">Finance Officer / Registrar</span>
                   <span className="text-ink-muted block text-[10px]">Financial Concurrence</span>
                 </div>
+              </div>
+
+              <div className="pt-2 text-center text-[10px] text-ink-subtle">
+                Sample format · Gautam Buddha University Stores & Purchase Prototype
               </div>
             </div>
           </div>

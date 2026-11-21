@@ -216,6 +216,7 @@ export const api = {
     const res = await request(`/api/purchase-orders${qs}`);
     return wrapListResponse(res);
   },
+  getPurchaseOrders: (params = {}) => api.getPOs(params),
   getPO: (id) => request(`/api/purchase-orders/${id}`),
   createPO: (data) => request('/api/purchase-orders', {
     method: 'POST',
