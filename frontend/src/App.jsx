@@ -29,7 +29,7 @@ function RoleGuard({ allowedRoles, children }) {
 export default function App() {
   return (
     <ToastProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL || '/'}>
         <Routes>
           {/* Public login route */}
           <Route path="/login" element={<Login />} />
