@@ -110,14 +110,18 @@ async def correlation_id_middleware(request: Request, call_next):
     return response
 
 
-# 3. Security Headers Middleware
+# 3. Security Headers Middleware (Enterprise Grade)
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    if os.getenv("ENV") == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
     return response
 
 
@@ -1368,6 +1372,286 @@ def rep_txn(db: Session = Depends(get_db), u: User = Depends(me)):
         ["Date", "Item", "Type", "Qty", "Unit Cost", "Ref", "Note", "By"],
         [[r["at"], r["item"], r["kind"], r["qty"], r["unit_cost"], r["ref"], r["note"], r["by"]] for r in rows]
     )
+
+
+# ----------------- Advanced Analytical Reports -----------------
+@app.get("/api/reports/stock-as-of")
+def rep_stock_as_of(date: str, db: Session = Depends(get_db), u: User = Depends(me)):
+    """Computes exact stock quantities and valuations as of a historical date by replaying the ledger."""
+    try:
+        dt = datetime.fromisoformat(date)
+    except Exception:
+        raise AppException(400, "INVALID_DATE", "Date must be in ISO format (YYYY-MM-DD).")
+
+    cutoff = datetime(dt.year, dt.month, dt.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
+    items = db.scalars(select(Item).order_by(Item.code)).all()
+    results = []
+    total_val = Decimal("0.00")
+    total_qty = Decimal("0.000")
+
+    for i in items:
+        txns = db.scalars(
+            select(Txn).where(Txn.item_id == i.id, Txn.at <= cutoff)
+        ).all()
+
+        in_qty = sum((t.qty for t in txns if t.kind in ("IN", "OPENING", "ADJUST_IN")), Decimal("0.000"))
+        out_qty = sum((t.qty for t in txns if t.kind in ("OUT", "WRITE_OFF", "ADJUST_OUT")), Decimal("0.000"))
+        historical_qty = max(Decimal("0.000"), in_qty - out_qty)
+        val = round(historical_qty * i.price, 2)
+
+        total_val += val
+        total_qty += historical_qty
+
+        results.append({
+            "id": i.id,
+            "code": i.code,
+            "name": i.name,
+            "category": i.category.name if i.category else "",
+            "unit": i.unit,
+            "qty": float(historical_qty),
+            "price": float(i.price),
+            "value": float(val),
+            "location": i.location,
+            "min_stock": float(i.min_stock),
+            "status": "NORMAL" if historical_qty >= i.min_stock else "LOW",
+        })
+
+    return {
+        "as_of_date": dt.strftime("%Y-%m-%d"),
+        "total_items": len(results),
+        "total_qty": float(total_qty),
+        "total_valuation": float(total_val),
+        "items": results
+    }
+
+
+@app.get("/api/reports/bin-card")
+def rep_bin_card(
+    item_id: int,
+    from_date: str = "",
+    to_date: str = "",
+    db: Session = Depends(get_db),
+    u: User = Depends(me)
+):
+    """Generates official Bin Card / Stock Ledger statement for a specific item over a date range."""
+    i = get_or_404(db, Item, item_id, "Item")
+
+    start_dt = datetime.fromisoformat(from_date) if from_date else datetime(2020, 1, 1, tzinfo=timezone.utc)
+    end_dt = datetime.fromisoformat(to_date) if to_date else datetime.now(timezone.utc)
+    end_dt = datetime(end_dt.year, end_dt.month, end_dt.day, 23, 59, 59, 999999, tzinfo=timezone.utc)
+
+    prior_txns = db.scalars(
+        select(Txn).where(Txn.item_id == i.id, Txn.at < start_dt)
+    ).all()
+    prior_in = sum((t.qty for t in prior_txns if t.kind in ("IN", "OPENING", "ADJUST_IN")), Decimal("0.000"))
+    prior_out = sum((t.qty for t in prior_txns if t.kind in ("OUT", "WRITE_OFF", "ADJUST_OUT")), Decimal("0.000"))
+    opening_bal = max(Decimal("0.000"), prior_in - prior_out)
+
+    period_txns = db.scalars(
+        select(Txn).where(Txn.item_id == i.id, Txn.at >= start_dt, Txn.at <= end_dt).order_by(Txn.at.asc(), Txn.id.asc())
+    ).all()
+
+    entries = []
+    running_bal = opening_bal
+
+    for t in period_txns:
+        is_in = t.kind in ("IN", "OPENING", "ADJUST_IN")
+        if is_in:
+            running_bal += t.qty
+            receipt_qty = float(t.qty)
+            issue_qty = 0.0
+        else:
+            running_bal = max(Decimal("0.000"), running_bal - t.qty)
+            receipt_qty = 0.0
+            issue_qty = float(t.qty)
+
+        entries.append({
+            "id": t.id,
+            "date": t.at.strftime("%Y-%m-%d"),
+            "ref": t.ref,
+            "particulars": t.note or ("Stock Receipt" if is_in else "Stock Issue"),
+            "kind": t.kind,
+            "receipt_qty": receipt_qty,
+            "issue_qty": issue_qty,
+            "balance_qty": float(running_bal),
+            "unit_cost": float(t.unit_cost),
+            "by": t.user.name if t.user else "System"
+        })
+
+    return {
+        "item": d_item(i),
+        "from_date": start_dt.strftime("%Y-%m-%d"),
+        "to_date": end_dt.strftime("%Y-%m-%d"),
+        "opening_balance": float(opening_bal),
+        "closing_balance": float(running_bal),
+        "total_receipts": sum(e["receipt_qty"] for e in entries),
+        "total_issues": sum(e["issue_qty"] for e in entries),
+        "entries": entries
+    }
+
+
+@app.get("/api/reports/consumption-by-dept")
+def rep_consumption_by_dept(days: int = 90, db: Session = Depends(get_db), u: User = Depends(me)):
+    """Computes departmental consumption breakdown (quantities and spend) over recent days."""
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days) if days > 0 else datetime(2020, 1, 1, tzinfo=timezone.utc)
+
+    out_txns = db.scalars(
+        select(Txn).where(Txn.kind == "OUT", Txn.at >= cutoff).order_by(Txn.at.desc())
+    ).all()
+
+    dept_stats: dict[str, dict] = {}
+    total_spend = Decimal("0.00")
+    total_issues_count = len(out_txns)
+
+    for t in out_txns:
+        dept_name = "Central University Pool"
+        if t.note and "To " in t.note:
+            parts = t.note.split("To ")[1].split(".")[0].strip()
+            if parts:
+                dept_name = parts
+
+        item_cost = t.unit_cost if t.unit_cost > 0 else (t.item.price if t.item else Decimal("0.00"))
+        line_val = t.qty * item_cost
+        total_spend += line_val
+
+        if dept_name not in dept_stats:
+            dept_stats[dept_name] = {
+                "department": dept_name,
+                "issues_count": 0,
+                "total_qty": Decimal("0.000"),
+                "total_value": Decimal("0.00"),
+            }
+
+        dept_stats[dept_name]["issues_count"] += 1
+        dept_stats[dept_name]["total_qty"] += t.qty
+        dept_stats[dept_name]["total_value"] += line_val
+
+    sorted_depts = sorted(
+        [
+            {
+                "department": s["department"],
+                "issues_count": s["issues_count"],
+                "total_qty": float(s["total_qty"]),
+                "total_value": float(round(s["total_value"], 2)),
+                "pct": float(round((s["total_value"] / total_spend * 100), 1)) if total_spend > 0 else 0.0,
+            }
+            for s in dept_stats.values()
+        ],
+        key=lambda x: x["total_value"],
+        reverse=True
+    )
+
+    return {
+        "period_days": days,
+        "total_issues": total_issues_count,
+        "total_consumption_value": float(round(total_spend, 2)),
+        "departments": sorted_depts
+    }
+
+
+@app.get("/api/reports/abc-analysis")
+def rep_abc_analysis(db: Session = Depends(get_db), u: User = Depends(me)):
+    """Computes ABC Inventory Analysis by annual consumption value with Pareto classification."""
+    items = db.scalars(select(Item).order_by(Item.id)).all()
+
+    analysis = []
+    grand_total_val = Decimal("0.00")
+
+    for i in items:
+        issued_qty = db.scalar(
+            select(func.coalesce(func.sum(Txn.qty), 0))
+            .where(Txn.item_id == i.id, Txn.kind == "OUT")
+        ) or Decimal("0.000")
+
+        effective_qty = issued_qty if issued_qty > 0 else (i.min_stock if i.min_stock > 0 else Decimal("1.000"))
+        annual_val = round(effective_qty * i.price, 2)
+        grand_total_val += annual_val
+
+        analysis.append({
+            "id": i.id,
+            "code": i.code,
+            "name": i.name,
+            "category": i.category.name if i.category else "",
+            "annual_qty": float(effective_qty),
+            "unit_price": float(i.price),
+            "annual_value": float(annual_val),
+            "raw_val": annual_val,
+        })
+
+    analysis.sort(key=lambda x: x["raw_val"], reverse=True)
+
+    cumulative_val = Decimal("0.00")
+    a_count, b_count, c_count = 0, 0, 0
+
+    for idx, item in enumerate(analysis):
+        cumulative_val += Decimal(str(item["raw_val"]))
+        cum_pct = float(round((cumulative_val / grand_total_val * 100), 2)) if grand_total_val > 0 else 0.0
+        item["cumulative_percentage"] = cum_pct
+
+        if cum_pct <= 72.0 or idx == 0:
+            item["class"] = "A"
+            a_count += 1
+        elif cum_pct <= 92.0:
+            item["class"] = "B"
+            b_count += 1
+        else:
+            item["class"] = "C"
+            c_count += 1
+
+        del item["raw_val"]
+
+    return {
+        "grand_total_value": float(round(grand_total_val, 2)),
+        "summary": {
+            "class_a_count": a_count,
+            "class_b_count": b_count,
+            "class_c_count": c_count,
+            "total_items": len(analysis)
+        },
+        "items": analysis
+    }
+
+
+@app.get("/api/reports/vendor-performance")
+def rep_vendor_performance(db: Session = Depends(get_db), u: User = Depends(need("store", "approver"))):
+    """Vendor scorecard: fulfillment rates, PO volume, and delivery efficiency."""
+    vendors = db.scalars(select(Vendor).order_by(Vendor.name)).all()
+    results = []
+
+    for v in vendors:
+        pos = db.scalars(select(PO).where(PO.vendor_id == v.id)).all()
+        po_count = len(pos)
+        completed = sum(1 for p in pos if p.status == "RECEIVED")
+        pending = sum(1 for p in pos if p.status in ("OPEN", "PARTIAL"))
+
+        total_ordered_qty = Decimal("0.000")
+        total_received_qty = Decimal("0.000")
+        total_spend = Decimal("0.00")
+
+        for p in pos:
+            for l in p.lines:
+                total_ordered_qty += l.qty
+                total_received_qty += l.got
+                total_spend += (l.qty * l.rate)
+
+        fill_rate = float(round((total_received_qty / total_ordered_qty * 100), 1)) if total_ordered_qty > 0 else 100.0
+
+        results.append({
+            "id": v.id,
+            "name": v.name,
+            "contact": v.phone or v.email or "Store Vendor",
+            "po_count": po_count,
+            "completed_pos": completed,
+            "pending_pos": pending,
+            "total_spend": float(round(total_spend, 2)),
+            "fill_rate_percentage": fill_rate,
+            "rating": "A" if fill_rate >= 95.0 else ("B" if fill_rate >= 80.0 else "C")
+        })
+
+    return {
+        "total_vendors": len(results),
+        "vendors": sorted(results, key=lambda x: x["total_spend"], reverse=True)
+    }
 
 
 # ----------------- Admin Integrity Check & Audit -----------------

@@ -476,5 +476,50 @@ def test_notices_flow():
     assert del_res.status_code == 200
 
 
+# 13. Enterprise Reports & Analytics
+def test_enterprise_reports_and_analytics():
+    store_headers, _ = login("store@gbu.demo")
+
+    # 1. Historical Stock As-Of
+    res = client.get("/api/reports/stock-as-of?date=2026-11-21", headers=store_headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total_items"] >= 20
+    assert data["total_valuation"] > 0
+    assert len(data["items"]) >= 20
+
+    # 2. Bin Card / Stock Ledger
+    bin_res = client.get("/api/reports/bin-card?item_id=1", headers=store_headers)
+    assert bin_res.status_code == 200
+    bin_data = bin_res.json()
+    assert "item" in bin_data
+    assert "opening_balance" in bin_data
+    assert "closing_balance" in bin_data
+    assert isinstance(bin_data["entries"], list)
+
+    # 3. Department Consumption
+    dept_res = client.get("/api/reports/consumption-by-dept?days=90", headers=store_headers)
+    assert dept_res.status_code == 200
+    dept_data = dept_res.json()
+    assert "total_consumption_value" in dept_data
+    assert isinstance(dept_data["departments"], list)
+
+    # 4. ABC Pareto Analysis
+    abc_res = client.get("/api/reports/abc-analysis", headers=store_headers)
+    assert abc_res.status_code == 200
+    abc_data = abc_res.json()
+    assert abc_data["summary"]["class_a_count"] > 0
+    assert abc_data["summary"]["class_b_count"] > 0
+    assert abc_data["summary"]["class_c_count"] > 0
+    assert abc_data["items"][0]["class"] == "A"
+
+    # 5. Vendor Performance Scorecard
+    vendor_res = client.get("/api/reports/vendor-performance", headers=store_headers)
+    assert vendor_res.status_code == 200
+    vendor_data = vendor_res.json()
+    assert vendor_data["total_vendors"] >= 1
+    assert "fill_rate_percentage" in vendor_data["vendors"][0]
+
+
 if __name__ == "__main__":
     pytest.main(["-v", "backend/test_flows.py"])

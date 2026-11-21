@@ -262,6 +262,17 @@ export const api = {
 
   // Dashboard & Reports
   getDashboard: () => request('/api/dashboard'),
+  getStockAsOf: (date) => request(`/api/reports/stock-as-of?date=${encodeURIComponent(date)}`),
+  getBinCard: (itemId, fromDate = '', toDate = '') => {
+    const q = new URLSearchParams({ item_id: itemId });
+    if (fromDate) q.append('from_date', fromDate);
+    if (toDate) q.append('to_date', toDate);
+    return request(`/api/reports/bin-card?${q.toString()}`);
+  },
+  getConsumptionByDept: (days = 90) => request(`/api/reports/consumption-by-dept?days=${days}`),
+  getAbcAnalysis: () => request('/api/reports/abc-analysis'),
+  getVendorPerformance: () => request('/api/reports/vendor-performance'),
+
   downloadStockReport: async () => {
     const blob = await request('/api/reports/stock.csv');
     const url = window.URL.createObjectURL(blob);

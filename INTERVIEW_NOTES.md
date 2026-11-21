@@ -98,6 +98,32 @@
 - **Answer:** `TextSizeContext.jsx` maintains three standard university accessibility font scales (`A-` 13px, `A` 14px, `A+` 16px) stored in `localStorage` and dynamically updates `document.documentElement.style.fontSize`. Because all layouts use proportional `rem` and Tailwind font sizes, all UI components scale harmoniously.
 - **Code Reference:** `frontend/src/context/TextSizeContext.jsx`, and `frontend/src/components/UtilityBar.jsx`.
 
+### Q21: How do the analytical reporting protocols (Historical Stock As-Of, Bin Card, Department Consumption, ABC Pareto) work?
+- **Answer:**
+  1. **Historical Stock As-Of:** For CAG audit compliance, we reconstruct stock balances at any past date by replaying the immutable ledger: $\text{Stock}(t) = \sum_{at \le t} \text{IN} - \sum_{at \le t} \text{OUT}$.
+  2. **Bin Card:** Computes opening balance before the start date, lists all chronological vouchers with running balance, and displays closing balance.
+  3. **Department Consumption:** Aggregates store issues by university school / lab with spend percentages and trend visualization.
+  4. **ABC Pareto Analysis:** Computes annual turnover value per item, sorts descending, and assigns Pareto classes (Class A = top 70%, Class B = next 20%, Class C = remaining 10%).
+  5. **Vendor Scorecard:** Calculates PO fulfillment rates ($\frac{\sum \text{got}}{\sum \text{qty}}$), total spend, and supplier efficiency ratings (A/B/C).
+- **Code Reference:** `backend/app/main.py` -> `rep_stock_as_of()`, `rep_bin_card()`, `rep_consumption_by_dept()`, `rep_abc_analysis()`, and `rep_vendor_performance()`.
+
+### Q22: What HTTP security headers and protocol hardening measures are in place?
+- **Answer:** We enforce defense-in-depth:
+  - `X-Content-Type-Options: nosniff` (prevents MIME-sniffing)
+  - `X-Frame-Options: DENY` (prevents clickjacking)
+  - `X-XSS-Protection: 1; mode=block` (browser reflection protection)
+  - `Referrer-Policy: strict-origin-when-cross-origin` (protects internal URL privacy)
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()` (restricts unauthorized browser APIs)
+  - `Cross-Origin-Opener-Policy: same-origin` (isolates execution context)
+  - In production: `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
+  - Sliding-window login rate limiting (5 attempts per 10 minutes)
+  - Request body size limit (1 MB max payload to protect against memory exhaustion).
+- **Code Reference:** `backend/app/main.py` -> `security_headers_middleware()` and `request_size_limit_middleware()`.
+
+### Q23: How do you ensure the system is free of known CVE vulnerabilities?
+- **Answer:** We conduct automated vulnerability scans across dependencies using `pip-audit` for Python and `npm audit` for Node. Running `pip-audit` against our environment confirms **0 known CVE vulnerabilities** across all backend packages.
+- **Verification:** Verified via `.venv/bin/pip-audit`.
+
 ---
 
 ## 3. Five Honest Answers to "What Would You Improve with More Time?"
