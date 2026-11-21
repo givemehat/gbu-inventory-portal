@@ -92,28 +92,50 @@ export default function Login() {
     <div className="min-h-screen bg-paper flex items-center justify-center p-4 sm:p-6 lg:p-8 text-ink">
       <div className="max-w-[1100px] w-full bg-surface border border-line rounded-panel md:shadow-card overflow-hidden grid grid-cols-1 md:grid-cols-12">
         {/* Left Column: University Identity (stacked header on mobile, full-height blue panel on desktop) */}
-        <div className="md:col-span-5 bg-primary text-white p-6 sm:p-8 md:p-10 flex flex-col justify-between">
+        <div className="md:col-span-5 bg-primary text-white p-6 sm:p-8 md:p-8 flex flex-col justify-between">
           <div>
-            <div className="mb-4 md:mb-6">
+            <div className="flex items-center gap-3 mb-4">
               <img
                 src="/gbu-logo.jpg"
                 alt="Gautam Buddha University Logo"
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white p-1 shadow-md object-contain"
+                className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white p-1 shadow-md object-contain shrink-0"
               />
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-blue-200 font-medium">
+                  गौतम बुद्ध विश्वविद्यालय
+                </p>
+                <p className="text-[11px] text-blue-200/90 italic">
+                  An Ultimate Destination for Higher Learning
+                </p>
+              </div>
             </div>
-            <h1 className="font-serif text-[22px] sm:text-[26px] md:text-[28px] font-semibold tracking-tight leading-snug text-white">
+            <h1 className="font-serif text-[22px] sm:text-[24px] md:text-[26px] font-semibold tracking-tight leading-snug text-white">
               Gautam Buddha University
             </h1>
-            <p className="font-serif text-[15px] sm:text-[16px] text-blue-100 mt-1">
+            <p className="font-serif text-[15px] sm:text-[16px] text-blue-100 mt-0.5">
               Stores & Purchase Department
             </p>
-            <p className="hidden md:block text-[13px] text-blue-100/90 mt-4 leading-relaxed">
-              Digital stock register, departmental material requisitions, purchase order procurement, and asset condemnation records.
+            <p className="hidden md:block text-[12px] text-blue-100/90 mt-3 leading-relaxed">
+              Official digital portal for departmental stock indents, purchase orders, inventory ledgers, and condemnation records.
             </p>
+
+            {/* Campus Landmark Photo: Administrative Building */}
+            <div className="hidden md:block mt-5 rounded border border-white/20 overflow-hidden shadow-sm bg-primary-hover/50">
+              <img
+                src="/gbu-campus.webp"
+                alt="GBU Administrative Building (प्रशासनिक भवन)"
+                className="w-full h-28 object-cover"
+              />
+              <div className="px-2.5 py-1.5 bg-[#0F2252]/90 flex items-center justify-between text-[11px] text-blue-100">
+                <span className="font-medium">प्रशासनिक भवन (Admin Block)</span>
+                <span className="text-[10px] text-blue-200 italic font-serif">अत्ता हि अत्तनो नाथो</span>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-4 md:mt-8 pt-4 md:pt-6 border-t border-blue-400/30 text-[12px] text-blue-200">
-            Greater Noida, Uttar Pradesh — 201312
+          <div className="mt-4 md:mt-6 pt-3 md:pt-4 border-t border-blue-400/30 text-[11px] text-blue-200 flex items-center justify-between">
+            <span>Greater Noida, UP — 201312</span>
+            <span>EPABX: 0120-2344200</span>
           </div>
         </div>
 
