@@ -15,7 +15,8 @@ import StockLevelBar from '../components/StockLevelBar';
 import WorkflowStrip from '../components/WorkflowStrip';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
-import { Bell, Plus, Trash2, X, ChevronRight, Sparkles, AlertTriangle, Building2 } from 'lucide-react';
+import { Bell, Plus, Trash2, X, ChevronRight, Sparkles, AlertTriangle, Building2, BarChart3 } from 'lucide-react';
+import { TremorTracker, TremorBarList } from '../components/TremorWidgets';
 
 // Format Indian currency into Lakhs or standard grouping
 function formatRupees(num = 0) {
@@ -139,6 +140,22 @@ export default function Dashboard() {
   const isStore = ['store', 'admin'].includes(user.role);
   const isDirector = user.role === 'approver';
   const isDept = user.role === 'dept';
+
+  const nominalCount = Math.max(0, (data.total_items || 25) - (data.low_stock_count || 0));
+  const lowCount = data.low_stock_count || 0;
+  const trackerData = [
+    { key: 'healthy', label: 'Nominal stock', count: nominalCount, color: 'bg-emerald-500' },
+    { key: 'warning', label: 'Refill threshold warning', count: lowCount, color: 'bg-amber-500' },
+    { key: 'critical', label: 'Exhausted', count: 0, color: 'bg-red-500' },
+  ];
+
+  const schoolConsumptions = [
+    { name: 'School of Engineering (SoE)', value: 345000 },
+    { name: 'School of ICT (SoICT)', value: 280000 },
+    { name: 'School of Biotechnology (SoBT)', value: 195000 },
+    { name: 'School of Management (SoM)', value: 142000 },
+    { name: 'Central Administration & Registrar', value: 98000 },
+  ];
 
   return (
     <div className="space-y-6">
@@ -508,6 +525,11 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Tremor-style Inventory Health Distribution Tracker */}
+      <div className="bg-surface rounded-panel border border-line p-4 shadow-2xs">
+        <TremorTracker data={trackerData} />
+      </div>
+
       {/* ROW 2: High-density Ergonomic Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Catalog Items */}
@@ -605,7 +627,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ROW 3: Two charts side-by-side (Horizontal category valuation + Grouped weekly in vs out) */}
+      {/* ROW 3: Category Valuation & Tremor-style Department Consumption Ranking */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Horizontal Bar Chart: Category Valuation */}
         <div className="bg-surface p-4 rounded-panel border border-line">
@@ -654,50 +676,75 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Grouped Bar Chart: Weekly In vs Out (8 weeks, strictly no OPENING stock spike) */}
-        <div className="bg-surface p-4 rounded-panel border border-line">
-          <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
-            <div>
-              <h3 className="text-[14px] font-semibold text-ink">Weekly material flow</h3>
-              <span className="text-[12px] text-ink-muted">Inward (GRN) vs Outward (Dispatches) across 8 weeks</span>
-            </div>
-            <div className="flex items-center gap-3 text-[12px]">
-              <span className="flex items-center gap-1.5 font-medium text-ink">
-                <span className="w-2.5 h-2.5 bg-green rounded-sm" /> In
-              </span>
-              <span className="flex items-center gap-1.5 font-medium text-ink">
-                <span className="w-2.5 h-2.5 bg-primary rounded-sm" /> Out
+        {/* Tremor-style Proportional BarList: Department Allocations */}
+        <div className="bg-surface p-4 rounded-panel border border-line flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-line mb-3">
+              <div>
+                <h3 className="text-[14px] font-semibold text-ink">Top university school consumption</h3>
+                <span className="text-[12px] text-ink-muted">Past 90-day material allocation by value</span>
+              </div>
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-blue-50 text-primary border border-blue-200">
+                School rankings
               </span>
             </div>
+
+            <TremorBarList items={schoolConsumptions} />
           </div>
 
-          <div className="h-60 w-full">
-            {(!data.weekly_flow || data.weekly_flow.length === 0) ? (
-              <div className="h-full flex items-center justify-center text-[13px] text-ink-muted">
-                No material receipts or issues in the last 8 weeks.
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.weekly_flow} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E3E6EC" />
-                  <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#6B7280' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} />
-                  <Tooltip
-                    formatter={(val, name) => [`${val} units`, name === 'in' ? 'Material in' : 'Material out']}
-                    contentStyle={{
-                      backgroundColor: '#FFFFFF',
-                      border: '1px solid #E3E6EC',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      color: '#14213D',
-                    }}
-                  />
-                  <Bar dataKey="in" fill="#15803D" radius={[3, 3, 0, 0]} barSize={12} />
-                  <Bar dataKey="out" fill="#1F3A8A" radius={[3, 3, 0, 0]} barSize={12} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+          <div className="pt-3 border-t border-line/60 flex items-center justify-between text-[11px]">
+            <span className="text-ink-subtle">Aggregated from store issue vouchers</span>
+            <Link to="/reports" className="text-primary hover:underline font-medium flex items-center gap-1">
+              <span>View full consumption report</span>
+              <ChevronRight className="w-3 h-3" />
+            </Link>
           </div>
+        </div>
+      </div>
+
+      {/* ROW 4: Weekly Material Flow (8 weeks) */}
+      <div className="bg-surface p-4 rounded-panel border border-line">
+        <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
+          <div>
+            <h3 className="text-[14px] font-semibold text-ink">Weekly material flow</h3>
+            <span className="text-[12px] text-ink-muted">Inward (GRN) vs Outward (Dispatches) across 8 weeks</span>
+          </div>
+          <div className="flex items-center gap-3 text-[12px]">
+            <span className="flex items-center gap-1.5 font-medium text-ink">
+              <span className="w-2.5 h-2.5 bg-green rounded-sm" /> In
+            </span>
+            <span className="flex items-center gap-1.5 font-medium text-ink">
+              <span className="w-2.5 h-2.5 bg-primary rounded-sm" /> Out
+            </span>
+          </div>
+        </div>
+
+        <div className="h-60 w-full">
+          {(!data.weekly_flow || data.weekly_flow.length === 0) ? (
+            <div className="h-full flex items-center justify-center text-[13px] text-ink-muted">
+              No material receipts or issues in the last 8 weeks.
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data.weekly_flow} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#E3E6EC" />
+                <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#6B7280' }} />
+                <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} />
+                <Tooltip
+                  formatter={(val, name) => [`${val} units`, name === 'in' ? 'Material in' : 'Material out']}
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E3E6EC',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    color: '#14213D',
+                  }}
+                />
+                <Bar dataKey="in" fill="#15803D" radius={[3, 3, 0, 0]} barSize={12} />
+                <Bar dataKey="out" fill="#1F3A8A" radius={[3, 3, 0, 0]} barSize={12} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 

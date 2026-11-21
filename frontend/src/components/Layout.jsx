@@ -5,6 +5,7 @@ import Header from './Header';
 import UtilityBar from './UtilityBar';
 import Footer from './Footer';
 import ItemDrawer from './ItemDrawer';
+import CommandPalette from './CommandPalette';
 import { getToken, getCurrentUser } from '../api';
 import { ChevronRight, Home } from 'lucide-react';
 
@@ -25,6 +26,7 @@ const routeMetadata = {
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [drawerItem, setDrawerItem] = useState(null);
+  const [commandOpen, setCommandOpen] = useState(false);
   const location = useLocation();
   const token = getToken();
   const user = getCurrentUser();
@@ -55,6 +57,7 @@ export default function Layout() {
             title={currentMeta.title}
             group={currentMeta.group}
             onItemSelect={(item) => setDrawerItem(item)}
+            onOpenCommand={() => setCommandOpen(true)}
           />
 
           <main className="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-6">
@@ -71,6 +74,13 @@ export default function Layout() {
         item={drawerItem}
         isOpen={!!drawerItem}
         onClose={() => setDrawerItem(null)}
+      />
+
+      {/* Global Command Palette (Cmd+K) */}
+      <CommandPalette
+        isOpen={commandOpen}
+        setIsOpen={setCommandOpen}
+        onItemSelect={(item) => setDrawerItem(item)}
       />
     </div>
   );

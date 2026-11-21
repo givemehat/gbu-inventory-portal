@@ -3,57 +3,33 @@ import { Link } from 'react-router-dom';
 import { Menu, Search, LogOut, ChevronDown, Package, Home, ChevronRight } from 'lucide-react';
 import { getCurrentUser, logout, api } from '../api';
 
-export default function Header({ setMobileOpen, title, group = 'Portal', onItemSelect }) {
+export default function Header({ setMobileOpen, title, group = 'Portal', onItemSelect, onOpenCommand }) {
   const user = getCurrentUser() || { name: 'User', role: 'store', dept: 'Stores & Purchase' };
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchOpen, setSearchOpen] = useState(false);
-
   const menuRef = useRef(null);
-  const searchInputRef = useRef(null);
-  const searchRef = useRef(null);
 
-  // Global keyboard shortcut: press / to focus search
+  // Global keyboard shortcut: press / to open command
   useEffect(() => {
     function handleKeyDown(e) {
-      if (e.key === '/' && document.activeElement !== searchInputRef.current && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
         e.preventDefault();
-        searchInputRef.current?.focus();
+        onOpenCommand?.();
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [onOpenCommand]);
 
-  // Click outside listener for menu & search
+  // Click outside listener for menu
   useEffect(() => {
     function handleClickOutside(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setSearchOpen(false);
-      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Search items as user types
-  useEffect(() => {
-    if (searchQuery.trim().length >= 2) {
-      api.getItems({ q: searchQuery.trim() })
-        .then((res) => {
-          setSearchResults(res.slice(0, 8));
-          setSearchOpen(true);
-        })
-        .catch(() => setSearchResults([]));
-    } else {
-      setSearchResults([]);
-      setSearchOpen(false);
-    }
-  }, [searchQuery]);
 
   const roleDisplay = {
     admin: 'Administrator',
@@ -87,50 +63,24 @@ export default function Header({ setMobileOpen, title, group = 'Portal', onItemS
         </nav>
       </div>
 
-      {/* Middle: Global Search (Item 12: placeholder="Search items", aria-label full, / hint) */}
-      <div ref={searchRef} className="relative flex-1 max-w-sm hidden md:block">
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => searchQuery.length >= 2 && setSearchOpen(true)}
-            placeholder="Search items"
-            aria-label="Search items by name or code (press / to focus)"
-            className="w-full h-8 pl-9 pr-8 text-[13px] bg-paper rounded border border-line focus:border-primary focus:bg-surface outline-none transition-colors placeholder:text-ink-subtle"
-          />
-          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-ink-subtle border border-line bg-surface px-1 py-0.2 rounded pointer-events-none">
-            /
-          </kbd>
-        </div>
-
-        {/* Search Results Dropdown */}
-        {searchOpen && searchResults.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded shadow-sm overflow-hidden z-50 divide-y divide-line/40">
-            {searchResults.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setSearchOpen(false);
-                  setSearchQuery('');
-                  onItemSelect?.(item);
-                }}
-                className="w-full px-3 py-2 text-left hover:bg-paper flex items-center justify-between transition-colors text-[13px]"
-              >
-                <div className="truncate pr-2">
-                  <span className="font-mono text-[11px] text-ink-muted mr-1.5">[{item.code}]</span>
-                  <span className="font-medium text-ink truncate">{item.name}</span>
-                </div>
-                <span className="tabular-nums text-[12px] font-medium text-ink-muted shrink-0">
-                  {item.qty} {item.unit}
-                </span>
-              </button>
-            ))}
+      {/* Middle: Global Search / Command Palette Launcher (Shadcn Admin Style) */}
+      <div className="relative flex-1 max-w-sm hidden md:block">
+        <button
+          type="button"
+          onClick={onOpenCommand}
+          aria-label="Search items by name or code (press ⌘K or / to open)"
+          className="w-full h-8 pl-3 pr-2 text-[13px] bg-paper rounded border border-line hover:border-primary/50 text-left text-ink-subtle flex items-center justify-between transition-colors shadow-2xs group"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <Search className="w-3.5 h-3.5 text-ink-subtle group-hover:text-primary transition-colors" />
+            <span className="truncate">Search items, vouchers, pages...</span>
           </div>
-        )}
+          <div className="flex items-center gap-1 shrink-0">
+            <kbd className="text-[10px] font-mono text-ink-subtle border border-line bg-surface px-1.5 py-0.2 rounded shadow-2xs">
+              ⌘K
+            </kbd>
+          </div>
+        </button>
       </div>
 
       {/* Right: Consolidated User Menu */}
