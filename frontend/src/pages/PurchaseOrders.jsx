@@ -236,16 +236,8 @@ export default function PurchaseOrders() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumbs & Header (MIT Style) */}
+      {/* Header (MIT Style) */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
-          <span>🏠</span>
-          <span>/</span>
-          <span>roadmaps</span>
-          <span>/</span>
-          <span className="font-semibold text-slate-800">Purchase_Orders_and_Goods_Receipt</span>
-        </div>
-
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">

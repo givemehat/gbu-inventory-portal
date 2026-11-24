@@ -62,32 +62,24 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         />
       )}
 
-      {/* Sidebar container with MIT-inspired Royal Blue Theme */}
+      {/* Sidebar container with MIT-inspired Royal Blue Theme starting beneath top bar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-[240px] bg-[#1565C0] text-white flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 shadow-md ${
+        className={`fixed top-14 bottom-0 left-0 z-40 w-[240px] bg-[#1565C0] text-white flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 shadow-md ${
           mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
-        {/* Brand header */}
-        <div className="h-16 px-4 bg-[#0D47A1] border-b border-blue-400/20 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <img
-              src={assetUrl('gbu-logo.jpg')}
-              alt="GBU Logo"
-              className="w-9 h-9 rounded-full bg-white object-contain p-0.5 border border-white/30 shrink-0 shadow-sm"
-            />
-            <div className="leading-tight">
-              <span className="font-bold text-[14.5px] text-white tracking-tight block">Stores & Purchase</span>
-              <span className="text-[11.5px] text-blue-200 block font-medium">Gautam Buddha University</span>
-            </div>
-          </div>
+        {/* Navigation Roster Header */}
+        <div className="h-11 px-4 bg-[#0D47A1] border-b border-blue-400/20 flex items-center justify-between shrink-0">
+          <span className="font-bold text-[11.5px] uppercase tracking-wider text-blue-100/90">
+            Navigation Menu
+          </span>
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
             aria-label="Close navigation"
             className="lg:hidden text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -111,7 +103,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                       <NavLink
                         key={item.to}
                         to={item.to}
-                        onClick={() => setMobileOpen(false)}
+                        onClick={() => {
+                          setMobileOpen(false);
+                          if (item.to === '/dashboard') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }
+                        }}
                         className={({ isActive }) =>
                           `flex items-center gap-2.5 px-3 py-2 rounded-md text-[14.5px] font-medium transition-all ${
                             isActive

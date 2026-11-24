@@ -163,16 +163,8 @@ export default function Items() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb & Section Header (MIT Style) */}
+      {/* Section Header (MIT Style) */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
-          <span>🏠</span>
-          <span>/</span>
-          <span>roadmaps</span>
-          <span>/</span>
-          <span className="font-semibold text-slate-800">Central_Stock_Register</span>
-        </div>
-
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">

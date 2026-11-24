@@ -144,16 +144,8 @@ export default function Indents() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumbs & Page Header (MIT Style) */}
+      {/* Page Header (MIT Style) */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
-          <span>🏠</span>
-          <span>/</span>
-          <span>roadmaps</span>
-          <span>/</span>
-          <span className="font-semibold text-slate-800">Departmental_Indents_and_Requisitions</span>
-        </div>
-
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">

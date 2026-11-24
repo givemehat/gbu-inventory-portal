@@ -174,15 +174,6 @@ export default function Reports() {
     <div className="space-y-6">
       {/* Top Banner & Primary Actions (hidden on print) */}
       <div className="no-print space-y-4">
-        {/* Breadcrumb Trail */}
-        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
-          <span>🏠</span>
-          <span>/</span>
-          <span>roadmaps</span>
-          <span>/</span>
-          <span className="font-semibold text-slate-800">Inventory_Reports_and_Statements</span>
-        </div>
-
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">

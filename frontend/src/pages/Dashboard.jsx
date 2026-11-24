@@ -257,18 +257,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* 1. MIT-Inspired Top Breadcrumb Trail */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
-        <Link to="/dashboard" className="hover:text-blue-600 flex items-center gap-1.5 text-slate-400 hover:text-blue-600 transition-colors">
-          <Home className="w-4 h-4" />
-        </Link>
-        <span className="text-slate-400">/</span>
-        <span className="text-slate-500">roadmaps</span>
-        <span className="text-slate-400">/</span>
-        <span className="font-semibold text-slate-800">Inventory_Management_System</span>
-      </nav>
-
-      {/* 2. Main Page Header (Exact MIT Styling: Large Title + Technology Roadmap Blue Section) */}
+      {/* 1. Main Page Header (Exact MIT Styling: Large Title + Technology Roadmap Blue Section) */}
       <div className="space-y-4">
         <h1 className="text-3xl sm:text-4xl md:text-[38px] font-bold text-slate-900 tracking-tight leading-tight">
           Inventory Management System
