@@ -55,13 +55,13 @@ export default function Header({ setMobileOpen, onOpenCommand, onOpenShortcuts }
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-[70px] bg-[#0B0F19] text-white z-50 border-b border-slate-800/90 px-4 sm:px-8 flex items-center justify-between gap-4 select-none shadow-lg">
+    <header className="fixed top-0 left-0 right-0 h-[64px] sm:h-[70px] bg-[#0B0F19] text-white z-50 border-b border-slate-800/90 px-3 sm:px-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-lg">
       {/* 1. Left: Broad Institutional Branding with Logo & Directorate Subtitle */}
-      <div className="flex items-center gap-3.5 shrink-0 min-w-0">
+      <div className="flex items-center gap-2 sm:gap-3.5 flex-1 sm:flex-initial min-w-0">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+          className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
@@ -70,24 +70,29 @@ export default function Header({ setMobileOpen, onOpenCommand, onOpenShortcuts }
         <Link
           to="/dashboard"
           onClick={handleHomeLogoClick}
-          className="flex items-center gap-3 group cursor-pointer"
+          className="flex items-center gap-2 sm:gap-3 group cursor-pointer min-w-0"
           title="Return to Dashboard Home"
         >
           {/* University Emblem + Red Accent Bar */}
-          <div className="flex items-center gap-2.5">
-            <span className="w-1.5 h-8 bg-red-600 rounded-full shrink-0 shadow-sm" />
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            <span className="w-1.5 h-7 sm:h-8 bg-red-600 rounded-full shrink-0 shadow-sm" />
             <img
               src={assetUrl('gbu-logo.jpg')}
               alt="GBU Seal"
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white object-contain p-0.5 border border-white/20 shrink-0 shadow-sm group-hover:scale-105 transition-transform"
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white object-contain p-0.5 border border-white/20 shrink-0 shadow-sm group-hover:scale-105 transition-transform"
             />
           </div>
 
-          <div className="leading-tight">
-            <span className="font-extrabold text-white text-[15.5px] sm:text-[18px] md:text-[19px] tracking-wide uppercase group-hover:text-blue-400 transition-colors block">
+          <div className="leading-tight min-w-0">
+            {/* Mobile title */}
+            <span className="sm:hidden font-extrabold text-white text-[14px] tracking-wide uppercase truncate block">
+              GBU IMS PORTAL
+            </span>
+            {/* Desktop / tablet title */}
+            <span className="hidden sm:block font-extrabold text-white text-[17px] md:text-[19px] tracking-wide uppercase group-hover:text-blue-400 transition-colors truncate">
               GBU INVENTORY MANAGEMENT PORTAL
             </span>
-            <span className="text-[10.5px] sm:text-[11.5px] font-medium text-slate-400 tracking-wider uppercase hidden sm:block mt-0.5">
+            <span className="text-[10.5px] sm:text-[11.5px] font-medium text-slate-400 tracking-wider uppercase hidden sm:block mt-0.5 truncate">
               Gautam Buddha University • Stores & Purchase Directorate
             </span>
           </div>
@@ -115,13 +120,14 @@ export default function Header({ setMobileOpen, onOpenCommand, onOpenShortcuts }
       </div>
 
       {/* 3. Right: Shortcuts, Notification Bell & User Profile Menu */}
-      <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-3.5 shrink-0">
         {/* Mobile Search Button (shows when top pill is hidden) */}
         <button
           type="button"
           onClick={onOpenCommand}
           className="md:hidden p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           title="Search"
+          aria-label="Search catalog and POs"
         >
           <Search className="w-5 h-5" />
         </button>
@@ -147,15 +153,15 @@ export default function Header({ setMobileOpen, onOpenCommand, onOpenShortcuts }
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="User account menu"
-            className="flex items-center gap-2.5 py-1.5 px-2.5 rounded-full hover:bg-slate-800/80 transition-colors border border-transparent hover:border-slate-700"
+            className="flex items-center gap-1.5 sm:gap-2.5 py-1.5 px-1.5 sm:px-2.5 rounded-full hover:bg-slate-800/80 transition-colors border border-transparent hover:border-slate-700"
           >
-            <div className="w-8 h-8 rounded-full bg-[#1565C0] text-white flex items-center justify-center font-bold text-[13px] uppercase border border-white/20 shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-[#1565C0] text-white flex items-center justify-center font-bold text-[13px] uppercase border border-white/20 shadow-xs shrink-0">
               {user.name.charAt(0)}
             </div>
             <span className="text-[14px] font-semibold text-slate-200 hidden sm:inline">
               {user.name}
             </span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
           </button>
 
           {/* User Dropdown */}

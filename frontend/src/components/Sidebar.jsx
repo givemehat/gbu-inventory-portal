@@ -57,29 +57,36 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-xs"
+          className="fixed inset-0 bg-slate-900/60 z-50 lg:hidden backdrop-blur-xs"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar container with MIT-inspired Royal Blue Theme starting beneath top bar */}
       <aside
-        className={`fixed top-[70px] bottom-0 left-0 z-40 w-[240px] bg-[#1565C0] text-white flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 shadow-md ${
-          mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+        className={`fixed top-0 lg:top-[70px] bottom-0 left-0 z-50 lg:z-40 w-[280px] sm:w-[260px] lg:w-[240px] max-w-[85vw] bg-[#1565C0] text-white flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 shadow-2xl lg:shadow-md ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Navigation Roster Header */}
-        <div className="h-11 px-4 bg-[#0D47A1] border-b border-blue-400/20 flex items-center justify-between shrink-0">
-          <span className="font-bold text-[11.5px] uppercase tracking-wider text-blue-100/90">
-            Navigation Menu
-          </span>
+        {/* Navigation Roster Header with GBU Seal on Mobile */}
+        <div className="h-14 lg:h-11 px-4 bg-[#0D47A1] border-b border-blue-400/20 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5">
+            <img
+              src={assetUrl('gbu-logo.jpg')}
+              alt="GBU Seal"
+              className="w-7 h-7 rounded-full bg-white object-contain p-0.5 border border-white/20 lg:hidden"
+            />
+            <span className="font-bold text-[12px] lg:text-[11.5px] uppercase tracking-wider text-blue-100/90">
+              Navigation Menu
+            </span>
+          </div>
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
             aria-label="Close navigation"
-            className="lg:hidden text-white/80 hover:text-white p-1 rounded hover:bg-white/10"
+            className="lg:hidden text-white/90 hover:text-white p-1.5 rounded-md hover:bg-white/10 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

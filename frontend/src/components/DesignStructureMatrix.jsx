@@ -105,6 +105,10 @@ export default function DesignStructureMatrix() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Matrix Grid */}
         <div className="lg:col-span-8 overflow-x-auto">
+          <div className="sm:hidden mb-2 px-2.5 py-1.5 bg-blue-50 border border-blue-200/80 rounded-md text-[12px] text-blue-800 flex items-center justify-between font-medium">
+            <span>👉 Swipe horizontally to view full matrix</span>
+            <span className="font-mono text-[10px] uppercase font-bold text-blue-600">7 x 7</span>
+          </div>
           <table className="w-full border-collapse text-center select-none">
             <thead>
               <tr>

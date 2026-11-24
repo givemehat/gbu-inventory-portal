@@ -62,21 +62,21 @@ export default function Layout() {
         onOpenShortcuts={() => setShortcutsOpen(true)}
       />
 
-      {/* 2. Body Container below Top Bar (pt-[70px] matches Header h-[70px]) */}
-      <div className="flex-1 flex pt-[70px]">
+      {/* 2. Body Container below Top Bar (pt-[64px] sm:pt-[70px] matches Header height) */}
+      <div className="flex-1 flex pt-[64px] sm:pt-[70px]">
         {/* 240px Royal Blue Sidebar starting beneath top bar */}
         <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
         {/* Main Body */}
         <div className="flex-1 lg:pl-[240px] flex flex-col min-w-0">
           {/* Sub-Header: Single clean Breadcrumb Bar (MIT Style) + Quick Links */}
-          <div className="h-10 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between text-[13.5px] select-none shrink-0 z-10 shadow-2xs">
+          <div className="h-10 bg-white border-b border-slate-200 px-3 sm:px-6 flex items-center justify-between text-[13.5px] select-none shrink-0 z-10 shadow-2xs">
             {/* Breadcrumb Navigation Trail */}
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-slate-500 font-medium truncate">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 sm:gap-2 text-slate-500 font-medium truncate min-w-0">
               <Link
                 to="/dashboard"
                 onClick={handleHomeClick}
-                className="hover:text-[#1565C0] flex items-center gap-1.5 text-slate-500 hover:text-[#1565C0] transition-colors"
+                className="hover:text-[#1565C0] flex items-center gap-1.5 text-slate-500 hover:text-[#1565C0] transition-colors shrink-0"
                 title="Go to Home Overview (Click to scroll top)"
               >
                 <Home className="w-4 h-4 text-slate-400" />
@@ -89,7 +89,7 @@ export default function Layout() {
             </nav>
 
             {/* Quick Resource Links & Text Size Controls */}
-            <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               <div className="hidden md:flex items-center gap-3.5 text-[12.5px] text-slate-600 font-medium">
                 <Link to="/directory" className="hover:text-[#1565C0] flex items-center gap-1 transition-colors">
                   <Building2 className="w-3.5 h-3.5 text-slate-400" />
@@ -107,8 +107,8 @@ export default function Layout() {
 
               <div className="hidden md:block h-3.5 w-px bg-slate-200" />
 
-              {/* Text Size Scale Control: A- | A | A+ */}
-              <div className="flex items-center gap-1 bg-slate-100 rounded-md px-1.5 py-0.5 border border-slate-200">
+              {/* Text Size Scale Control: A- | A | A+ (hidden on small mobile to maximize breadcrumb space) */}
+              <div className="hidden sm:flex items-center gap-1 bg-slate-100 rounded-md px-1.5 py-0.5 border border-slate-200">
                 <span className="text-[10px] text-slate-500 mr-1 hidden sm:inline font-medium">Text:</span>
                 <button
                   type="button"

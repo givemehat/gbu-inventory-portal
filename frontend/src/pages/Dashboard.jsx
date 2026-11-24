@@ -78,6 +78,7 @@ export default function Dashboard() {
   const [abcData, setAbcData] = useState(null);
   const [allItems, setAllItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const [newNotice, setNewNotice] = useState({ title: '', content: '', ref_no: '' });
   const [submittingNotice, setSubmittingNotice] = useState(false);
@@ -120,6 +121,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboard();
+    function handleResize() {
+      setIsMobile(window.innerWidth < 640);
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleCreateNotice = async (e) => {
@@ -501,16 +507,16 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={schoolBarData}
-                  margin={{ top: 25, right: 20, left: 10, bottom: 20 }}
+                  margin={{ top: 25, right: isMobile ? 5 : 20, left: isMobile ? -15 : 10, bottom: isMobile ? 25 : 20 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                   <XAxis
                     dataKey="name"
-                    tick={{ fontSize: 12, fill: '#1E293B', fontWeight: 600 }}
+                    tick={{ fontSize: isMobile ? 10 : 12, fill: '#1E293B', fontWeight: 600 }}
                     interval={0}
                   />
                   <YAxis
-                    tick={{ fontSize: 12, fill: '#64748B' }}
+                    tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748B' }}
                     tickFormatter={(val) => `₹${(val / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
@@ -526,14 +532,14 @@ export default function Dashboard() {
                       item.payload.fullName,
                     ]}
                   />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={34}>
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={isMobile ? 18 : 34}>
                     {schoolBarData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                     <LabelList
                       dataKey="displayValue"
                       position="top"
-                      style={{ fontSize: '11px', fontWeight: 'bold', fill: '#334155' }}
+                      style={{ fontSize: isMobile ? '9px' : '11px', fontWeight: 'bold', fill: '#334155' }}
                     />
                   </Bar>
                 </BarChart>
