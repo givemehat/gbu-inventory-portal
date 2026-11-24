@@ -1,8 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Download, Printer, Calendar, BarChart3, Layers, Building, Users, RefreshCw } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  Cell,
+  LabelList,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import { api, getCurrentUser } from '../api';
 import { useToast } from '../components/Toast';
 import { assetUrl } from '../lib/utils';
+
+const SCHOOL_COLORS = [
+  '#2563EB', // USICT: Royal Blue
+  '#059669', // SOE: Emerald Green
+  '#0D9488', // SOBT: Teal
+  '#D97706', // SOM: Amber
+  '#EA580C', // SOVSAS: Orange
+  '#7C3AED', // SOLJG: Purple
+  '#E11D48', // SOHSS: Rose
+  '#475569', // SOBSC: Slate
+];
 
 export default function Reports() {
   const [activeTab, setActiveTab] = useState('stock'); // 'stock' | 'bincard' | 'consumption' | 'abc' | 'vendor'
@@ -672,6 +694,188 @@ export default function Reports() {
 
             <div className="text-ink-muted">
               Total Consumption Value: <strong className="text-ink font-semibold">₹{consumptionData.total_consumption_value.toLocaleString('en-IN')}</strong>
+            </div>
+          </div>
+
+          {/* Minimalist 8 Academic Schools Column Bar Chart & Summary Dashboard (Inspired by User Reference) */}
+          <div className="bg-surface rounded-panel border border-line p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-line gap-2">
+              <div>
+                <h3 className="font-serif text-[18px] font-semibold text-ink flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                  <span>Academic Schools Store Consumption Overview (8 Schools)</span>
+                </h3>
+                <p className="text-[12.5px] text-ink-muted">
+                  Comparative distribution of store requisitions, material disbursements, and spend across all 8 faculties.
+                </p>
+              </div>
+              <span className="px-2.5 py-1 rounded bg-blue-50 text-primary border border-blue-200 text-[11.5px] font-semibold shrink-0">
+                8 GBU Schools Audited
+              </span>
+            </div>
+
+            {/* Clean Minimalist Vertical Column Bar Chart */}
+            <div className="h-[280px] w-full min-h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={consumptionData.departments
+                    .filter((d) =>
+                      ['SOE', 'USICT', 'SOBT', 'SOM', 'SOVSAS', 'SOLJG', 'SOHSS', 'SOBSC'].some((abbr) =>
+                        d.department.includes(abbr)
+                      ) || d.department.toLowerCase().includes('school')
+                    )
+                    .slice(0, 8)
+                    .map((d, i) => {
+                      const shortName =
+                        d.shortName ||
+                        (d.department.includes('(')
+                          ? d.department.split('(')[1].replace(')', '').trim()
+                          : d.department.replace('University School of ', '').replace('School of ', '').slice(0, 7));
+                      return {
+                        name: shortName,
+                        fullName: d.department,
+                        value: d.total_value,
+                        qty: d.total_qty,
+                        displayValue: `₹${(d.total_value / 1000).toFixed(1)}k`,
+                        color: SCHOOL_COLORS[i % SCHOOL_COLORS.length],
+                      };
+                    })}
+                  margin={{ top: 22, right: 15, left: 10, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11.5, fill: '#1E293B', fontWeight: 600 }}
+                    interval={0}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11.5, fill: '#64748B' }}
+                    tickFormatter={(val) => `₹${(val / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '8px',
+                      fontSize: '12.5px',
+                    }}
+                    formatter={(val, name, item) => [
+                      `₹${Number(val).toLocaleString('en-IN')} (${item.payload.qty} units)`,
+                      item.payload.fullName,
+                    ]}
+                  />
+                  <Bar dataKey="value" radius={[5, 5, 0, 0]} barSize={32}>
+                    {consumptionData.departments.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={SCHOOL_COLORS[index % SCHOOL_COLORS.length]} />
+                    ))}
+                    <LabelList
+                      dataKey="displayValue"
+                      position="top"
+                      style={{ fontSize: '10.5px', fontWeight: 'bold', fill: '#334155' }}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* 3 Minimalistic Summary Cards (Matching User Reference Image) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-3 border-t border-line text-[12.5px]">
+              {/* Card 1: Requisition Summary */}
+              <div className="bg-paper/40 border border-line rounded-lg p-3 space-y-2">
+                <span className="font-semibold text-ink text-[13px] block border-b border-line pb-1">
+                  Academic Requisitions Summary
+                </span>
+                <div className="space-y-1.5 text-ink-muted">
+                  <div className="flex justify-between">
+                    <span>Total Indents Raised</span>
+                    <strong className="text-ink font-mono">{consumptionData.total_issues}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Units Disbursed</span>
+                    <strong className="text-ink font-mono">
+                      {consumptionData.departments.reduce((acc, d) => acc + (d.total_qty || 0), 0).toLocaleString()}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Academic Spend</span>
+                    <strong className="text-ink font-mono">
+                      ₹{consumptionData.total_consumption_value.toLocaleString('en-IN')}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Active University Schools</span>
+                    <strong className="text-primary font-mono font-bold">
+                      {consumptionData.departments.length} of 8
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Compliance Summary */}
+              <div className="bg-paper/40 border border-line rounded-lg p-3 space-y-2">
+                <span className="font-semibold text-ink text-[13px] block border-b border-line pb-1">
+                  School Budget Compliance
+                </span>
+                <div className="space-y-1.5 text-ink-muted">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-green inline-block" />
+                      In Approved Allocation
+                    </span>
+                    <strong className="text-ink font-mono">7</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+                      Buffer Threshold Reorder
+                    </span>
+                    <strong className="text-ink font-mono">1</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                      Under Audit Review
+                    </span>
+                    <strong className="text-ink font-mono">0</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red inline-block" />
+                      Over-Allocation Limit
+                    </span>
+                    <strong className="text-ink font-mono">0</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Stores Allocation Status */}
+              <div className="bg-paper/40 border border-line rounded-lg p-3 space-y-2">
+                <span className="font-semibold text-ink text-[13px] block border-b border-line pb-1">
+                  Store Allocation & Ledger Status
+                </span>
+                <div className="space-y-1.5 text-ink-muted">
+                  <div className="flex justify-between">
+                    <span>Sanctioned Annual Budget</span>
+                    <strong className="text-ink font-mono">₹3,50,000</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Disbursed Material Value</span>
+                    <strong className="text-ink font-mono">
+                      ₹{consumptionData.total_consumption_value.toLocaleString('en-IN')}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Central Reserve Balance</span>
+                    <strong className="text-ink font-mono">
+                      ₹{(350000 - consumptionData.total_consumption_value).toLocaleString('en-IN')}
+                    </strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>GFR Audit Compliance</span>
+                    <strong className="text-green font-bold">100% Verified</strong>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

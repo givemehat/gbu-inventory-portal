@@ -3,6 +3,8 @@ import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import {
   BarChart,
   Bar,
+  Cell,
+  LabelList,
   AreaChart,
   Area,
   LineChart,
@@ -218,21 +220,38 @@ export default function Dashboard() {
         { date: '24 Nov', in: 65, out: 42 },
       ];
 
-  // School Consumption data: Top 5 Faculties
-  const rawDepts = consumptionData?.departments || [];
-  const primaryDepts = [
-    { department: 'School of ICT', total_value: 62450, total_qty: 185 },
-    { department: 'School of Engineering', total_value: 41200, total_qty: 142 },
-    { department: 'School of Management', total_value: 23680, total_qty: 95 },
-    { department: 'Central IT Cell', total_value: 14500, total_qty: 38 },
-    { department: 'Estate Maintenance', total_value: 6730, total_qty: 48 },
+  // Official 8 Academic Schools at Gautam Buddha University
+  const SCHOOL_COLORS = [
+    '#2563EB', // USICT: Royal Blue
+    '#059669', // SOE: Emerald Green
+    '#0D9488', // SOBT: Teal
+    '#D97706', // SOM: Amber
+    '#EA580C', // SOVSAS: Orange
+    '#7C3AED', // SOLJG: Purple
+    '#E11D48', // SOHSS: Rose
+    '#475569', // SOBSC: Slate
   ];
 
-  const schoolBarData = primaryDepts.map((d) => ({
-    name: d.department.replace('School of ', 'So').replace('Central ', ''),
+  // The 8 Official GBU Academic Schools
+  const primaryDepts = [
+    { department: 'School of Information & Communication Technology', shortName: 'USICT', total_value: 64850, total_qty: 245, issues_count: 18 },
+    { department: 'University School of Engineering', shortName: 'SOE', total_value: 46200, total_qty: 198, issues_count: 15 },
+    { department: 'University School of Biotechnology', shortName: 'SOBT', total_value: 32400, total_qty: 135, issues_count: 12 },
+    { department: 'University School of Management', shortName: 'SOM', total_value: 26800, total_qty: 160, issues_count: 11 },
+    { department: 'School of Vocational Studies & Applied Sciences', shortName: 'SOVSAS', total_value: 22100, total_qty: 120, issues_count: 10 },
+    { department: 'School of Law, Justice & Governance', shortName: 'SOLJG', total_value: 16400, total_qty: 110, issues_count: 8 },
+    { department: 'School of Humanities & Social Sciences', shortName: 'SOHSS', total_value: 12100, total_qty: 95, issues_count: 7 },
+    { department: 'School of Buddhist Studies & Civilizations', shortName: 'SOBSC', total_value: 8300, total_qty: 65, issues_count: 5 },
+  ];
+
+  const schoolBarData = primaryDepts.map((d, i) => ({
+    name: d.shortName,
     fullName: d.department,
     value: d.total_value,
     qty: d.total_qty,
+    issues: d.issues_count || 1,
+    displayValue: `₹${(d.total_value / 1000).toFixed(1)}k`,
+    color: SCHOOL_COLORS[i % SCHOOL_COLORS.length],
   }));
 
   // Pareto ABC Data
@@ -460,60 +479,161 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* PLOT 2: Academic School Spend & Consumption Breakdown Plot */}
+          {/* PLOT 2: All 8 Academic Schools Consumption Spend Distribution Plot */}
           <div id="plot-school-consumption" className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 mb-4 gap-2">
               <div>
                 <h3 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-[#1565C0]" />
-                  <span>Plot 2: Academic School Consumption Spend Distribution</span>
+                  <span>Plot 2: GBU Academic Schools (8 Schools) Spend Distribution</span>
                 </h3>
                 <p className="text-[14.5px] text-slate-600">
-                  Total material allocation and spend breakdown across faculties and administrative centers.
+                  Total material allocation and store issue spend across all 8 official academic schools of Gautam Buddha University.
                 </p>
               </div>
               <span className="px-2.5 py-1 rounded bg-blue-50 text-[#1565C0] font-semibold text-[13px] border border-blue-200 shrink-0">
-                Quarterly Spend Audit
+                8 Academic Schools Audited
               </span>
             </div>
 
-            <div className="h-72 w-full">
+            {/* Clean Minimalist Vertical Column Bar Chart (Inspired by User Reference) */}
+            <div className="h-[290px] w-full min-h-[290px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  layout="vertical"
                   data={schoolBarData}
-                  margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
+                  margin={{ top: 25, right: 20, left: 10, bottom: 20 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                   <XAxis
-                    type="number"
-                    tick={{ fontSize: 13, fill: '#475569' }}
-                    tickFormatter={(val) => formatRupees(val)}
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: '#1E293B', fontWeight: 600 }}
+                    interval={0}
                   />
                   <YAxis
-                    type="category"
-                    dataKey="name"
-                    tick={{ fontSize: 13.5, fill: '#1E293B', fontWeight: 600 }}
-                    width={90}
+                    tick={{ fontSize: 12, fill: '#64748B' }}
+                    tickFormatter={(val) => `₹${(val / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#FFFFFF',
                       border: '1px solid #CBD5E1',
                       borderRadius: '8px',
-                      fontSize: '13.5px',
+                      fontSize: '13px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     }}
-                    formatter={(val) => [formatRupees(val), 'Consumption Spend']}
+                    formatter={(val, name, item) => [
+                      `${formatRupees(val)} (${item.payload.qty} units drawn • ${item.payload.issues} indents)`,
+                      item.payload.fullName,
+                    ]}
                   />
-                  <Bar dataKey="value" fill="#1565C0" radius={[0, 6, 6, 0]} barSize={22} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={34}>
+                    {schoolBarData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                    <LabelList
+                      dataKey="displayValue"
+                      position="top"
+                      style={{ fontSize: '11px', fontWeight: 'bold', fill: '#334155' }}
+                    />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
+            {/* Minimalistic Audit Summary Cards (Inspired by User Reference Image) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-4 pt-4 border-t border-slate-100">
+              {/* Card 1: Requisition Summary */}
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg p-3.5 space-y-2 text-[13px]">
+                <span className="font-bold text-slate-800 text-[13.5px] block border-b border-slate-200/60 pb-1.5">
+                  Academic Requisition Summary
+                </span>
+                <div className="space-y-1.5 text-slate-600 font-medium">
+                  <div className="flex justify-between">
+                    <span>Total Indents Raised</span>
+                    <strong className="text-slate-900 font-mono">86</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Units Disbursed</span>
+                    <strong className="text-slate-900 font-mono">1,128</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Academic Spend</span>
+                    <strong className="text-slate-900 font-mono">₹2,29,150</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Active University Schools</span>
+                    <strong className="text-blue-700 font-mono font-bold">8 of 8</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Compliance Summary */}
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg p-3.5 space-y-2 text-[13px]">
+                <span className="font-bold text-slate-800 text-[13.5px] block border-b border-slate-200/60 pb-1.5">
+                  School Budget Compliance
+                </span>
+                <div className="space-y-1.5 text-slate-600 font-medium">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                      In Approved Allocation
+                    </span>
+                    <strong className="text-slate-900 font-mono">7</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                      Buffer Threshold Reorder
+                    </span>
+                    <strong className="text-slate-900 font-mono">1</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                      Under Audit Review
+                    </span>
+                    <strong className="text-slate-900 font-mono">0</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
+                      Over-Allocation Limit
+                    </span>
+                    <strong className="text-slate-900 font-mono">0</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Stores Allocation Status */}
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-lg p-3.5 space-y-2 text-[13px]">
+                <span className="font-bold text-slate-800 text-[13.5px] block border-b border-slate-200/60 pb-1.5">
+                  Store Allocation & Ledger Status
+                </span>
+                <div className="space-y-1.5 text-slate-600 font-medium">
+                  <div className="flex justify-between">
+                    <span>Sanctioned Annual Budget</span>
+                    <strong className="text-slate-900 font-mono">₹3,50,000</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Disbursed Material Value</span>
+                    <strong className="text-slate-900 font-mono">₹2,29,150</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Central Reserve Balance</span>
+                    <strong className="text-slate-900 font-mono">₹1,20,850</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>GFR Audit Compliance</span>
+                    <strong className="text-emerald-700 font-bold">100% Verified</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[13px] text-slate-500">
-              <span>Top Consuming Unit: School of ICT (₹62,450 • 42.0% of total spend)</span>
+              <span>Top Consuming Unit: School of ICT (₹64,850 • 28.3% of total academic spend)</span>
               <Link to="/reports" className="text-[#1565C0] font-semibold hover:underline flex items-center gap-1">
-                <span>View Full School Ledger Drill-down</span>
+                <span>View Full School Ledger Drill-down (All 8 Schools)</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>

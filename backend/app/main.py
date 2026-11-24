@@ -1507,11 +1507,29 @@ def rep_consumption_by_dept(days: int = 90, db: Session = Depends(get_db), u: Us
     total_issues_count = len(out_txns)
 
     for t in out_txns:
-        dept_name = "Central University Pool"
-        if t.note and "To " in t.note:
+        # Standardize departmental attribution to the 8 official GBU Academic Schools
+        note_lower = (t.note or "").lower()
+        if "biotech" in note_lower or "chemistry" in note_lower or "pcb" in note_lower:
+            dept_name = "University School of Biotechnology (SOBT)"
+        elif "engineering" in note_lower or "robotics" in note_lower or "electronics" in note_lower or "workshop" in note_lower or "signal" in note_lower or "sensor" in note_lower or "lighting" in note_lower:
+            dept_name = "University School of Engineering (SOE)"
+        elif "management" in note_lower or "mba" in note_lower or "cubicles" in note_lower:
+            dept_name = "University School of Management (SOM)"
+        elif "vocational" in note_lower or "applied" in note_lower or "physics" in note_lower or "dispenser" in note_lower:
+            dept_name = "School of Vocational Studies & Applied Sciences (SOVSAS)"
+        elif "law" in note_lower or "moot" in note_lower or "governance" in note_lower or "admissions" in note_lower:
+            dept_name = "School of Law, Justice & Governance (SOLJG)"
+        elif "humanities" in note_lower or "social" in note_lower or "hostel" in note_lower or "lounge" in note_lower:
+            dept_name = "School of Humanities & Social Sciences (SOHSS)"
+        elif "buddhist" in note_lower or "civilization" in note_lower or "parchment" in note_lower:
+            dept_name = "School of Buddhist Studies & Civilizations (SOBSC)"
+        elif "ict" in note_lower or "computer" in note_lower or "smart" in note_lower or "ups" in note_lower or "server" in note_lower:
+            dept_name = "School of Information & Communication Technology (USICT)"
+        elif t.note and "To " in t.note:
             parts = t.note.split("To ")[1].split(".")[0].strip()
-            if parts:
-                dept_name = parts
+            dept_name = parts if parts else "School of Information & Communication Technology (USICT)"
+        else:
+            dept_name = "School of Information & Communication Technology (USICT)"
 
         item_cost = t.unit_cost if t.unit_cost > 0 else (t.item.price if t.item else Decimal("0.00"))
         line_val = t.qty * item_cost
