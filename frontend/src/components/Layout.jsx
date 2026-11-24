@@ -11,14 +11,14 @@ import { ChevronRight, Home, Building2, FileText, HelpCircle } from 'lucide-reac
 import { useTextSize } from '../context/TextSizeContext';
 
 const routeMetadata = {
-  '/dashboard': { title: 'Inventory_Management_System', group: 'roadmaps' },
-  '/items': { title: 'Central_Stock_Register', group: 'roadmaps' },
-  '/issue-stock': { title: 'Issue_Stock_to_Schools', group: 'roadmaps' },
-  '/indents': { title: 'Departmental_Requisitions', group: 'roadmaps' },
-  '/purchase-orders': { title: 'Purchase_Orders_and_Goods_Receipt', group: 'roadmaps' },
+  '/dashboard': { title: 'Inventory_Management_System', group: 'central_stores' },
+  '/items': { title: 'Central_Stock_Register', group: 'central_stores' },
+  '/issue-stock': { title: 'Issue_Stock_to_Schools', group: 'central_stores' },
+  '/indents': { title: 'Departmental_Requisitions', group: 'procurement' },
+  '/purchase-orders': { title: 'Purchase_Orders_and_Goods_Receipt', group: 'procurement' },
   '/write-offs': { title: 'Condemnations_and_WriteOffs', group: 'governance' },
-  '/reports': { title: 'Inventory_Reports_and_Statements', group: 'roadmaps' },
-  '/audit': { title: 'Audit_Ledger_Log', group: 'governance' },
+  '/reports': { title: 'Inventory_Reports_and_Statements', group: 'analytics' },
+  '/audit': { title: 'Audit_Ledger_Log', group: 'audit' },
   '/directory': { title: 'University_Directory', group: 'resources' },
   '/forms': { title: 'Forms_and_Slips', group: 'resources' },
   '/help': { title: 'Stores_Help_and_SOP', group: 'resources' },
@@ -41,7 +41,7 @@ export default function Layout() {
 
   const currentMeta = routeMetadata[location.pathname] || {
     title: 'Stores_and_Purchase_Portal',
-    group: 'roadmaps',
+    group: 'central_stores',
   };
 
   const handleHomeClick = (e) => {

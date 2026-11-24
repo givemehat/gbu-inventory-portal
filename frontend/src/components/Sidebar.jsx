@@ -35,14 +35,14 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       ],
     },
     {
-      title: 'Technology Roadmaps',
+      title: 'Analytics & Reports',
       items: [
         { to: '/reports', label: 'School Consumption & Plots', icon: ChevronRight, roles: ['admin', 'store', 'approver', 'dept'], isSub: true },
         { to: '/audit', label: 'Audit Trail & Ledgers', icon: ChevronRight, roles: ['admin', 'approver'], isSub: true },
       ],
     },
     {
-      title: 'Bubbles & Governance',
+      title: 'Governance & SOPs',
       items: [
         { to: '/write-offs', label: 'Write-offs & Condemnations', icon: ChevronRight, roles: ['admin', 'store', 'approver'], isSub: true },
         { to: '/forms', label: 'Forms, Slips & Registers', icon: ChevronRight, roles: ['admin', 'store', 'approver', 'dept'], isSub: true },
@@ -130,8 +130,8 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
         {/* Institutional Badge Footer */}
         <div className="p-3.5 bg-[#0D47A1]/80 border-t border-blue-400/20 text-[11.5px] text-blue-200 flex items-center justify-between">
-          <span>Enterprise IMS v2.4</span>
-          <span className="px-1.5 py-0.5 bg-blue-500/30 text-white rounded text-[10px] font-mono">MIT Style</span>
+          <span className="font-medium text-white/90">Enterprise IMS v2.4</span>
+          <span className="px-2 py-0.5 bg-blue-900/80 text-blue-100 border border-blue-400/30 rounded text-[10px] font-semibold tracking-wide">GBU S&P</span>
         </div>
       </aside>
     </>

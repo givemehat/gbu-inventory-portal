@@ -263,10 +263,10 @@ export default function Dashboard() {
           Inventory Management System
         </h1>
 
-        {/* Section Heading with distinctive Blue Underline (MIT Screenshot Style) */}
-        <div id="technology-roadmap" className="pt-2">
+        {/* Section Heading with distinctive Blue Underline (Institutional Styling) */}
+        <div id="stores-overview" className="pt-2">
           <h2 className="text-2xl sm:text-3xl md:text-[32px] font-bold text-[#1565C0] pb-2.5 border-b-2 border-[#1565C0]">
-            Technology Roadmap
+            Central Stores & Procurement Directorate
           </h2>
         </div>
       </div>
@@ -275,10 +275,10 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
         {/* Main Left Column (Content & Plots) */}
         <div className="xl:col-span-9 space-y-8 min-w-0">
-          {/* Section: Roadmap Overview Narrative */}
-          <div id="roadmap-overview" className="space-y-4 text-slate-700">
+          {/* Section: Operational Overview Narrative */}
+          <div id="operational-overview" className="space-y-4 text-slate-700">
             <h3 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Roadmap Overview
+              Operational Overview & Supply Chain Governance
             </h3>
 
             <p className="text-[16px] leading-relaxed text-slate-700">
@@ -794,14 +794,14 @@ export default function Dashboard() {
 
             <ul className="space-y-2 text-[14px] font-medium">
               <li>
-                <a href="#technology-roadmap" className="text-slate-900 hover:text-[#1565C0] font-bold flex items-center gap-1.5">
+                <a href="#stores-overview" className="text-slate-900 hover:text-[#1565C0] font-bold flex items-center gap-1.5">
                   <ChevronRight className="w-3.5 h-3.5 text-[#1565C0]" />
-                  <span>Technology Roadmap</span>
+                  <span>Stores Directorate</span>
                 </a>
               </li>
               <li className="pl-4">
-                <a href="#roadmap-overview" className="text-slate-600 hover:text-[#1565C0] block py-0.5">
-                  Roadmap Overview
+                <a href="#operational-overview" className="text-slate-600 hover:text-[#1565C0] block py-0.5">
+                  Operational Overview
                 </a>
               </li>
               <li className="pl-4">
