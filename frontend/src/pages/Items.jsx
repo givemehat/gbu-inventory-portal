@@ -162,25 +162,43 @@ export default function Items() {
   const lowCount = items.filter((i) => i.low).length;
 
   return (
-    <div className="space-y-4">
-      {/* Top action row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <span className="text-[13px] text-ink-muted">
-            {items.length} items cataloged • {lowCount} below minimum
-          </span>
+    <div className="space-y-6">
+      {/* Breadcrumb & Section Header (MIT Style) */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
+          <span>🏠</span>
+          <span>/</span>
+          <span>roadmaps</span>
+          <span>/</span>
+          <span className="font-semibold text-slate-800">Central_Stock_Register</span>
         </div>
 
-        {isStore && (
-          <button
-            type="button"
-            onClick={() => setIsAddOpen(true)}
-            className="h-8 px-3.5 bg-primary hover:bg-primary-hover text-white text-[13px] font-semibold rounded flex items-center gap-1.5 transition-colors self-start sm:self-auto"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add item</span>
-          </button>
-        )}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
+              Central Stock Register
+            </h1>
+            <div className="pt-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#1565C0] pb-2 border-b-2 border-[#1565C0]">
+                Catalog Items & Central Warehouse Storage
+              </h2>
+            </div>
+            <p className="text-[15.5px] text-slate-600 mt-2">
+              Master catalog with {items.length} SKUs across 5 commodity categories • {lowCount} items requiring refill.
+            </p>
+          </div>
+
+          {isStore && (
+            <button
+              type="button"
+              onClick={() => setIsAddOpen(true)}
+              className="h-10 px-4 bg-[#1565C0] hover:bg-blue-700 text-white text-[14px] font-semibold rounded-md flex items-center gap-2 transition-colors self-start sm:self-auto shadow-xs"
+            >
+              <Plus className="w-4.5 h-4.5" />
+              <span>Add New Item SKU</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter and search bar */}

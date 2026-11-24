@@ -144,29 +144,44 @@ export default function Indents() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
-            Material Requisitions
-          </h1>
-          <p className="text-[14px] text-ink-muted mt-1">
-            Departmental indents submitted to Stores & Purchase for administrative approval.
-          </p>
+      {/* Breadcrumbs & Page Header (MIT Style) */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
+          <span>🏠</span>
+          <span>/</span>
+          <span>roadmaps</span>
+          <span>/</span>
+          <span className="font-semibold text-slate-800">Departmental_Indents_and_Requisitions</span>
         </div>
 
-        <button
-          onClick={() => {
-            if (items.length > 0 && !lines[0]?.item_id) {
-              setLines([{ item_id: items[0].id, qty: 10 }]);
-            }
-            setIsCreateOpen(true);
-          }}
-          className="h-9 px-4 rounded bg-primary hover:bg-primary-hover text-surface font-medium text-[14px] transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Raise indent</span>
-        </button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
+              Departmental Requisitions
+            </h1>
+            <div className="pt-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#1565C0] pb-2 border-b-2 border-[#1565C0]">
+                Institutional Indents & Sanction Workflows
+              </h2>
+            </div>
+            <p className="text-[15.5px] text-slate-600 mt-2">
+              Formal academic requisitions submitted to Central Stores for Director approvals under GFR guidelines.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              if (items.length > 0 && !lines[0]?.item_id) {
+                setLines([{ item_id: items[0].id, qty: 10 }]);
+              }
+              setIsCreateOpen(true);
+            }}
+            className="h-10 px-4 rounded-md bg-[#1565C0] hover:bg-blue-700 text-white font-semibold text-[14px] transition-colors inline-flex items-center gap-2 self-start sm:self-auto shadow-xs"
+          >
+            <Plus className="w-4.5 h-4.5" />
+            <span>Raise New Indent</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Tabs */}

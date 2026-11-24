@@ -236,43 +236,58 @@ export default function PurchaseOrders() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[28px] font-medium text-ink leading-tight">
-            Purchase Orders & Goods Receipt
-          </h1>
-          <p className="text-[14px] text-ink-muted mt-1">
-            <span className="tabular-nums">{pos.length}</span> orders on file • <span className="tabular-nums">{openPoCount}</span> open • Total commitment: <span className="tabular-nums font-medium text-ink">₹{totalPoValue.toLocaleString('en-IN')}</span>
-          </p>
+      {/* Breadcrumbs & Header (MIT Style) */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
+          <span>🏠</span>
+          <span>/</span>
+          <span>roadmaps</span>
+          <span>/</span>
+          <span className="font-semibold text-slate-800">Purchase_Orders_and_Goods_Receipt</span>
         </div>
 
-        {isStore && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsVendorOpen(true)}
-              className="h-9 px-3 rounded border border-line bg-surface hover:bg-paper text-ink text-[13px] font-medium transition-colors inline-flex items-center gap-1.5"
-            >
-              <Truck className="w-3.5 h-3.5 text-ink-muted" />
-              <span>Register vendor</span>
-            </button>
-            <button
-              onClick={() => {
-                if (approvedIndents.length === 0) {
-                  toast.error('No approved indents available. Raise and approve an indent first.');
-                  return;
-                }
-                handleIndentSelect(approvedIndents[0].id);
-                setSelectedVendorId(vendors[0]?.id || '');
-                setIsCreateOpen(true);
-              }}
-              className="h-9 px-4 rounded bg-primary hover:bg-primary-hover text-surface text-[14px] font-medium transition-colors inline-flex items-center gap-1.5"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create purchase order</span>
-            </button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
+              Purchase Orders & Goods Receipt (GRN)
+            </h1>
+            <div className="pt-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#1565C0] pb-2 border-b-2 border-[#1565C0]">
+                Vendor Procurement & Physical Inspection
+              </h2>
+            </div>
+            <p className="text-[15.5px] text-slate-600 mt-2">
+              <span className="tabular-nums font-semibold">{pos.length}</span> orders on record • <span className="tabular-nums font-semibold text-blue-600">{openPoCount}</span> open • Total university commitment: <span className="tabular-nums font-bold text-slate-900">₹{totalPoValue.toLocaleString('en-IN')}</span>
+            </p>
           </div>
-        )}
+
+          {isStore && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setIsVendorOpen(true)}
+                className="h-10 px-3.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-[13.5px] font-semibold transition-colors inline-flex items-center gap-2 shadow-xs"
+              >
+                <Truck className="w-4 h-4 text-slate-500" />
+                <span>Register Vendor</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (approvedIndents.length === 0) {
+                    toast.error('No approved indents available. Raise and approve an indent first.');
+                    return;
+                  }
+                  handleIndentSelect(approvedIndents[0].id);
+                  setSelectedVendorId(vendors[0]?.id || '');
+                  setIsCreateOpen(true);
+                }}
+                className="h-10 px-4 rounded-md bg-[#1565C0] hover:bg-blue-700 text-white text-[14px] font-semibold transition-colors inline-flex items-center gap-2 shadow-xs"
+              >
+                <Plus className="w-4.5 h-4.5" />
+                <span>Create Purchase Order</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* PO List */}

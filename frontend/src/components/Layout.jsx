@@ -45,11 +45,11 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-paper flex flex-col text-ink font-sans">
       <div className="flex-1 flex">
-        {/* 232px Sidebar */}
+        {/* 240px Sidebar */}
         <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
         {/* Main Body */}
-        <div className="flex-1 lg:pl-[232px] flex flex-col min-w-0">
+        <div className="flex-1 lg:pl-[240px] flex flex-col min-w-0">
           {/* Top Utility Bar starts at content edge, never clipped by sidebar */}
           <UtilityBar />
 

@@ -173,42 +173,58 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       {/* Top Banner & Primary Actions (hidden on print) */}
-      <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[26px] sm:text-[28px] font-medium text-ink leading-tight">
-            Inventory Reports & Stock Statements
-          </h1>
-          <p className="text-[13px] text-ink-muted mt-0.5">
-            Verified stock ledgers, historical audits, departmental consumption, ABC analysis, and vendor ratings.
-          </p>
+      <div className="no-print space-y-4">
+        {/* Breadcrumb Trail */}
+        <div className="flex items-center gap-2 text-[14px] text-slate-500 font-medium">
+          <span>🏠</span>
+          <span>/</span>
+          <span>roadmaps</span>
+          <span>/</span>
+          <span className="font-semibold text-slate-800">Inventory_Reports_and_Statements</span>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={handleDownloadStock}
-            disabled={downloadingStock}
-            className="h-8.5 px-3 rounded border border-line bg-surface hover:bg-paper text-ink text-[12px] font-medium transition-colors inline-flex items-center gap-1.5 shadow-sm"
-          >
-            <Download className="w-3.5 h-3.5 text-ink-muted" />
-            <span>{downloadingStock ? 'Downloading...' : 'Export stock CSV'}</span>
-          </button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
+              Inventory Reports & Statements
+            </h1>
+            <div className="pt-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#1565C0] pb-2 border-b-2 border-[#1565C0]">
+                Analytical Ledgers & Consumption Statements
+              </h2>
+            </div>
+            <p className="text-[15.5px] text-slate-600 mt-2">
+              Statutory stock registers, historical audits, school-wise consumption plots, Pareto ABC analysis, and vendor ratings.
+            </p>
+          </div>
 
-          <button
-            onClick={handleDownloadTxn}
-            disabled={downloadingTxn}
-            className="h-8.5 px-3 rounded border border-line bg-surface hover:bg-paper text-ink text-[12px] font-medium transition-colors inline-flex items-center gap-1.5 shadow-sm"
-          >
-            <Download className="w-3.5 h-3.5 text-ink-muted" />
-            <span>{downloadingTxn ? 'Downloading...' : 'Export ledger CSV'}</span>
-          </button>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <button
+              onClick={handleDownloadStock}
+              disabled={downloadingStock}
+              className="h-9 px-3.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-[13.5px] font-semibold transition-colors inline-flex items-center gap-2 shadow-xs"
+            >
+              <Download className="w-4 h-4 text-slate-500" />
+              <span>{downloadingStock ? 'Downloading...' : 'Export Stock CSV'}</span>
+            </button>
 
-          <button
-            onClick={handlePrint}
-            className="h-8.5 px-3.5 rounded bg-primary hover:bg-primary-hover text-surface text-[13px] font-medium transition-colors inline-flex items-center gap-1.5 shadow-sm"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Print statement</span>
-          </button>
+            <button
+              onClick={handleDownloadTxn}
+              disabled={downloadingTxn}
+              className="h-9 px-3.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-[13.5px] font-semibold transition-colors inline-flex items-center gap-2 shadow-xs"
+            >
+              <Download className="w-4 h-4 text-slate-500" />
+              <span>{downloadingTxn ? 'Downloading...' : 'Export Transactions CSV'}</span>
+            </button>
+
+            <button
+              onClick={handlePrint}
+              className="h-9 px-4 rounded-md bg-[#1565C0] hover:bg-blue-700 text-white text-[13.5px] font-semibold transition-colors inline-flex items-center gap-2 shadow-xs"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Print Official Statement</span>
+            </button>
+          </div>
         </div>
       </div>
 
