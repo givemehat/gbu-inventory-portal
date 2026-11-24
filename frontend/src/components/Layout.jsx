@@ -62,8 +62,8 @@ export default function Layout() {
         onOpenShortcuts={() => setShortcutsOpen(true)}
       />
 
-      {/* 2. Body Container below Top Bar (pt-14 matches Header h-14) */}
-      <div className="flex-1 flex pt-14">
+      {/* 2. Body Container below Top Bar (pt-[70px] matches Header h-[70px]) */}
+      <div className="flex-1 flex pt-[70px]">
         {/* 240px Royal Blue Sidebar starting beneath top bar */}
         <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 

@@ -64,7 +64,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
       {/* Sidebar container with MIT-inspired Royal Blue Theme starting beneath top bar */}
       <aside
-        className={`fixed top-14 bottom-0 left-0 z-40 w-[240px] bg-[#1565C0] text-white flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 shadow-md ${
+        className={`fixed top-[70px] bottom-0 left-0 z-40 w-[240px] bg-[#1565C0] text-white flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 shadow-md ${
           mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
